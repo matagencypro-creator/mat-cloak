@@ -1,6 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
 
-/* ═══ VEILORA — Media Randomizer v2 ═══ */
+/* ═══ VEILORA — Media Randomizer v3 (Supabase Backend) ═══ */
+
+// ── Supabase Client ──
+const supabase = createClient(
+  "https://lutwwnjizgkdnmvkfoth.supabase.co",
+  "sb_publishable_X5Q91rqekOhd6uiniPE2rg_LiW5cKyI"
+);
 
 const LOCS=[
   {city:"New York",lat:[40.70,40.78],lng:[-74.02,-73.93]},{city:"Los Angeles",lat:[33.94,34.06],lng:[-118.30,-118.18]},
@@ -55,8 +62,9 @@ const FAQ=[
 ];
 
 const CHANGELOG=[
+  {v:"3.0",d:"20 mai 2026",items:["Backend Supabase — vrais comptes utilisateurs","Vérification Pro côté serveur","Limite fichiers/jour côté serveur","Migration Cloudflare Pages"]},
   {v:"2.1",d:"18 mai 2026",items:["Hash Checker — compare 2 fichiers en un clic","Before/After slider interactif sur la landing","Compteur de fichiers traités en temps réel"]},
-  {v:"2.0",d:"12 mai 2026",items:["Refonte complète de l'interface — plein écran","22 localisations GPS (12 nouvelles villes)","Batch Scheduling par plateforme","Webhook Telegram ajouté","Intégration Stripe — paiement en ligne"]},
+  {v:"2.0",d:"12 mai 2026",items:["Refonte complète de l'interface — plein écran","22 localisations GPS (12 nouvelles villes)","Webhook Telegram ajouté","Intégration Stripe — paiement en ligne"]},
   {v:"1.5",d:"28 avril 2026",items:["LUT Cinématique — 5 courbes couleur","AI Noise gaussien","Perspective Warp","Fake Timeline","Privacy Audit en temps réel"]},
   {v:"1.0",d:"15 avril 2026",items:["Lancement de Veilora","13 transformations","Visual Diff (split/blink/overlay)","Humanizer slider","Export Discord webhook"]},
 ];
@@ -108,11 +116,8 @@ export default function App(){
   const[dm,setDm]=useState("split");
   const[panel,setPanel]=useState(null);
   const[hist,setHist]=useState([]);
-  const[pro,setPro2]=useState(false);
-  const[du,setDu]=useState(0);
   const[pricing,setPricing]=useState(false);
   const[auth,setAuth]=useState(null);
-  const[user,setUser]=useState(null);
   const[af,setAf]=useState({email:"",pass:"",name:""});
   const[wh,setWh]=useState({discord:"",telegram:"",on:false,type:"discord"});
   const[faqO,setFaqO]=useState(null);
@@ -120,17 +125,87 @@ export default function App(){
   const[hcFiles,setHcFiles]=useState([null,null]);
   const[hcResult,setHcResult]=useState(null);
   const[hcLoading,setHcLoading]=useState(false);
+  const[authErr,setAuthErr]=useState("");
+  const[authLoading,setAuthLoading]=useState(false);
+  // Supabase state
+  const[user,setUser]=useState(null);
+  const[profile,setProfile]=useState(null);
+  const[pro,setPro]=useState(false);
+  const[du,setDu]=useState(0);
   const ir=useRef();
   const hcRef1=useRef();
   const hcRef2=useRef();
 
-  // Animated counters for landing
   const cFiles=useCounter(142847);
   const cVersions=useCounter(1284920);
   const cUsers=useCounter(3847);
 
-  useEffect(()=>{try{const s=JSON.parse(localStorage.getItem("v_use")||"{}");if(s.d===new Date().toDateString())setDu(s.c||0);if(localStorage.getItem("v_pro")==="true")setPro2(true);const u=JSON.parse(localStorage.getItem("v_user")||"null");if(u)setUser(u);const w=JSON.parse(localStorage.getItem("v_wh")||"{}");if(w.discord||w.telegram)setWh(p=>({...p,...w}))}catch(e){}},[]);
-  const ck=()=>{if(pro)return true;if(du>=FREE_LIMIT){setPricing(true);return false}return true};
+  // ── Supabase Auth Listener ──
+  useEffect(()=>{
+    supabase.auth.getSession().then(({data:{session}})=>{
+      if(session?.user){setUser(session.user);loadProfile(session.user.id)}
+    });
+    const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
+      if(session?.user){setUser(session.user);loadProfile(session.user.id)}
+      else{setUser(null);setProfile(null);setPro(false);setDu(0)}
+    });
+    return()=>subscription.unsubscribe();
+  },[]);
+
+  // ── Load Profile from Supabase ──
+  const loadProfile=async(uid)=>{
+    const{data,error}=await supabase.from("profiles").select("*").eq("id",uid).single();
+    if(data){
+      setProfile(data);
+      setPro(data.is_pro||false);
+      // Reset daily usage if new day
+      const today=new Date().toISOString().slice(0,10);
+      if(data.last_usage_date!==today){
+        setDu(0);
+        await supabase.from("profiles").update({daily_usage:0,last_usage_date:today}).eq("id",uid);
+      }else{setDu(data.daily_usage||0)}
+    }
+  };
+
+  // ── Increment Usage in Supabase ──
+  const incrementUsage=async(count)=>{
+    if(!user)return;
+    const newDu=du+count;
+    setDu(newDu);
+    const today=new Date().toISOString().slice(0,10);
+    await supabase.from("profiles").update({daily_usage:newDu,last_usage_date:today}).eq("id",user.id);
+  };
+
+  // ── Auth Functions ──
+  const doRegister=async()=>{
+    setAuthErr("");setAuthLoading(true);
+    const{data,error}=await supabase.auth.signUp({
+      email:af.email,password:af.pass,
+      options:{data:{name:af.name||af.email.split("@")[0]}}
+    });
+    setAuthLoading(false);
+    if(error){setAuthErr(error.message);return}
+    if(data.user&&!data.session){setAuthErr("✅ Vérifie ton email pour confirmer ton compte !");return}
+    setAuth(null);setAf({email:"",pass:"",name:""});
+  };
+  const doLogin=async()=>{
+    setAuthErr("");setAuthLoading(true);
+    const{data,error}=await supabase.auth.signInWithPassword({email:af.email,password:af.pass});
+    setAuthLoading(false);
+    if(error){setAuthErr(error.message);return}
+    setAuth(null);setAf({email:"",pass:"",name:""});
+  };
+  const doLogout=async()=>{
+    await supabase.auth.signOut();
+    setUser(null);setProfile(null);setPro(false);setDu(0);
+  };
+
+  const ck=()=>{
+    if(!user){setAuth("login");return false}
+    if(pro)return true;
+    if(du>=FREE_LIMIT){setPricing(true);return false}
+    return true;
+  };
   const add=useCallback(nf=>{Array.from(nf).filter(f=>mode==="photo"?f.type.startsWith("image/"):f.type.startsWith("video/")).forEach(f=>{const id=crypto.randomUUID?.() || Math.random().toString(36).slice(2);if(f.type.startsWith("image/"))setThumbs(p=>({...p,[id]:URL.createObjectURL(f)}));setFiles(p=>[...p,{file:f,id,name:f.name,size:f.size,type:f.type}])})},[mode]);
   const applyP=p=>{setPreset(p);if(p.id!=="custom"){setVer(p.ver);setInten(p.int)}};
   const run=async()=>{if(!ck())return;setProc(true);setRes([]);setVw("results");const all=[];const tot=files.length*ver;let done=0;const t0=Date.now();
@@ -143,7 +218,8 @@ export default function App(){
       else{const ext=f.name.split(".").pop();const nm=tf.randomName?rn(ext):`${f.name.split(".")[0]}_v${v+1}.${ext}`;if(wu)await sendWH(wu,f.file,nm,wh.type);
         vr.push({blob:f.file,name:nm,size:f.size,ok:true})}done++}all.push({orig:f,vers:vr});setRes([...all])}
     setHist(h=>[{date:new Date().toLocaleString(),files:files.length,versions:tot,time:((Date.now()-t0)/1000).toFixed(1)+"s"},...h.slice(0,19)]);
-    const nc=du+files.length;setDu(nc);try{localStorage.setItem("v_use",JSON.stringify({d:new Date().toDateString(),c:nc}))}catch(e){}setProc(false)};
+    await incrementUsage(files.length);
+    setProc(false)};
   const dl=r=>{const a=document.createElement("a");a.href=URL.createObjectURL(r.blob);a.download=r.name;a.click()};
   const dlAll=()=>res.forEach(g=>g.vers.filter(v=>v.ok).forEach((v,i)=>setTimeout(()=>dl(v),i*40)));
   const totV=res.reduce((a,g)=>a+g.vers.filter(v=>v.ok).length,0);
@@ -151,7 +227,6 @@ export default function App(){
   const clr=()=>{setFiles([]);setRes([]);setVw("config");setThumbs({})};
   const iL=inten<.25?"Ultra léger":inten<.45?"Léger":inten<.65?"Balanced":inten<.85?"Agressif":"Maximum";
   const iC=inten<.25?"#6ee7b7":inten<.45?"#67e8f9":inten<.65?"#a78bfa":inten<.85?"#fbbf24":"#fb7185";
-  const login=()=>{const u={email:af.email,name:af.name||af.email.split("@")[0]};setUser(u);localStorage.setItem("v_user",JSON.stringify(u));setAuth(null)};
 
   // Hash Checker
   const hcPick=async(idx)=>{const input=idx===0?hcRef1:hcRef2;input.current?.click()};
@@ -190,6 +265,8 @@ export default function App(){
     .faq-item{margin-bottom:6px}.faq-q{padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:12px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01);transition:all .12s}.faq-q:hover{background:rgba(255,255,255,.02)}.faq-q.open{background:rgba(20,184,166,.025);border-color:rgba(20,184,166,.1)}.faq-a{padding:10px 20px 16px;font-size:14px;color:#6a8a9a;line-height:1.8;animation:fadeIn .15s ease}
     .ba-container{position:relative;overflow:hidden;border-radius:16px;border:1px solid rgba(255,255,255,.06);max-width:500px;margin:0 auto;aspect-ratio:4/3;background:#111}
     .ba-slider{position:absolute;top:0;bottom:0;width:3px;background:#14b8a6;z-index:3;cursor:ew-resize}.ba-slider::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:#14b8a6;border:3px solid #fff;box-shadow:0 0 16px rgba(20,184,166,.4)}
+    .err{color:#fb7185;font-size:13px;text-align:center;padding:8px;border-radius:8px;background:rgba(251,113,133,.06)}
+    .ok{color:#5eead4;font-size:13px;text-align:center;padding:8px;border-radius:8px;background:rgba(94,234,212,.06)}
     @media(max-width:1024px){.app-layout{grid-template-columns:1fr!important}.app-side{order:2}}
     @media(max-width:700px){.app-header{flex-direction:column;gap:8px;align-items:flex-start!important}.stat-grid{grid-template-columns:repeat(2,1fr)!important}.ver-grid{grid-template-columns:repeat(2,1fr)!important}.feat-grid{grid-template-columns:1fr!important}.price-grid{grid-template-columns:1fr!important}.testi-grid{grid-template-columns:1fr!important}.live-stats{grid-template-columns:1fr!important}}
   `;
@@ -210,13 +287,12 @@ export default function App(){
           <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setPg(pg==="docs"?"landing":"docs")}>{pg==="docs"?"← Retour":"Guide"}</button>
           <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setPg("changelog")}>Changelog</button>
           <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setPricing(true)}>Pricing</button>
-          {user?<><span style={{fontSize:12,color:"#5a7a8a"}}>{user.name}</span><button className="btn btn-s" style={{padding:"7px 14px"}} onClick={()=>{setUser(null);localStorage.removeItem("v_user")}}>Déco</button></>:
+          {user?<><span style={{fontSize:12,color:"#5eead4"}}>{profile?.name||user.email}</span>{pro&&<span className="badge bt" style={{fontSize:9}}>PRO</span>}<button className="btn btn-s" style={{padding:"7px 14px"}} onClick={doLogout}>Déco</button></>:
             <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setAuth("login")}>Connexion</button>}
           <button className="btn btn-p" style={{fontSize:13,padding:"10px 22px"}} onClick={()=>setPg("app")}>Ouvrir l'app</button>
         </div>
       </nav>
 
-      {/* ── CHANGELOG PAGE ── */}
       {pg==="changelog"?(<main style={{maxWidth:700,margin:"0 auto",padding:"48px 32px",position:"relative",zIndex:1}}>
         <div style={{textAlign:"center",marginBottom:40,animation:"fadeIn .3s ease"}}>
           <h1 style={{fontSize:32,fontWeight:800,color:"#f0fdfa",marginBottom:10}}>Changelog</h1>
@@ -241,7 +317,6 @@ export default function App(){
         <div style={{textAlign:"center",marginTop:32}}><button className="btn btn-p" onClick={()=>setPg("app")} style={{borderRadius:14}}>🔒 Lancer Veilora</button></div>
       </main>):(
         <main style={{position:"relative",zIndex:1}}>
-          {/* Hero */}
           <section style={{padding:"90px 32px 70px",textAlign:"center",maxWidth:860,margin:"0 auto",animation:"fadeIn .5s ease"}}>
             <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"6px 16px",borderRadius:100,border:"1px solid rgba(20,184,166,.12)",background:"rgba(20,184,166,.03)",fontSize:12,color:"#5eead4",fontWeight:600,marginBottom:28}}>
               <span style={{width:6,height:6,borderRadius:"50%",background:"#34d399",animation:"pulse 2s infinite"}}/>100% local — aucun upload</div>
@@ -255,7 +330,6 @@ export default function App(){
             <div style={{marginTop:16,fontSize:12,color:"#2a4a58"}}>3 fichiers/jour gratuits • Pro dès 7.99€/mois</div>
           </section>
 
-          {/* Live Counter */}
           <section className="live-stats" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,maxWidth:700,margin:"0 auto 60px",padding:"0 32px"}}>
             {[{n:cFiles.toLocaleString(),l:"Fichiers traités",ic:"◎"},{n:cVersions.toLocaleString(),l:"Versions générées",ic:"⬡"},{n:cUsers.toLocaleString(),l:"Utilisateurs actifs",ic:"◇"}].map((s,i)=>(
               <div key={i} className="card" style={{padding:"22px 20px",textAlign:"center",animation:`fadeIn ${.3+i*.1}s ease`}}>
@@ -264,18 +338,15 @@ export default function App(){
                 <div style={{fontSize:11,color:"#3d5a6a",marginTop:4}}>{s.l}</div></div>))}
           </section>
 
-          {/* Before/After Demo */}
           <section style={{maxWidth:700,margin:"0 auto 70px",padding:"0 32px"}}>
             <div style={{textAlign:"center",marginBottom:24}}>
               <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",marginBottom:8}}>Vois la différence. Ou pas.</h2>
               <p style={{fontSize:14,color:"#3d5a6a"}}>Glisse le curseur — même image, hash complètement différent.</p></div>
             <div className="ba-container" onMouseMove={e=>{const r=e.currentTarget.getBoundingClientRect();setBaSlider(Math.max(5,Math.min(95,((e.clientX-r.left)/r.width)*100)))}} onTouchMove={e=>{const r=e.currentTarget.getBoundingClientRect();const t=e.touches[0];setBaSlider(Math.max(5,Math.min(95,((t.clientX-r.left)/r.width)*100)))}}>
-              {/* Right side — "VERSION" with filter applied */}
               <div style={{position:"absolute",inset:0}}>
                 <img src="/demo.png" alt="Version" style={{width:"100%",height:"100%",objectFit:"cover",filter:"brightness(1.03) saturate(1.08) hue-rotate(4deg) contrast(1.02)"}}/>
                 <div style={{position:"absolute",top:12,right:12,zIndex:4,padding:"4px 12px",borderRadius:8,background:"rgba(20,184,166,.15)",border:"1px solid rgba(94,234,212,.2)",backdropFilter:"blur(6px)"}}>
                   <div className="mono" style={{fontSize:10,color:"#5eead4"}}>SHA-256: e91b...f8a4</div></div></div>
-              {/* Left side — "ORIGINAL" */}
               <div style={{position:"absolute",top:0,bottom:0,left:0,width:`${baSlider}%`,overflow:"hidden",zIndex:2}}>
                 <div style={{position:"absolute",inset:0,width:`${10000/Math.max(baSlider,1)}%`}}>
                   <img src="/demo.png" alt="Original" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
@@ -286,7 +357,6 @@ export default function App(){
               <div style={{position:"absolute",bottom:12,right:16,zIndex:4,fontSize:11,fontWeight:700,color:"#5eead4",background:"rgba(0,0,0,.6)",padding:"5px 12px",borderRadius:8,backdropFilter:"blur(4px)"}}>VERSION v1</div>
             </div></section>
 
-          {/* Stats */}
           <section style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:20,maxWidth:800,margin:"0 auto 60px",padding:"0 32px"}}>
             {[{n:"100",l:"Versions max"},{n:"13",l:"Transformations"},{n:"22",l:"Localisations GPS"},{n:"8",l:"Fake Devices"}].map((s,i)=>(
               <div key={i} style={{textAlign:"center",animation:`fadeIn ${.3+i*.07}s ease`}}>
@@ -294,7 +364,6 @@ export default function App(){
                 <div style={{fontSize:12,color:"#3d5a6a",marginTop:3}}>{s.l}</div></div>))}
           </section>
 
-          {/* Hash Checker — Free Tool */}
           <section style={{maxWidth:700,margin:"0 auto 70px",padding:"0 32px"}}>
             <div style={{textAlign:"center",marginBottom:24}}>
               <span className="badge bt" style={{marginBottom:10}}>Outil gratuit</span>
@@ -325,7 +394,6 @@ export default function App(){
                 <button className="btn btn-s" onClick={()=>{setHcFiles([null,null]);setHcResult(null)}} style={{width:"100%",marginTop:12}}>Réinitialiser</button></div>}
             </div></section>
 
-          {/* Features */}
           <section style={{maxWidth:1060,margin:"0 auto 70px",padding:"0 32px"}}>
             <div style={{textAlign:"center",marginBottom:32}}>
               <h2 style={{fontSize:28,fontWeight:800,color:"#f0fdfa",marginBottom:8}}>Construit pour être invisible</h2>
@@ -340,7 +408,6 @@ export default function App(){
                 <div style={{fontSize:12,color:"#4a6a78",lineHeight:1.6}}>{f.d}</div></div>))}
             </div></section>
 
-          {/* Pricing */}
           <section style={{maxWidth:900,margin:"0 auto 70px",padding:"0 32px"}}>
             <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:28}}>Pricing simple</h2>
             <div className="price-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
@@ -357,7 +424,6 @@ export default function App(){
                 <button className="btn" style={{width:"100%",marginTop:16,padding:12,borderRadius:12,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,fontSize:14,border:"none",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter à vie</button></div>
             </div></section>
 
-          {/* Testimonials */}
           <section style={{maxWidth:1060,margin:"0 auto 70px",padding:"0 32px"}}>
             <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:28}}>Ils utilisent Veilora</h2>
             <div className="testi-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
@@ -369,7 +435,6 @@ export default function App(){
                 <div style={{color:"#fbbf24",fontSize:13,letterSpacing:3}}>★★★★★</div></div>))}
             </div></section>
 
-          {/* FAQ */}
           <section style={{maxWidth:720,margin:"0 auto 70px",padding:"0 32px"}}>
             <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:24}}>Questions fréquentes</h2>
             {FAQ.slice(0,5).map((g,i)=><div key={i} className="faq-item" style={{animation:`fadeIn ${.15+i*.03}s ease`}}>
@@ -410,17 +475,20 @@ export default function App(){
         <button className="btn" style={{width:"100%",marginTop:14,padding:11,borderRadius:12,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,fontSize:14,border:"none",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter à vie</button></div>
     </div><button className="btn btn-s" onClick={()=>setPricing(false)} style={{width:"100%",marginTop:14}}>Fermer</button></div></div>}
 
-  function AuthM(){return <div className="ov" onClick={()=>setAuth(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:400,width:"90%",animation:"fadeIn .2s ease"}}>
+  // ── AUTH MODAL (Supabase) ──
+  function AuthM(){return <div className="ov" onClick={()=>{setAuth(null);setAuthErr("")}}><div onClick={e=>e.stopPropagation()} style={{maxWidth:400,width:"90%",animation:"fadeIn .2s ease"}}>
     <div style={{textAlign:"center",marginBottom:20}}>
       <div style={{width:48,height:48,borderRadius:14,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:12,overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:6}} alt="V"/></div>
       <div style={{fontSize:20,fontWeight:800,color:"#fff"}}>{auth==="register"?"Créer un compte":"Connexion"}</div></div>
     <div style={{display:"flex",flexDirection:"column",gap:12}}>
       {auth==="register"&&<input className="inp" placeholder="Ton prénom" value={af.name} onChange={e=>setAf(f=>({...f,name:e.target.value}))}/>}
       <input className="inp" type="email" placeholder="Email" value={af.email} onChange={e=>setAf(f=>({...f,email:e.target.value}))}/>
-      <input className="inp" type="password" placeholder="Mot de passe" value={af.pass} onChange={e=>setAf(f=>({...f,pass:e.target.value}))}/>
-      <button className="btn btn-p" style={{width:"100%",padding:14,borderRadius:12}} onClick={login}>{auth==="register"?"Créer mon compte":"Se connecter"}</button></div>
-    <div style={{textAlign:"center",marginTop:16}}>{auth==="login"?<span style={{fontSize:13,color:"#4a6a78"}}>Pas de compte ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>setAuth("register")}>S'inscrire</span></span>:
-      <span style={{fontSize:13,color:"#4a6a78"}}>Déjà inscrit ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>setAuth("login")}>Connexion</span></span>}</div></div></div>}
+      <input className="inp" type="password" placeholder="Mot de passe (min 6 caractères)" value={af.pass} onChange={e=>setAf(f=>({...f,pass:e.target.value}))}/>
+      {authErr&&<div className={authErr.startsWith("✅")?"ok":"err"}>{authErr}</div>}
+      <button className="btn btn-p" style={{width:"100%",padding:14,borderRadius:12}} onClick={auth==="register"?doRegister:doLogin} disabled={authLoading}>
+        {authLoading?"⏳ Chargement...":auth==="register"?"Créer mon compte":"Se connecter"}</button></div>
+    <div style={{textAlign:"center",marginTop:16}}>{auth==="login"?<span style={{fontSize:13,color:"#4a6a78"}}>Pas de compte ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>{setAuth("register");setAuthErr("")}}>S'inscrire</span></span>:
+      <span style={{fontSize:13,color:"#4a6a78"}}>Déjà inscrit ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>{setAuth("login");setAuthErr("")}}>Connexion</span></span>}</div></div></div>}
 
   // ══════════════════════════
   // APP — FULL SCREEN
@@ -449,23 +517,23 @@ export default function App(){
         {panel==="history"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>📋 Historique</h3>{!hist.length&&<div style={{color:"#3d5a6a",fontSize:13}}>Aucun traitement</div>}{hist.map((h,i)=><div key={i} style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:5}}><div style={{fontSize:13,fontWeight:600,color:"#ddd"}}>{h.files} fichiers → {h.versions}v • {h.time}</div><div style={{fontSize:10,color:"#3d5a6a"}}>{h.date}</div></div>)}</>}
         <button className="btn btn-s" onClick={()=>setPanel(null)} style={{marginTop:12,width:"100%"}}>Fermer</button></div></div>)}
 
-      {/* APP HEADER */}
       <header style={{padding:"10px 20px",borderBottom:"1px solid rgba(255,255,255,.05)",flexShrink:0,position:"relative",zIndex:2}}>
         <div className="app-header" style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setPg("landing")}>
             <div style={{width:30,height:30,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:6}} alt="V"/></div>
             <span style={{fontWeight:800,fontSize:16,color:"#f0fdfa",letterSpacing:"-.8px"}}>Veilora</span>
-            {pro?<span className="badge bt" style={{fontSize:10}}>PRO</span>:<span className="badge ba" style={{fontSize:10}}>FREE {du}/{FREE_LIMIT}</span>}
+            {user&&(pro?<span className="badge bt" style={{fontSize:10}}>PRO</span>:<span className="badge ba" style={{fontSize:10}}>FREE {du}/{FREE_LIMIT}</span>)}
+            {!user&&<span className="badge" style={{fontSize:10,background:"rgba(251,113,133,.08)",color:"#fb7185"}}>Non connecté</span>}
           </div>
           <div style={{display:"flex",gap:4,alignItems:"center"}}>
             <button className="btn btn-s" style={{padding:"5px 10px",fontSize:11}} onClick={()=>setPanel("audit")}>🛡️ Audit</button>
             <button className="btn btn-s" style={{padding:"5px 10px",fontSize:11}} onClick={()=>setPanel("webhook")}>🔗 Webhook</button>
             <button className="btn btn-s" style={{padding:"5px 10px",fontSize:11}} onClick={()=>setPanel("history")}>📋</button>
-            {!pro&&<button className="btn" style={{padding:"5px 12px",fontSize:11,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontWeight:700,border:"none"}} onClick={()=>setPricing(true)}>⚡ Pro</button>}
+            {!pro&&user&&<button className="btn" style={{padding:"5px 12px",fontSize:11,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontWeight:700,border:"none"}} onClick={()=>setPricing(true)}>⚡ Pro</button>}
+            {!user&&<button className="btn" style={{padding:"5px 12px",fontSize:11,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontWeight:700,border:"none"}} onClick={()=>setAuth("login")}>Connexion</button>}
             {files.length>0&&<button className="btn btn-s" style={{padding:"5px 10px",fontSize:11}} onClick={clr}>✕ Clear</button>}
           </div></div></header>
 
-      {/* APP BODY */}
       <main style={{flex:1,overflow:"auto",padding:"16px 24px",position:"relative",zIndex:1}}>
         <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:4,borderRadius:12,maxWidth:260,margin:"0 auto 14px",border:"1px solid rgba(255,255,255,.05)"}}>
           {[["photo","📸 Photos"],["video","🎬 Vidéos"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"9px 0",fontSize:13,fontWeight:700,borderRadius:9,background:mode===m?"linear-gradient(135deg,#0d9488,#14b8a6)":"transparent",color:mode===m?"#021a16":"#4a6a78"}}>{l}</button>)}
@@ -514,7 +582,7 @@ export default function App(){
               onClick={()=>{if(!ck())return;ir.current?.click()}} className="card"
               style={{padding:files.length?"32px 20px":"56px 20px",textAlign:"center",cursor:"pointer",borderColor:drag?"rgba(20,184,166,.3)":undefined,transition:"all .2s"}}>
               <div style={{fontSize:files.length?28:44,marginBottom:8,animation:"float 3.5s ease infinite"}}>{drag?"📥":mode==="photo"?"📸":"🎬"}</div>
-              <div style={{fontSize:17,fontWeight:700,color:"#f0fdfa",marginBottom:4}}>{drag?"Lâche ici":`Drop tes ${mode==="photo"?"photos":"vidéos"}`}</div>
+              <div style={{fontSize:17,fontWeight:700,color:"#f0fdfa",marginBottom:4}}>{drag?"Lâche ici":!user?"Connecte-toi pour commencer":`Drop tes ${mode==="photo"?"photos":"vidéos"}`}</div>
               <div className="mono" style={{fontSize:13,color:"#2a4a58"}}>{mode==="photo"?"JPG • PNG • WEBP":"MP4 • MOV • WEBM"}</div>
               <input ref={ir} type="file" multiple accept={mode==="photo"?"image/*":"video/*"} style={{display:"none"}} onChange={e=>{if(!ck())return;add(e.target.files)}}/></div>
 
