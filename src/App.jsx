@@ -174,7 +174,7 @@ export default function App(){
 
       <nav style={{padding:"18px 36px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:2,maxWidth:1200,margin:"0 auto"}}>
         <div style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer"}} onClick={()=>setPg("landing")}>
-          <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#021a16",fontSize:15,animation:"glow 4s infinite"}}>V</div>
+          <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",animation:"glow 4s infinite",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:6}} alt="V"/></div>
           <span style={{fontWeight:800,fontSize:20,color:"#f0fdfa",letterSpacing:"-1px"}}>Veilora</span>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
@@ -300,7 +300,7 @@ export default function App(){
 
   function AuthM(){return <div className="ov" onClick={()=>setAuth(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:400,width:"90%",animation:"fadeIn .2s ease"}}>
     <div style={{textAlign:"center",marginBottom:20}}>
-      <div style={{width:48,height:48,borderRadius:14,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"inline-flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#021a16",fontSize:20,marginBottom:12}}>V</div>
+      <div style={{width:48,height:48,borderRadius:14,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:12,overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:6}} alt="V"/></div>
       <div style={{fontSize:20,fontWeight:800,color:"#fff"}}>{auth==="register"?"Créer un compte":"Connexion"}</div></div>
     <div style={{display:"flex",flexDirection:"column",gap:12}}>
       {auth==="register"&&<input className="inp" placeholder="Ton prénom" value={af.name} onChange={e=>setAf(f=>({...f,name:e.target.value}))}/>}
@@ -341,7 +341,7 @@ export default function App(){
       <header style={{padding:"10px 20px",borderBottom:"1px solid rgba(255,255,255,.05)",flexShrink:0,position:"relative",zIndex:2}}>
         <div className="app-header" style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setPg("landing")}>
-            <div style={{width:30,height:30,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#021a16",fontSize:13}}>V</div>
+            <div style={{width:30,height:30,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:6}} alt="V"/></div>
             <span style={{fontWeight:800,fontSize:16,color:"#f0fdfa",letterSpacing:"-.8px"}}>Veilora</span>
             {pro?<span className="badge bt" style={{fontSize:10}}>PRO</span>:<span className="badge ba" style={{fontSize:10}}>FREE {du}/{FREE_LIMIT}</span>}
           </div>
