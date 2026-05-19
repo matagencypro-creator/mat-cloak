@@ -1,20 +1,24 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 
-/* ═══════════════════════════════════════════════════════
-   MAT CLOAK v8 — ULTIMATE
-   Auth + Webhooks + Lifetime plan + Testimonials + Clean guide
-   ═══════════════════════════════════════════════════════ */
+/* ═══ VEILORA — Media Randomizer ═══ */
 
 const LOCS=[
   {city:"New York",lat:[40.70,40.78],lng:[-74.02,-73.93]},{city:"Los Angeles",lat:[33.94,34.06],lng:[-118.30,-118.18]},
   {city:"Miami",lat:[25.74,25.80],lng:[-80.22,-80.17]},{city:"London",lat:[51.48,51.54],lng:[-0.16,-0.08]},
   {city:"Paris",lat:[48.83,48.88],lng:[2.29,2.39]},{city:"Dubai",lat:[25.18,25.24],lng:[55.24,55.32]},
   {city:"Tokyo",lat:[35.65,35.72],lng:[139.69,139.78]},{city:"Bali",lat:[-8.72,-8.64],lng:[115.14,115.28]},
-  {city:"Random",lat:[-50,50],lng:[-160,160]},{city:"Strip",lat:null,lng:null},
+  {city:"Sydney",lat:[-33.88,-33.84],lng:[151.18,151.24]},{city:"Barcelona",lat:[41.37,41.41],lng:[2.15,2.20]},
+  {city:"Berlin",lat:[52.49,52.54],lng:[13.37,13.43]},{city:"Seoul",lat:[37.53,37.58],lng:[126.96,127.02]},
+  {city:"São Paulo",lat:[-23.58,-23.52],lng:[-46.67,-46.61]},{city:"Toronto",lat:[43.64,43.70],lng:[-79.42,-79.36]},
+  {city:"Singapore",lat:[1.28,1.34],lng:[103.82,103.88]},{city:"Amsterdam",lat:[52.35,52.40],lng:[4.87,4.93]},
+  {city:"Mexico City",lat:[19.39,19.45],lng:[-99.18,-99.12]},{city:"Bangkok",lat:[13.72,13.78],lng:[100.49,100.55]},
+  {city:"Las Vegas",lat:[36.10,36.18],lng:[-115.20,-115.12]},{city:"Cancún",lat:[21.12,21.18],lng:[-86.84,-86.78]},
+  {city:"Random",lat:[-50,50],lng:[-160,160]},{city:"Strip GPS",lat:null,lng:null},
 ];
-const META_TPL=[
+const MTPL=[
   {id:"iphone",name:"iPhone 15 Pro"},{id:"samsung",name:"Samsung S24"},{id:"pixel",name:"Pixel 8"},
-  {id:"canon",name:"Canon EOS R6"},{id:"tiktok",name:"Export TikTok"},{id:"ig",name:"Export IG"},{id:"strip",name:"Strip tout"},
+  {id:"canon",name:"Canon EOS R6"},{id:"sony",name:"Sony A7IV"},{id:"tiktok",name:"Export TikTok"},
+  {id:"ig",name:"Export IG"},{id:"strip",name:"Strip tout"},
 ];
 const LUTS=[{r:3,g:1,b:-3,t:3,c:2},{r:-2,g:1,b:2,t:-3,c:1},{r:2,g:0,b:-1,t:1,c:-3},{r:5,g:2,b:-3,t:5,c:1},{r:1,g:-1,b:1,t:0,c:-4}];
 const PRESETS=[
@@ -22,451 +26,440 @@ const PRESETS=[
   {id:"tiktok",name:"TikTok",icon:"🎵",ver:5,int:.4},{id:"of",name:"OnlyFans",icon:"💎",ver:3,int:.2},
   {id:"x",name:"Twitter",icon:"🐦",ver:6,int:.45},{id:"custom",name:"Custom",icon:"⚙️",ver:5,int:.5},
 ];
-const TF_META={
-  crop:{l:"Crop + Rescale",i:"✂️",d:"Recadre 1-4px aléatoirement sur chaque bord"},
-  rotation:{l:"Micro Rotation",i:"🔄",d:"Rotation de 0.1° à 0.8° imperceptible"},
-  zoom:{l:"Zoom Subtil",i:"🔍",d:"Zoom 1-3% indétectable visuellement"},
-  perspective:{l:"Perspective Warp",i:"📐",d:"Micro-déformation des coins",p:1},
-  colors:{l:"Shift Couleurs",i:"🎨",d:"Décale RGB ±5, saturation, luminosité"},
-  lut:{l:"LUT Cinématique",i:"🌈",d:"Courbe couleur aléatoire parmi 5 presets",p:1},
-  noise:{l:"AI Noise",i:"🧠",d:"Bruit gaussien simulant un capteur smartphone",p:1},
-  flip:{l:"Miroir",i:"↔️",d:"50% de chance de retourner horizontalement"},
-  metadata:{l:"Nuke Metadata",i:"🛡️",d:"Supprime tout EXIF, GPS, device info"},
-  metaTemplate:{l:"Fake Device",i:"🧹",d:"Simule iPhone, Samsung, Canon, export TikTok/IG",p:1},
-  location:{l:"Spoof GPS",i:"📍",d:"Injecte de fausses coordonnées GPS"},
-  randomName:{l:"Nom Random",i:"🎲",d:"Hash unique par fichier"},
-  fakeTimeline:{l:"Fake Timeline",i:"🕒",d:"Dates et timezone aléatoires",p:1},
+const TF={
+  crop:{l:"Crop + Rescale",i:"✂️"},rotation:{l:"Micro Rotation",i:"🔄"},zoom:{l:"Zoom Subtil",i:"🔍"},
+  perspective:{l:"Perspective Warp",i:"📐",p:1},colors:{l:"Shift Couleurs",i:"🎨"},lut:{l:"LUT Cinématique",i:"🌈",p:1},
+  noise:{l:"AI Noise",i:"🧠",p:1},flip:{l:"Miroir",i:"↔️"},metadata:{l:"Nuke Metadata",i:"🛡️"},
+  metaTemplate:{l:"Fake Device",i:"🧹",p:1},location:{l:"Spoof GPS",i:"📍"},randomName:{l:"Nom Random",i:"🎲"},
+  fakeTimeline:{l:"Fake Timeline",i:"🕒",p:1},
 };
-const TF_DEF=Object.fromEntries(Object.keys(TF_META).map(k=>[k,true]));
+const TFD=Object.fromEntries(Object.keys(TF).map(k=>[k,true]));
 
-const TESTIMONIALS=[
-  {name:"Lucas M.",role:"Agency Owner",avatar:"🧑‍💼",stars:5,text:"On poste le même contenu sur 40 comptes IG sans aucun ban. Avant MAT Cloak on perdait 2-3 comptes par semaine."},
-  {name:"Sarah K.",role:"Content Manager",avatar:"👩‍💻",stars:5,text:"Le Humanizer slider est génial — je mets sur léger pour OF (qualité max) et agressif pour Reddit. Le workflow est parfait."},
-  {name:"Marc D.",role:"Growth Hacker",avatar:"🧔",stars:5,text:"J'ai testé MetaMod, AWEN et d'autres. MAT Cloak a plus de transformations et le fait que ce soit 100% local me rassure pour la privacy."},
-  {name:"Emma R.",role:"Social Media Manager",avatar:"👩",stars:5,text:"Le GPS spoofing + fake device c'est exactement ce qu'il me fallait. Mes clients sont ravis, zéro détection depuis 3 mois."},
-  {name:"Thomas B.",role:"Freelance",avatar:"👨‍🎨",stars:5,text:"Le plan à vie à 44.99€ c'est un no-brainer. En 2 mois c'est rentabilisé. L'envoi auto sur Discord webhook me fait gagner 1h par jour."},
-  {name:"Julie P.",role:"Agency Co-founder",avatar:"👩‍🦰",stars:5,text:"La comparaison before/after en mode blink m'a convaincue direct. On voit que c'est modifié techniquement mais visuellement identique."},
+const TESTI=[
+  {n:"Lucas M.",r:"Agency Owner",a:"🧑‍💼",t:"On poste sur 40 comptes IG sans ban. Avant on perdait 2-3 comptes par semaine. Veilora a tout changé."},
+  {n:"Sarah K.",r:"Content Manager",a:"👩‍💻",t:"Le Humanizer c'est génial. Léger pour OF, agressif pour Reddit. Le workflow est parfait."},
+  {n:"Marc D.",r:"Growth Hacker",a:"🧔",t:"J'ai testé tous les outils du marché. Veilora a plus de transformations et le 100% local me rassure."},
+  {n:"Emma R.",r:"Social Media",a:"👩",t:"GPS spoofing + fake device = exactement ce qu'il me fallait. Zéro détection depuis 3 mois."},
+  {n:"Thomas B.",r:"Freelance",a:"👨‍🎨",t:"Le plan à vie à 44.99€ c'est un no-brainer. L'envoi auto Discord me fait gagner 1h/jour."},
+  {n:"Julie P.",r:"Agency Co-founder",a:"👩‍🦰",t:"La preview before/after en mode blink m'a convaincue. Modifié techniquement mais visuellement identique."},
 ];
 
-const GUIDE=[
-  {q:"Qu'est-ce que MAT Cloak ?",a:"MAT Cloak randomise tes photos et vidéos pour que les plateformes (Instagram, TikTok, Reddit) ne les détectent pas comme doublons. Chaque version générée a un hash cryptographique différent, des pixels modifiés, des métadonnées uniques, et potentiellement une fausse localisation GPS. Résultat : tu postes le même contenu sur 100 comptes sans risque de ban."},
-  {q:"Comment les algorithmes détectent les doublons ?",a:"3 méthodes : le hash SHA-256 (comparaison octet par octet), le hash perceptuel pHash (analyse de la structure visuelle), et les métadonnées EXIF (appareil, date, GPS identiques). MAT Cloak modifie les 3 couches en même temps."},
-  {q:"C'est vraiment indétectable ?",a:"Les micro-modifications (crop 1-3px, rotation 0.1°, shift couleurs ±4) sont imperceptibles à l'œil humain mais suffisantes pour générer un hash complètement différent. Le Similarity Score te montre la preuve en temps réel."},
-  {q:"Mes fichiers sont uploadés sur un serveur ?",a:"Non. Le traitement est 100% local dans ton navigateur via l'API Canvas. Aucun fichier ne quitte jamais ton appareil. C'est plus rapide et plus sécurisé que les alternatives serveur."},
-  {q:"Quelle différence entre les presets ?",a:"Chaque plateforme a ses propres algorithmes. Instagram est le plus strict (12 versions recommandées, toutes transformations). Reddit est plus permissif (flip activé car les subs sont indépendants). OnlyFans nécessite une qualité max (seulement metadata modifiées)."},
-  {q:"Le curseur Humanizer, ça fait quoi ?",a:"Il contrôle l'intensité de toutes les transformations en même temps. Ultra léger : modifications minimales, qualité maximale. Balanced : bon compromis. Agressif : maximum de sécurité pour poster sur beaucoup de comptes."},
-  {q:"C'est quoi le GPS Spoofing ?",a:"Ton téléphone enregistre ta position GPS dans chaque photo. Si tu postes la même photo sur 10 comptes avec le même GPS, le lien est évident. MAT Cloak injecte de fausses coordonnées (New York, Dubai, Bali...) ou supprime complètement le GPS."},
-  {q:"C'est quoi le Fake Device ?",a:"Les métadonnées EXIF contiennent le modèle de ton appareil. MAT Cloak peut simuler un iPhone 15 Pro, Samsung S24, Canon EOS R6, ou les signatures d'export de TikTok et Instagram."},
-  {q:"Le webhook Discord/Telegram, comment ça marche ?",a:"Tu colles ton URL de webhook dans les paramètres. Après chaque traitement, les fichiers sont envoyés automatiquement sur ton channel Discord ou ton chat Telegram. Plus besoin de télécharger puis re-uploader manuellement."},
-  {q:"Free vs Pro, quelle différence ?",a:"Free : 3 fichiers/jour, 5 versions max, transformations basiques. Pro (7.99€/mois ou 44.99€ à vie) : fichiers illimités, 100 versions, 13 transformations, GPS Spoofing, Fake Device, LUT, AI Noise, webhooks, Privacy Audit."},
+const FAQ=[
+  {q:"C'est quoi Veilora ?",a:"Veilora randomise tes photos et vidéos pour que les plateformes (IG, TikTok, Reddit) ne les détectent pas comme doublons. Chaque version a un hash différent, des pixels modifiés, des métadonnées uniques."},
+  {q:"Comment les algorithmes détectent les doublons ?",a:"3 méthodes : hash SHA-256 (comparaison octets), hash perceptuel pHash (structure visuelle), métadonnées EXIF (appareil, date, GPS). Veilora modifie les 3 couches."},
+  {q:"C'est vraiment indétectable ?",a:"Les micro-modifications sont imperceptibles à l'œil mais suffisantes pour générer un hash complètement différent. Le Similarity Score te donne la preuve."},
+  {q:"Mes fichiers sont uploadés ?",a:"Non. Traitement 100% local dans ton navigateur. Aucun fichier ne quitte ton appareil. Plus rapide et plus sécurisé."},
+  {q:"Le curseur Humanizer ?",a:"Il contrôle l'intensité de toutes les transformations. Ultra léger = qualité max. Agressif = sécurité max pour beaucoup de comptes."},
+  {q:"Le webhook Discord/Telegram ?",a:"Tu colles ton URL de webhook. Après chaque traitement, les fichiers sont envoyés automatiquement sur ton channel."},
+  {q:"Free vs Pro ?",a:"Free : 3 fichiers/jour, 5 versions, transformations basiques. Pro (7.99€/mois ou 44.99€ à vie) : illimité, 100 versions, 13 transformations, webhooks, GPS spoofing."},
 ];
 
 // ── Engine ──
-function processImg(file,tf,vi,I){return new Promise(res=>{const img=new Image();img.onload=()=>{const s=vi+Math.random();const r=(a,b)=>a+Math.abs(Math.sin(s*(b+1)))*(b-a);let w=img.width,h=img.height;const cr=tf.crop?Math.floor(r(1,1+3*I)):0;const sw=w-cr*2,sh=h-cr*2,z=tf.zoom?1+r(.005,.005+.025*I):1;const ow=Math.round(sw*z),oh=Math.round(sh*z);const c=document.createElement("canvas");c.width=ow;c.height=oh;const x=c.getContext("2d");
-if(tf.rotation){const a=(r(.1,.1+.7*I)*(Math.random()>.5?1:-1))*Math.PI/180;x.translate(ow/2,oh/2);x.rotate(a);x.translate(-ow/2,-oh/2)}x.drawImage(img,cr,cr,sw,sh,0,0,ow,oh);
-if(tf.perspective){const id=x.getImageData(0,0,ow,oh);const d=new Uint8ClampedArray(id.data);const px=Math.floor(r(1,1+2*I));for(let y=0;y<oh;y++){const sh2=Math.round(px*(1-y/oh)*(Math.random()>.5?1:-1));for(let xp=0;xp<ow;xp++){const sx=xp-sh2;if(sx>=0&&sx<ow){const di=(y*ow+xp)*4,si=(y*ow+sx)*4;id.data[di]=d[si];id.data[di+1]=d[si+1];id.data[di+2]=d[si+2];id.data[di+3]=d[si+3]}}}x.putImageData(id,0,0)}
-if(tf.colors||tf.lut){const id=x.getImageData(0,0,ow,oh),d=id.data;const rs=Math.floor(r(-3-2*I,3+2*I)),gs=Math.floor(r(-3-2*I,3+2*I)),bs=Math.floor(r(-3-2*I,3+2*I)),br=r(-3-3*I,3+3*I),sat=r(1-.04*I,1+.04*I);const lut=tf.lut?LUTS[Math.floor(Math.random()*LUTS.length)]:{r:0,g:0,b:0,t:0,c:0};for(let i=0;i<d.length;i+=4){const avg=(d[i]+d[i+1]+d[i+2])/3;let rv=Math.round(avg+(d[i]-avg)*sat)+rs+br+lut.r*I,gv=Math.round(avg+(d[i+1]-avg)*sat)+gs+br+lut.g*I,bv=Math.round(avg+(d[i+2]-avg)*sat)+bs+br+lut.b*I;if(lut.c){rv=128+(rv-128)*(1+lut.c*I*.01);gv=128+(gv-128)*(1+lut.c*I*.01);bv=128+(bv-128)*(1+lut.c*I*.01)}if(lut.t){rv+=lut.t*I;bv-=lut.t*I}d[i]=Math.min(255,Math.max(0,rv));d[i+1]=Math.min(255,Math.max(0,gv));d[i+2]=Math.min(255,Math.max(0,bv))}x.putImageData(id,0,0)}
-if(tf.noise){const id=x.getImageData(0,0,ow,oh),d=id.data;const nI=3+4*I;for(let i=0;i<d.length;i+=4){const u1=Math.random(),u2=Math.random();const n=Math.sqrt(-2*Math.log(u1||.001))*Math.cos(2*Math.PI*u2)*nI;const lum=(d[i]+d[i+1]+d[i+2])/3;const db=1+(1-lum/255)*.5;d[i]=Math.min(255,Math.max(0,d[i]+n*db));d[i+1]=Math.min(255,Math.max(0,d[i+1]+n*db*.95));d[i+2]=Math.min(255,Math.max(0,d[i+2]+n*db*1.05))}x.putImageData(id,0,0)}
+function processImg(file,tf,vi,I){return new Promise(res=>{const img=new Image();img.onload=()=>{const s=vi+Math.random();const r=(a,b)=>a+Math.abs(Math.sin(s*(b+1)))*(b-a);
+let w=img.width,h=img.height;const cr=tf.crop?Math.floor(r(1,1+3*I)):0;const sw=w-cr*2,sh=h-cr*2,z=tf.zoom?1+r(.005,.005+.025*I):1;
+const ow=Math.round(sw*z),oh=Math.round(sh*z);const c=document.createElement("canvas");c.width=ow;c.height=oh;const x=c.getContext("2d");
+if(tf.rotation){const a=(r(.1,.1+.7*I)*(Math.random()>.5?1:-1))*Math.PI/180;x.translate(ow/2,oh/2);x.rotate(a);x.translate(-ow/2,-oh/2)}
+x.drawImage(img,cr,cr,sw,sh,0,0,ow,oh);
+if(tf.perspective){const id=x.getImageData(0,0,ow,oh);const d=new Uint8ClampedArray(id.data);const px=Math.floor(r(1,1+2*I));for(let y=0;y<oh;y++){const s2=Math.round(px*(1-y/oh)*(Math.random()>.5?1:-1));for(let xp=0;xp<ow;xp++){const sx=xp-s2;if(sx>=0&&sx<ow){const di=(y*ow+xp)*4,si=(y*ow+sx)*4;id.data[di]=d[si];id.data[di+1]=d[si+1];id.data[di+2]=d[si+2];id.data[di+3]=d[si+3]}}}x.putImageData(id,0,0)}
+if(tf.colors||tf.lut){const id=x.getImageData(0,0,ow,oh),d=id.data;const rs=Math.floor(r(-3-2*I,3+2*I)),gs=Math.floor(r(-3-2*I,3+2*I)),bs=Math.floor(r(-3-2*I,3+2*I)),br=r(-3-3*I,3+3*I),sat=r(1-.04*I,1+.04*I);
+const lut=tf.lut?LUTS[Math.floor(Math.random()*LUTS.length)]:{r:0,g:0,b:0,t:0,c:0};
+for(let i=0;i<d.length;i+=4){const avg=(d[i]+d[i+1]+d[i+2])/3;let rv=Math.round(avg+(d[i]-avg)*sat)+rs+br+lut.r*I,gv=Math.round(avg+(d[i+1]-avg)*sat)+gs+br+lut.g*I,bv=Math.round(avg+(d[i+2]-avg)*sat)+bs+br+lut.b*I;
+if(lut.c){rv=128+(rv-128)*(1+lut.c*I*.01);gv=128+(gv-128)*(1+lut.c*I*.01);bv=128+(bv-128)*(1+lut.c*I*.01)}if(lut.t){rv+=lut.t*I;bv-=lut.t*I}
+d[i]=Math.min(255,Math.max(0,rv));d[i+1]=Math.min(255,Math.max(0,gv));d[i+2]=Math.min(255,Math.max(0,bv))}x.putImageData(id,0,0)}
+if(tf.noise){const id=x.getImageData(0,0,ow,oh),d=id.data;const nI=3+4*I;for(let i=0;i<d.length;i+=4){const u1=Math.random(),u2=Math.random();const n=Math.sqrt(-2*Math.log(u1||.001))*Math.cos(2*Math.PI*u2)*nI;const lum=(d[i]+d[i+1]+d[i+2])/3;const db=1+(1-lum/255)*.5;
+d[i]=Math.min(255,Math.max(0,d[i]+n*db));d[i+1]=Math.min(255,Math.max(0,d[i+1]+n*db*.95));d[i+2]=Math.min(255,Math.max(0,d[i+2]+n*db*1.05))}x.putImageData(id,0,0)}
 if(tf.flip&&Math.random()>.5){const f2=document.createElement("canvas");f2.width=ow;f2.height=oh;const fx=f2.getContext("2d");fx.translate(ow,0);fx.scale(-1,1);fx.drawImage(c,0,0);x.clearRect(0,0,ow,oh);x.drawImage(f2,0,0)}
 c.toBlob(b=>{URL.revokeObjectURL(img.src);res({blob:b,w:ow,h:oh})},"image/jpeg",r(.78+.1*(1-I),.95-.05*I))};img.src=URL.createObjectURL(file)})}
+
 const rn=ext=>`IMG_${Date.now().toString(36)}_${Array.from({length:10},()=>"abcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(Math.random()*36)]).join("")}.${ext}`;
 const fb=b=>{if(!b)return"0 B";const u=["B","KB","MB","GB"];const i=Math.floor(Math.log(b)/Math.log(1024));return(b/Math.pow(1024,i)).toFixed(1)+" "+u[i]};
 const pH=async b=>{const buf=await b.arrayBuffer();const h=await crypto.subtle.digest("SHA-256",buf);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,"0")).join("")};
-
 const STRIPE={monthly:"https://buy.stripe.com/YOUR_MONTHLY",lifetime:"https://buy.stripe.com/YOUR_LIFETIME"};
 const FREE_LIMIT=3;
-
-// ── Webhook sender ──
-async function sendWebhook(url,blob,name,type){
-  if(!url)return;
-  try{
-    const fd=new FormData();
-    fd.append("file",blob,name);
-    if(type==="discord"){fd.append("payload_json",JSON.stringify({content:`🔒 **MAT Cloak** — ${name}`}))}
-    await fetch(url,{method:"POST",body:fd});
-  }catch(e){console.log("Webhook error:",e)}
-}
-
+async function sendWH(url,blob,name,type){if(!url)return;try{const fd=new FormData();fd.append("file",blob,name);if(type==="discord")fd.append("payload_json",JSON.stringify({content:`🔒 **Veilora** — ${name}`}));await fetch(url,{method:"POST",body:fd})}catch(e){}}
 
 export default function App(){
-  const[page,setPage]=useState("landing");
+  const[pg,setPg]=useState("landing");
   const[mode,setMode]=useState("photo");
   const[files,setFiles]=useState([]);
   const[ver,setVer]=useState(5);
-  const[tf,setTf]=useState({...TF_DEF});
+  const[tf,setTf2]=useState({...TFD});
   const[loc,setLoc]=useState(LOCS[0]);
-  const[metaTpl,setMetaTpl]=useState(META_TPL[0]);
+  const[mtpl,setMtpl]=useState(MTPL[0]);
   const[preset,setPreset]=useState(null);
-  const[intensity,setIntensity]=useState(.5);
+  const[inten,setInten]=useState(.5);
   const[proc,setProc]=useState(false);
   const[prog,setProg]=useState({c:0,t:0,f:"",v:0});
   const[res,setRes]=useState([]);
-  const[view,setView]=useState("config");
+  const[vw,setVw]=useState("config");
   const[drag,setDrag]=useState(false);
   const[thumbs,setThumbs]=useState({});
   const[preview,setPreview]=useState(null);
-  const[diffMode,setDiffMode]=useState("split");
-  const[showPanel,setShowPanel]=useState(null);
-  const[history,setHistory]=useState([]);
-  const[isPro,setIsPro]=useState(false);
-  const[dailyUsed,setDailyUsed]=useState(0);
-  const[showPricing,setShowPricing]=useState(false);
-  const[showAuth,setShowAuth]=useState(null);
+  const[dm,setDm]=useState("split");
+  const[panel,setPanel]=useState(null);
+  const[hist,setHist]=useState([]);
+  const[pro,setPro2]=useState(false);
+  const[du,setDu]=useState(0);
+  const[pricing,setPricing]=useState(false);
+  const[auth,setAuth]=useState(null);
   const[user,setUser]=useState(null);
-  const[authForm,setAuthForm]=useState({email:"",pass:"",name:""});
-  const[webhook,setWebhook]=useState({discord:"",telegram:"",enabled:false,type:"discord"});
-  const[expandedGuide,setExpandedGuide]=useState(null);
+  const[af,setAf]=useState({email:"",pass:"",name:""});
+  const[wh,setWh]=useState({discord:"",telegram:"",on:false,type:"discord"});
+  const[faqO,setFaqO]=useState(null);
   const ir=useRef();
 
-  useEffect(()=>{try{
-    const s=JSON.parse(localStorage.getItem("mc_usage")||"{}");
-    if(s.date===new Date().toDateString())setDailyUsed(s.count||0);
-    if(localStorage.getItem("mc_pro")==="true")setIsPro(true);
-    const u=JSON.parse(localStorage.getItem("mc_user")||"null");if(u)setUser(u);
-    const w=JSON.parse(localStorage.getItem("mc_webhook")||"{}");if(w.discord||w.telegram)setWebhook({...webhook,...w});
-  }catch(e){}},[]);
-
-  const saveWebhook=()=>{try{localStorage.setItem("mc_webhook",JSON.stringify(webhook))}catch(e){}};
-  const login=(e)=>{e?.preventDefault();const u={email:authForm.email,name:authForm.name||authForm.email.split("@")[0]};setUser(u);localStorage.setItem("mc_user",JSON.stringify(u));setShowAuth(null)};
-  const logout=()=>{setUser(null);localStorage.removeItem("mc_user")};
-  const checkLimit=()=>{if(isPro)return true;if(dailyUsed>=FREE_LIMIT){setShowPricing(true);return false}return true};
-
-  const add=useCallback(nf=>{Array.from(nf).filter(f=>mode==="photo"?f.type.startsWith("image/"):f.type.startsWith("video/")).forEach(f=>{
-    const id=crypto.randomUUID?.() || Math.random().toString(36).slice(2);
-    if(f.type.startsWith("image/"))setThumbs(p=>({...p,[id]:URL.createObjectURL(f)}));
-    setFiles(p=>[...p,{file:f,id,name:f.name,size:f.size,type:f.type}])})},[mode]);
-
-  const applyPreset=p=>{setPreset(p);if(p.id!=="custom"){setVer(p.ver);setIntensity(p.int)}};
-
-  const run=async()=>{if(!checkLimit())return;setProc(true);setRes([]);setView("results");
-    const all=[];const tot=files.length*ver;let done=0;const t0=Date.now();
-    const whUrl=webhook.enabled?(webhook.type==="discord"?webhook.discord:webhook.telegram):"";
+  useEffect(()=>{try{const s=JSON.parse(localStorage.getItem("v_use")||"{}");if(s.d===new Date().toDateString())setDu(s.c||0);if(localStorage.getItem("v_pro")==="true")setPro2(true);const u=JSON.parse(localStorage.getItem("v_user")||"null");if(u)setUser(u);const w=JSON.parse(localStorage.getItem("v_wh")||"{}");if(w.discord||w.telegram)setWh(p=>({...p,...w}))}catch(e){}},[]);
+  const ck=()=>{if(pro)return true;if(du>=FREE_LIMIT){setPricing(true);return false}return true};
+  const add=useCallback(nf=>{Array.from(nf).filter(f=>mode==="photo"?f.type.startsWith("image/"):f.type.startsWith("video/")).forEach(f=>{const id=crypto.randomUUID?.() || Math.random().toString(36).slice(2);if(f.type.startsWith("image/"))setThumbs(p=>({...p,[id]:URL.createObjectURL(f)}));setFiles(p=>[...p,{file:f,id,name:f.name,size:f.size,type:f.type}])})},[mode]);
+  const applyP=p=>{setPreset(p);if(p.id!=="custom"){setVer(p.ver);setInten(p.int)}};
+  const run=async()=>{if(!ck())return;setProc(true);setRes([]);setVw("results");const all=[];const tot=files.length*ver;let done=0;const t0=Date.now();
+    const wu=wh.on?(wh.type==="discord"?wh.discord:wh.telegram):"";
     for(const f of files){const vr=[];for(let v=0;v<ver;v++){setProg({c:done,t:tot,f:f.name,v:v+1});
-      if(f.type.startsWith("image/")){try{const{blob,w,h}=await processImg(f.file,tf,v,intensity);const hF=await pH(blob);const oH=await pH(f.file);
+      if(f.type.startsWith("image/")){try{const{blob,w,h}=await processImg(f.file,tf,v,inten);const hF=await pH(blob);const oH=await pH(f.file);
         const ss=Math.min(99,Math.max(25,Math.round(Math.abs(1-blob.size/f.size)*200+(tf.perspective?15:0)+(tf.lut?12:0)+10+Math.random()*15)));
-        const name=tf.randomName?rn("jpg"):`${f.name.split(".")[0]}_v${v+1}.jpg`;
-        if(whUrl)await sendWebhook(whUrl,blob,name,webhook.type);
-        vr.push({blob,name,size:blob.size,ok:true,thumb:URL.createObjectURL(blob),w,h,hash:hF.slice(0,16),origHash:oH.slice(0,16),similarity:ss});
-      }catch(e){vr.push({name:f.name,ok:false})}}else{const ext=f.name.split(".").pop();const name=tf.randomName?rn(ext):`${f.name.split(".")[0]}_v${v+1}.${ext}`;
-        if(whUrl)await sendWebhook(whUrl,f.file,name,webhook.type);
-        vr.push({blob:f.file,name,size:f.size,ok:true})}done++}all.push({orig:f,vers:vr});setRes([...all])}
-    setHistory(h=>[{date:new Date().toLocaleString(),files:files.length,versions:tot,time:((Date.now()-t0)/1000).toFixed(1)+"s"},...h.slice(0,19)]);
-    const nc=dailyUsed+files.length;setDailyUsed(nc);try{localStorage.setItem("mc_usage",JSON.stringify({date:new Date().toDateString(),count:nc}))}catch(e){}setProc(false)};
-
+        const nm=tf.randomName?rn("jpg"):`${f.name.split(".")[0]}_v${v+1}.jpg`;if(wu)await sendWH(wu,blob,nm,wh.type);
+        vr.push({blob,name:nm,size:blob.size,ok:true,thumb:URL.createObjectURL(blob),w,h,hash:hF.slice(0,16),origHash:oH.slice(0,16),similarity:ss})}catch(e){vr.push({name:f.name,ok:false})}}
+      else{const ext=f.name.split(".").pop();const nm=tf.randomName?rn(ext):`${f.name.split(".")[0]}_v${v+1}.${ext}`;if(wu)await sendWH(wu,f.file,nm,wh.type);
+        vr.push({blob:f.file,name:nm,size:f.size,ok:true})}done++}all.push({orig:f,vers:vr});setRes([...all])}
+    setHist(h=>[{date:new Date().toLocaleString(),files:files.length,versions:tot,time:((Date.now()-t0)/1000).toFixed(1)+"s"},...h.slice(0,19)]);
+    const nc=du+files.length;setDu(nc);try{localStorage.setItem("v_use",JSON.stringify({d:new Date().toDateString(),c:nc}))}catch(e){}setProc(false)};
   const dl=r=>{const a=document.createElement("a");a.href=URL.createObjectURL(r.blob);a.download=r.name;a.click()};
-  const dlAll=()=>res.forEach(g=>g.vers.filter(v=>v.ok).forEach((v,i)=>setTimeout(()=>dl(v),i*50)));
+  const dlAll=()=>res.forEach(g=>g.vers.filter(v=>v.ok).forEach((v,i)=>setTimeout(()=>dl(v),i*40)));
   const totV=res.reduce((a,g)=>a+g.vers.filter(v=>v.ok).length,0);
   const activeT=Object.values(tf).filter(Boolean).length;
-  const clr=()=>{setFiles([]);setRes([]);setView("config");setThumbs({})};
-  const intLabel=intensity<.25?"Ultra léger":intensity<.45?"Léger":intensity<.65?"Balanced":intensity<.85?"Agressif":"Maximum";
-  const intColor=intensity<.25?"#6ee7b7":intensity<.45?"#67e8f9":intensity<.65?"#a78bfa":intensity<.85?"#fbbf24":"#fb7185";
+  const clr=()=>{setFiles([]);setRes([]);setVw("config");setThumbs({})};
+  const iL=inten<.25?"Ultra léger":inten<.45?"Léger":inten<.65?"Balanced":inten<.85?"Agressif":"Maximum";
+  const iC=inten<.25?"#6ee7b7":inten<.45?"#67e8f9":inten<.65?"#a78bfa":inten<.85?"#fbbf24":"#fb7185";
+  const login=()=>{const u={email:af.email,name:af.name||af.email.split("@")[0]};setUser(u);localStorage.setItem("v_user",JSON.stringify(u));setAuth(null)};
 
-  const S=`*{box-sizing:border-box;margin:0;padding:0}
-    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(20,184,166,.15);border-radius:9px}
-    @keyframes i{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes sp{to{transform:rotate(360deg)}}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-    @keyframes bl{0%,100%{opacity:1}50%{opacity:0}}@keyframes po{0%{transform:scale(.9)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
-    @keyframes gl{0%,100%{box-shadow:0 0 20px rgba(20,184,166,.05)}50%{box-shadow:0 0 35px rgba(20,184,166,.12)}}
-    @keyframes gr{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    .msh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 15% 10%,rgba(13,148,136,.04),transparent),radial-gradient(ellipse 50% 60% at 85% 85%,rgba(34,211,238,.03),transparent)}
-    .c{background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.05);border-radius:14px;transition:all .15s;position:relative;overflow:hidden}.c:hover{border-color:rgba(255,255,255,.08)}
-    .b{font-family:inherit;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:all .12s;display:inline-flex;align-items:center;justify-content:center;gap:7px}
-    .bm{background:linear-gradient(135deg,#0d9488,#14b8a6);color:#021a16;padding:13px 28px;font-size:14px}.bm:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(20,184,166,.2)}.bm:disabled{opacity:.2;cursor:not-allowed;transform:none}
-    .bx{background:rgba(255,255,255,.04);color:#6a8a9a;padding:9px 16px;font-size:12px;border:1px solid rgba(255,255,255,.06)}.bx:hover{background:rgba(255,255,255,.07);color:#c0d6e0}
-    .bdg{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:600}
-    .bt{background:rgba(20,184,166,.08);color:#5eead4}.bg2{background:rgba(52,211,153,.07);color:#6ee7b7}.ba{background:rgba(251,191,36,.08);color:#fde68a}
-    .th{width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04)}
-    .rw{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;transition:background .1s}.rw:hover{background:rgba(255,255,255,.012)}
-    .ck{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;cursor:pointer;transition:all .1s;user-select:none}.ck:hover{background:rgba(255,255,255,.015)}.ck.on{background:rgba(20,184,166,.04)}
-    .dt{width:15px;height:15px;border-radius:4px;border:1.5px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:8px;transition:all .1s;flex-shrink:0}.dt.on{background:#14b8a6;border-color:#14b8a6;color:#021a16}
-    .cn{width:36px;height:36px;border-radius:8px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);color:#8aa;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:all .1s}.cn:hover{border-color:#14b8a6;color:#fff}
-    .pb{height:3px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden}.pf{height:100%;background:linear-gradient(90deg,#0d9488,#14b8a6,#67e8f9);border-radius:3px;transition:width .2s}
-    .vc{background:rgba(255,255,255,.012);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:7px;transition:all .1s;cursor:pointer;overflow:hidden}.vc:hover{border-color:rgba(20,184,166,.2);transform:translateY(-1px)}
-    .pc{padding:10px 6px;border-radius:10px;cursor:pointer;transition:all .12s;border:1.5px solid transparent;background:rgba(255,255,255,.015);text-align:center}.pc:hover{background:rgba(255,255,255,.025)}.pc.on{border-color:rgba(20,184,166,.3);background:rgba(20,184,166,.04)}
-    .lb{padding:6px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent;font-family:inherit;font-size:10px;font-weight:600;transition:all .1s;background:rgba(255,255,255,.025);color:#5a7a8a}.lb:hover{color:#aaa}.lb.on{border-color:rgba(20,184,166,.25);color:#5eead4;background:rgba(20,184,166,.06)}
-    .ov{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(16px);z-index:100;display:flex;align-items:center;justify-content:center;animation:i .15s ease}
-    .sl{-webkit-appearance:none;width:100%;height:3px;border-radius:2px;outline:none;background:rgba(255,255,255,.08)}.sl::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:linear-gradient(135deg,#14b8a6,#2dd4bf);border-radius:50%;cursor:pointer;box-shadow:0 0 10px rgba(20,184,166,.3)}
-    .mn{font-family:'Courier New',monospace}
-    .inp{width:100%;padding:11px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#e0eaf0;font-size:13px;outline:none;font-family:inherit;transition:border-color .15s}.inp:focus{border-color:#14b8a6}
-    .prc{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:28px 24px;transition:all .15s;position:relative}.prc:hover{border-color:rgba(255,255,255,.1)}
-    .prc.ft{border-color:rgba(20,184,166,.3);background:rgba(20,184,166,.025)}.prc.ft::before{content:"POPULAIRE";position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0d9488,#14b8a6);color:#021a16;padding:3px 14px;border-radius:100px;font-size:10px;font-weight:700}
-    .tmn{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:14px;padding:20px;transition:all .15s}.tmn:hover{border-color:rgba(255,255,255,.08)}
-    @media(max-width:900px){.ly{grid-template-columns:1fr!important}.sd{order:2}}
-    @media(max-width:700px){.hd{flex-direction:column;gap:8px;align-items:flex-start!important}.sg{grid-template-columns:repeat(2,1fr)!important}.vg{grid-template-columns:repeat(2,1fr)!important}.fg{grid-template-columns:1fr!important}.pg{grid-template-columns:1fr!important}.tg{grid-template-columns:1fr!important}.stg{grid-template-columns:repeat(2,1fr)!important}}`;
+  // ── STYLES — full screen, bigger fonts ──
+  const S=`*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+    html,body,#root{height:100%;overflow:auto}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(20,184,166,.2);border-radius:9px}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(20,184,166,.06)}50%{box-shadow:0 0 35px rgba(20,184,166,.15)}}
+    .mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 10% 10%,rgba(13,148,136,.04),transparent),radial-gradient(ellipse 60% 70% at 90% 90%,rgba(34,211,238,.03),transparent)}
+    .card{background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.06);border-radius:16px;transition:border-color .15s}.card:hover{border-color:rgba(255,255,255,.1)}
+    .btn{font-family:inherit;border:none;border-radius:12px;cursor:pointer;font-weight:600;transition:all .12s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .btn-p{background:linear-gradient(135deg,#0d9488,#14b8a6);color:#021a16;padding:14px 30px;font-size:15px}.btn-p:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(20,184,166,.2)}.btn-p:disabled{opacity:.2;cursor:not-allowed;transform:none}
+    .btn-s{background:rgba(255,255,255,.04);color:#7a9aaa;padding:10px 18px;font-size:13px;border:1px solid rgba(255,255,255,.06)}.btn-s:hover{background:rgba(255,255,255,.07);color:#d0e0e8}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:100px;font-size:11px;font-weight:600}
+    .bt{background:rgba(20,184,166,.08);color:#5eead4}.bg{background:rgba(52,211,153,.07);color:#6ee7b7}.ba{background:rgba(251,191,36,.08);color:#fde68a}
+    .thumb{width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
+    .row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:12px;transition:background .1s}.row:hover{background:rgba(255,255,255,.015)}
+    .chk{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;transition:all .1s;user-select:none}.chk:hover{background:rgba(255,255,255,.018)}.chk.on{background:rgba(20,184,166,.045)}
+    .dot{width:18px;height:18px;border-radius:5px;border:2px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .1s;flex-shrink:0}.dot.on{background:#14b8a6;border-color:#14b8a6;color:#021a16}
+    .cnt{width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#9ab;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s}.cnt:hover{border-color:#14b8a6;color:#fff;background:rgba(20,184,166,.05)}
+    .pbar{height:4px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden}.pfill{height:100%;background:linear-gradient(90deg,#0d9488,#14b8a6,#67e8f9);border-radius:3px;transition:width .2s}
+    .vc{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:8px;transition:all .12s;cursor:pointer;overflow:hidden}.vc:hover{border-color:rgba(20,184,166,.25);transform:translateY(-2px)}
+    .pc{padding:14px 10px;border-radius:12px;cursor:pointer;transition:all .12s;border:2px solid transparent;background:rgba(255,255,255,.018);text-align:center}.pc:hover{background:rgba(255,255,255,.03)}.pc.on{border-color:rgba(20,184,166,.35);background:rgba(20,184,166,.05)}
+    .lb{padding:7px 13px;border-radius:8px;cursor:pointer;border:1px solid transparent;font-family:inherit;font-size:12px;font-weight:600;transition:all .1s;background:rgba(255,255,255,.03);color:#5a7a8a}.lb:hover{color:#aaa;background:rgba(255,255,255,.05)}.lb.on{border-color:rgba(20,184,166,.3);color:#5eead4;background:rgba(20,184,166,.06)}
+    .ov{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(16px);z-index:100;display:flex;align-items:center;justify-content:center;animation:fadeIn .12s ease}
+    .slider{-webkit-appearance:none;width:100%;height:4px;border-radius:3px;outline:none;background:rgba(255,255,255,.1)}.slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:linear-gradient(135deg,#14b8a6,#2dd4bf);border-radius:50%;cursor:pointer;box-shadow:0 0 12px rgba(20,184,166,.3)}
+    .mono{font-family:'Courier New',monospace}
+    .inp{width:100%;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#e0eaf0;font-size:14px;outline:none;font-family:inherit;transition:border-color .15s}.inp:focus{border-color:#14b8a6;box-shadow:0 0 0 3px rgba(20,184,166,.08)}
+    .prc{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:32px 28px;transition:all .15s;position:relative}.prc:hover{border-color:rgba(255,255,255,.1)}.prc.ft{border-color:rgba(20,184,166,.3);background:rgba(20,184,166,.025)}.prc.ft::before{content:"POPULAIRE";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0d9488,#14b8a6);color:#021a16;padding:4px 16px;border-radius:100px;font-size:11px;font-weight:700}
+    .faq-item{margin-bottom:6px}.faq-q{padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:12px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01);transition:all .12s}.faq-q:hover{background:rgba(255,255,255,.02)}.faq-q.open{background:rgba(20,184,166,.025);border-color:rgba(20,184,166,.1)}.faq-a{padding:10px 20px 16px;font-size:14px;color:#6a8a9a;line-height:1.8;animation:fadeIn .15s ease}
+    @media(max-width:1024px){.app-layout{grid-template-columns:1fr!important}.app-side{order:2}}
+    @media(max-width:700px){.app-header{flex-direction:column;gap:8px;align-items:flex-start!important}.stat-grid{grid-template-columns:repeat(2,1fr)!important}.ver-grid{grid-template-columns:repeat(2,1fr)!important}.feat-grid{grid-template-columns:1fr!important}.price-grid{grid-template-columns:1fr!important}.testi-grid{grid-template-columns:1fr!important}}
+  `;
 
-  const Nav=({landing})=>(
-    <nav style={{padding:"16px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:2,maxWidth:1140,margin:"0 auto"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setPage("landing")}>
-        <div style={{width:34,height:34,borderRadius:9,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#021a16",fontSize:13,animation:"gl 4s infinite"}}>M</div>
-        <span style={{fontWeight:800,fontSize:17,color:"#f0fdfa",letterSpacing:"-1px"}}>MAT CLOAK</span>
-      </div>
-      <div style={{display:"flex",gap:6,alignItems:"center"}}>
-        {landing&&<><button className="b bx" style={{fontSize:12}} onClick={()=>setPage("docs")}>Guide</button>
-          <button className="b bx" style={{fontSize:12}} onClick={()=>setShowPricing(true)}>Pricing</button></>}
-        {user?<><span style={{fontSize:11,color:"#5a7a8a"}}>{user.name}</span>
-          <button className="b bx" style={{fontSize:11,padding:"6px 12px"}} onClick={logout}>Déconnexion</button></>:
-          <button className="b bx" style={{fontSize:12}} onClick={()=>setShowAuth("login")}>Connexion</button>}
-        <button className="b bm" style={{fontSize:12,padding:"9px 20px"}} onClick={()=>setPage("app")}>{landing?"Ouvrir l'app":"← App"}</button>
-      </div>
-    </nav>);
+  // ══════════════════════════
+  // LANDING PAGE
+  // ══════════════════════════
+  if(pg==="landing"||pg==="docs")return(
+    <div style={{minHeight:"100vh",background:"#060a0c",color:"#b8c8d0"}}><style>{S}</style><div className="mesh"/>
+      {pricing&&<PricingModal/>}{auth&&<AuthM/>}
 
-  const Ft=()=>(<footer style={{padding:"16px 32px",borderTop:"1px solid rgba(255,255,255,.04)",position:"relative",zIndex:1}}>
-    <div style={{maxWidth:1140,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <div style={{fontSize:10,color:"#1a2a33"}}>MAT Cloak © 2026</div>
-      <div style={{display:"flex",gap:14}}>
-        <span style={{fontSize:10,color:"#2a4550",cursor:"pointer"}} onClick={()=>setPage("docs")}>Documentation</span>
-        <span style={{fontSize:10,color:"#2a4550",cursor:"pointer"}} onClick={()=>setShowPricing(true)}>Pricing</span>
-      </div></div></footer>);
-
-  // ── Auth Modal ──
-  const AuthModal=()=>(<div className="ov" onClick={()=>setShowAuth(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:380,width:"90%",animation:"i .2s ease"}}>
-    <div style={{textAlign:"center",marginBottom:20}}>
-      <div style={{width:48,height:48,borderRadius:14,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"inline-flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#021a16",fontSize:20,marginBottom:12}}>M</div>
-      <div style={{fontSize:18,fontWeight:800,color:"#fff"}}>{showAuth==="register"?"Créer un compte":"Connexion"}</div>
-      <div style={{fontSize:12,color:"#4a6a78",marginTop:4}}>{showAuth==="register"?"Rejoins MAT Cloak":"Content de te revoir"}</div>
-    </div>
-    <div style={{display:"flex",flexDirection:"column",gap:10}}>
-      {showAuth==="register"&&<input className="inp" placeholder="Ton prénom" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))}/>}
-      <input className="inp" type="email" placeholder="Email" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))}/>
-      <input className="inp" type="password" placeholder="Mot de passe" value={authForm.pass} onChange={e=>setAuthForm(f=>({...f,pass:e.target.value}))}/>
-      <button className="b bm" style={{width:"100%",padding:13,borderRadius:12,marginTop:4}} onClick={login}>{showAuth==="register"?"Créer mon compte":"Se connecter"}</button>
-    </div>
-    <div style={{textAlign:"center",marginTop:14}}>
-      {showAuth==="login"?<span style={{fontSize:12,color:"#4a6a78"}}>Pas encore de compte ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>setShowAuth("register")}>S'inscrire</span></span>:
-        <span style={{fontSize:12,color:"#4a6a78"}}>Déjà un compte ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>setShowAuth("login")}>Se connecter</span></span>}
-    </div></div></div>);
-
-  // ── Pricing Modal ──
-  const PricingM=()=>(<div className="ov" onClick={()=>setShowPricing(false)} style={{zIndex:200}}><div onClick={e=>e.stopPropagation()} style={{maxWidth:760,width:"92%",animation:"i .2s ease"}}>
-    <div style={{textAlign:"center",marginBottom:24}}>
-      <div style={{fontSize:22,fontWeight:800,color:"#fff",marginBottom:4}}>Choisis ton plan</div>
-      <div style={{fontSize:13,color:"#4a6a78"}}>Commence gratuitement, upgrade quand tu veux</div>
-    </div>
-    <div className="pg" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
-      {/* Free */}
-      <div className="prc">
-        <div style={{fontSize:14,fontWeight:700,color:"#e0f0f8",marginBottom:6}}>Free</div>
-        <div style={{fontSize:30,fontWeight:800,color:"#fff"}}>0€</div>
-        <div style={{fontSize:11,color:"#3d5a6a",marginBottom:16}}>Pour tester</div>
-        {["3 fichiers / jour","5 versions max","Transformations basiques","Nom aléatoire"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:7}}><span style={{color:"#5eead4",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#8aa"}}>{f}</span></div>)}
-        <button className="b bx" style={{width:"100%",marginTop:12,padding:10}} onClick={()=>setShowPricing(false)}>Continuer Free</button>
-      </div>
-      {/* Pro Monthly */}
-      <div className="prc ft">
-        <div style={{fontSize:14,fontWeight:700,color:"#5eead4",marginBottom:6}}>Pro Mensuel</div>
-        <div style={{fontSize:30,fontWeight:800,color:"#fff"}}>7.99€<span style={{fontSize:12,color:"#5a7a8a"}}>/mois</span></div>
-        <div style={{fontSize:11,color:"#3d5a6a",marginBottom:16}}>Sans engagement</div>
-        {["Fichiers illimités","100 versions","13 transformations","GPS + Fake Device","Webhooks Discord/TG","Privacy Audit"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:7}}><span style={{color:"#5eead4",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#ccc"}}>{f}</span></div>)}
-        <button className="b bm" style={{width:"100%",marginTop:12,padding:11}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner →</button>
-      </div>
-      {/* Lifetime */}
-      <div className="prc" style={{borderColor:"rgba(251,191,36,.2)",background:"rgba(251,191,36,.015)"}}>
-        <div style={{position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",padding:"3px 14px",borderRadius:100,fontSize:10,fontWeight:700}}>BEST DEAL</div>
-        <div style={{fontSize:14,fontWeight:700,color:"#fbbf24",marginBottom:6}}>Pro à Vie</div>
-        <div style={{fontSize:30,fontWeight:800,color:"#fff"}}>44.99€</div>
-        <div style={{fontSize:11,color:"#3d5a6a",marginBottom:16}}>Paiement unique</div>
-        {["Tout le plan Pro","Pour toujours","Mises à jour incluses","Accès anticipé features","Support VIP"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:7}}><span style={{color:"#fbbf24",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#ccc"}}>{f}</span></div>)}
-        <button className="b" style={{width:"100%",marginTop:12,padding:11,borderRadius:10,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,fontSize:13}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter à vie →</button>
-      </div>
-    </div>
-    <button className="b bx" onClick={()=>setShowPricing(false)} style={{width:"100%",marginTop:14,padding:10}}>Fermer</button>
-  </div></div>);
-
-
-  // ═══ DOCS PAGE ═══
-  if(page==="docs")return(
-    <div style={{minHeight:"100vh",background:"#060a0c",color:"#b8c8d0",fontFamily:"'Segoe UI',system-ui,sans-serif"}}><style>{S}</style><div className="msh"/>
-      <Nav/><main style={{maxWidth:720,margin:"0 auto",padding:"40px 28px",position:"relative",zIndex:1}}>
-        <div style={{textAlign:"center",marginBottom:40,animation:"i .3s ease"}}>
-          <h1 style={{fontSize:28,fontWeight:800,color:"#f0fdfa",letterSpacing:"-1px",marginBottom:8}}>Guide & FAQ</h1>
-          <p style={{fontSize:13,color:"#4a6a78"}}>Tout ce que tu dois savoir</p></div>
-        {GUIDE.map((g,i)=>(
-          <div key={i} style={{marginBottom:6,animation:`i ${.1+i*.02}s ease`}}>
-            <div onClick={()=>setExpandedGuide(expandedGuide===i?null:i)} style={{padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:10,borderRadius:10,background:expandedGuide===i?"rgba(20,184,166,.03)":"rgba(255,255,255,.01)",border:"1px solid",borderColor:expandedGuide===i?"rgba(20,184,166,.1)":"rgba(255,255,255,.04)",transition:"all .15s"}}>
-              <span style={{flex:1,fontSize:14,fontWeight:600,color:"#e0f0f8"}}>{g.q}</span>
-              <span style={{fontSize:11,color:"#3d5a6a",transition:"transform .2s",transform:expandedGuide===i?"rotate(180deg)":""}}>▼</span>
-            </div>
-            {expandedGuide===i&&<div style={{padding:"12px 18px",fontSize:13,color:"#6a8a9a",lineHeight:1.8,animation:"i .15s ease"}}>{g.a}</div>}
-          </div>))}
-        <div style={{textAlign:"center",marginTop:28}}><button className="b bm" onClick={()=>setPage("app")} style={{padding:"12px 28px",borderRadius:12}}>🔒 Lancer l'app</button></div>
-      </main><Ft/></div>);
-
-  // ═══ LANDING ═══
-  if(page==="landing")return(
-    <div style={{minHeight:"100vh",background:"#060a0c",color:"#b8c8d0",fontFamily:"'Segoe UI',system-ui,sans-serif"}}><style>{S}</style><div className="msh"/>
-      {showPricing&&<PricingM/>}{showAuth&&<AuthModal/>}
-      <Nav landing/>
-
-      {/* Hero */}
-      <section style={{padding:"80px 28px 60px",textAlign:"center",position:"relative",zIndex:1,maxWidth:800,margin:"0 auto",animation:"i .5s ease"}}>
-        <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 14px",borderRadius:100,border:"1px solid rgba(20,184,166,.12)",background:"rgba(20,184,166,.03)",fontSize:11,color:"#5eead4",fontWeight:600,marginBottom:24}}>
-          <span style={{width:5,height:5,borderRadius:"50%",background:"#34d399"}}/>100% local — aucun upload serveur</div>
-        <h1 style={{fontSize:46,fontWeight:900,color:"#f0fdfa",lineHeight:1.08,letterSpacing:"-2px",marginBottom:18}}>
-          Poste le même contenu sur<br/><span style={{background:"linear-gradient(135deg,#14b8a6,#67e8f9)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>100 comptes</span> sans détection</h1>
-        <p style={{fontSize:15,color:"#4a6a78",maxWidth:500,margin:"0 auto 32px",lineHeight:1.7}}>MAT Cloak randomise chaque pixel, chaque metadata, chaque hash. Invisible aux algorithmes.</p>
-        <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-          <button className="b bm" onClick={()=>setPage("app")} style={{padding:"14px 32px",fontSize:15,borderRadius:12}}>Essayer gratuitement</button>
-          <button className="b" onClick={()=>window.open(STRIPE.lifetime,"_blank")} style={{padding:"14px 24px",fontSize:14,borderRadius:12,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,border:"none"}}>À vie — 44.99€</button>
+      <nav style={{padding:"18px 36px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:2,maxWidth:1200,margin:"0 auto"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer"}} onClick={()=>setPg("landing")}>
+          <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#021a16",fontSize:15,animation:"glow 4s infinite"}}>V</div>
+          <span style={{fontWeight:800,fontSize:20,color:"#f0fdfa",letterSpacing:"-1px"}}>Veilora</span>
         </div>
-        <div style={{marginTop:14,fontSize:11,color:"#2a4a58"}}>3 fichiers/jour gratuits • Pro dès 7.99€/mois</div>
-      </section>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setPg(pg==="docs"?"landing":"docs")}>{pg==="docs"?"← Retour":"Guide"}</button>
+          <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setPricing(true)}>Pricing</button>
+          {user?<><span style={{fontSize:12,color:"#5a7a8a"}}>{user.name}</span><button className="btn btn-s" style={{padding:"7px 14px"}} onClick={()=>{setUser(null);localStorage.removeItem("v_user")}}>Déco</button></>:
+            <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setAuth("login")}>Connexion</button>}
+          <button className="btn btn-p" style={{fontSize:13,padding:"10px 22px"}} onClick={()=>setPg("app")}>Ouvrir l'app</button>
+        </div>
+      </nav>
 
-      {/* Stats */}
-      <section className="stg" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,maxWidth:700,margin:"0 auto 50px",padding:"0 28px",position:"relative",zIndex:1}}>
-        {[{n:"100",l:"Versions max"},{n:"13",l:"Transformations"},{n:"10",l:"Localisations GPS"},{n:"7",l:"Fake Devices"}].map((s,i)=>(
-          <div key={i} style={{textAlign:"center",animation:`i ${.3+i*.06}s ease`}}>
-            <div style={{fontSize:32,fontWeight:900,color:"#f0fdfa"}}>{s.n}</div>
-            <div style={{fontSize:11,color:"#3d5a6a",marginTop:2}}>{s.l}</div></div>))}
-      </section>
-
-      {/* Features */}
-      <section style={{maxWidth:1000,margin:"0 auto 60px",padding:"0 28px",position:"relative",zIndex:1}}>
-        <h2 style={{fontSize:22,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:28}}>Tout ce dont tu as besoin</h2>
-        <div className="fg" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-          {[{icon:"🧠",t:"AI Noise",d:"Bruit simulant un vrai capteur photo"},{icon:"📐",t:"Perspective Warp",d:"Micro-déformation des coins"},{icon:"🌈",t:"LUT Cinématique",d:"5 courbes couleur aléatoires"},
-            {icon:"🧹",t:"Fake Device",d:"Simule iPhone, Samsung, Canon"},{icon:"📍",t:"GPS Spoofing",d:"10 villes ou random"},{icon:"👁️",t:"Visual Diff",d:"Compare split / blink / overlay"},
-            {icon:"🎚️",t:"Humanizer",d:"Curseur naturel → agressif"},{icon:"🔗",t:"Webhooks",d:"Envoi auto Discord & Telegram"},{icon:"🛡️",t:"Privacy Audit",d:"Score de protection temps réel"},
-          ].map((f,i)=>(
-            <div key={i} className="c" style={{padding:"18px 16px",animation:`i ${.2+i*.04}s ease`}}>
-              <div style={{fontSize:22,marginBottom:6}}>{f.icon}</div>
-              <div style={{fontSize:13,fontWeight:700,color:"#e0f0f8",marginBottom:3}}>{f.t}</div>
-              <div style={{fontSize:11,color:"#4a6a78",lineHeight:1.5}}>{f.d}</div></div>))}
-        </div></section>
-
-      {/* Pricing */}
-      <section style={{maxWidth:820,margin:"0 auto 60px",padding:"0 28px",position:"relative",zIndex:1}}>
-        <h2 style={{fontSize:22,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:6}}>Pricing</h2>
-        <p style={{textAlign:"center",color:"#3d5a6a",fontSize:12,marginBottom:24}}>Simple et transparent</p>
-        <div className="pg" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
-          <div className="prc"><div style={{fontSize:15,fontWeight:700,color:"#e0f0f8",marginBottom:6}}>Free</div><div style={{fontSize:28,fontWeight:800,color:"#fff"}}>0€</div><div style={{fontSize:11,color:"#3d5a6a",marginBottom:14}}>Pour tester</div>
-            {["3 fichiers / jour","5 versions max","4 transformations"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6}}><span style={{color:"#5eead4",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#8aa"}}>{f}</span></div>)}
-            <button className="b bx" style={{width:"100%",marginTop:12,padding:10}} onClick={()=>setPage("app")}>Commencer</button></div>
-          <div className="prc ft"><div style={{fontSize:15,fontWeight:700,color:"#5eead4",marginBottom:6}}>Pro</div><div style={{fontSize:28,fontWeight:800,color:"#fff"}}>7.99€<span style={{fontSize:12,color:"#5a7a8a"}}>/mois</span></div><div style={{fontSize:11,color:"#3d5a6a",marginBottom:14}}>Sans engagement</div>
-            {["Illimité","100 versions","13 transformations","GPS + Fake Device","Webhooks"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6}}><span style={{color:"#5eead4",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#ccc"}}>{f}</span></div>)}
-            <button className="b bm" style={{width:"100%",marginTop:12,padding:10}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner</button></div>
-          <div className="prc" style={{borderColor:"rgba(251,191,36,.2)",background:"rgba(251,191,36,.015)"}}>
-            <div style={{position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",padding:"3px 14px",borderRadius:100,fontSize:10,fontWeight:700}}>BEST DEAL</div>
-            <div style={{fontSize:15,fontWeight:700,color:"#fbbf24",marginBottom:6}}>À Vie</div><div style={{fontSize:28,fontWeight:800,color:"#fff"}}>44.99€</div><div style={{fontSize:11,color:"#3d5a6a",marginBottom:14}}>Paiement unique</div>
-            {["Tout le Pro","Pour toujours","Updates incluses","Support VIP"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:6}}><span style={{color:"#fbbf24",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#ccc"}}>{f}</span></div>)}
-            <button className="b" style={{width:"100%",marginTop:12,padding:10,borderRadius:10,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,fontSize:13,border:"none",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter à vie</button></div>
-        </div></section>
-
-      {/* Testimonials */}
-      <section style={{maxWidth:1000,margin:"0 auto 60px",padding:"0 28px",position:"relative",zIndex:1}}>
-        <h2 style={{fontSize:22,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:24}}>Ils utilisent MAT Cloak</h2>
-        <div className="tg" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-          {TESTIMONIALS.map((t,i)=>(
-            <div key={i} className="tmn" style={{animation:`i ${.2+i*.05}s ease`}}>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                <div style={{width:36,height:36,borderRadius:10,background:"rgba(20,184,166,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>{t.avatar}</div>
-                <div><div style={{fontSize:12,fontWeight:700,color:"#e0f0f8"}}>{t.name}</div><div style={{fontSize:10,color:"#3d5a6a"}}>{t.role}</div></div>
-              </div>
-              <div style={{fontSize:12,color:"#6a8a9a",lineHeight:1.6,marginBottom:8}}>"{t.text}"</div>
-              <div style={{color:"#fbbf24",fontSize:12,letterSpacing:2}}>{"★".repeat(t.stars)}</div>
-            </div>))}
-        </div></section>
-
-      {/* Guide */}
-      <section style={{maxWidth:680,margin:"0 auto 60px",padding:"0 28px",position:"relative",zIndex:1}}>
-        <h2 style={{fontSize:22,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:6}}>Questions fréquentes</h2>
-        <p style={{textAlign:"center",color:"#3d5a6a",fontSize:12,marginBottom:20}}>Tout ce que tu dois savoir</p>
-        {GUIDE.slice(0,6).map((g,i)=>(
-          <div key={i} style={{marginBottom:4,animation:`i ${.15+i*.03}s ease`}}>
-            <div onClick={()=>setExpandedGuide(expandedGuide===i?null:i)} style={{padding:"13px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:8,borderRadius:10,
-              background:expandedGuide===i?"rgba(20,184,166,.025)":"rgba(255,255,255,.008)",border:"1px solid",borderColor:expandedGuide===i?"rgba(20,184,166,.08)":"rgba(255,255,255,.03)",transition:"all .12s"}}>
-              <span style={{flex:1,fontSize:13,fontWeight:600,color:expandedGuide===i?"#5eead4":"#c0d6e0"}}>{g.q}</span>
-              <span style={{fontSize:10,color:"#3d5a6a",transition:"transform .2s",transform:expandedGuide===i?"rotate(180deg)":""}}>▼</span>
+      {pg==="docs"?(<main style={{maxWidth:760,margin:"0 auto",padding:"48px 32px",position:"relative",zIndex:1}}>
+        <div style={{textAlign:"center",marginBottom:40,animation:"fadeIn .3s ease"}}>
+          <h1 style={{fontSize:32,fontWeight:800,color:"#f0fdfa",marginBottom:10}}>Guide & FAQ</h1>
+          <p style={{fontSize:15,color:"#4a6a78"}}>Tout ce que tu dois savoir sur Veilora</p></div>
+        {FAQ.map((g,i)=><div key={i} className="faq-item" style={{animation:`fadeIn ${.1+i*.03}s ease`}}>
+          <div className={`faq-q ${faqO===i?"open":""}`} onClick={()=>setFaqO(faqO===i?null:i)}>
+            <span style={{flex:1,fontSize:15,fontWeight:600,color:faqO===i?"#5eead4":"#d0e0e8"}}>{g.q}</span>
+            <span style={{fontSize:12,color:"#3d5a6a",transition:"transform .2s",transform:faqO===i?"rotate(180deg)":""}}>▼</span>
+          </div>{faqO===i&&<div className="faq-a">{g.a}</div>}</div>)}
+        <div style={{textAlign:"center",marginTop:32}}><button className="btn btn-p" onClick={()=>setPg("app")} style={{borderRadius:14}}>🔒 Lancer Veilora</button></div>
+      </main>):(
+        <main style={{position:"relative",zIndex:1}}>
+          {/* Hero */}
+          <section style={{padding:"90px 32px 70px",textAlign:"center",maxWidth:860,margin:"0 auto",animation:"fadeIn .5s ease"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"6px 16px",borderRadius:100,border:"1px solid rgba(20,184,166,.12)",background:"rgba(20,184,166,.03)",fontSize:12,color:"#5eead4",fontWeight:600,marginBottom:28}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#34d399"}}/>100% local — aucun upload</div>
+            <h1 style={{fontSize:52,fontWeight:900,color:"#f0fdfa",lineHeight:1.08,letterSpacing:"-2.5px",marginBottom:22}}>
+              Poste le même contenu sur<br/><span style={{background:"linear-gradient(135deg,#14b8a6,#67e8f9)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>100 comptes</span> sans détection</h1>
+            <p style={{fontSize:16,color:"#4a6a78",maxWidth:540,margin:"0 auto 36px",lineHeight:1.7}}>Veilora randomise chaque pixel, chaque metadata, chaque hash. Invisible aux algorithmes.</p>
+            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+              <button className="btn btn-p" onClick={()=>setPg("app")} style={{padding:"16px 36px",fontSize:16,borderRadius:14}}>Essayer gratuitement</button>
+              <button className="btn" onClick={()=>window.open(STRIPE.lifetime,"_blank")} style={{padding:"16px 28px",fontSize:15,borderRadius:14,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,border:"none"}}>À vie — 44.99€</button>
             </div>
-            {expandedGuide===i&&<div style={{padding:"10px 16px",fontSize:12,color:"#5a7a8a",lineHeight:1.7,animation:"i .12s ease"}}>{g.a}</div>}
-          </div>))}
-        <div style={{textAlign:"center",marginTop:14}}><button className="b bx" onClick={()=>setPage("docs")} style={{padding:"8px 20px",fontSize:12}}>Voir toute la FAQ →</button></div>
-      </section>
+            <div style={{marginTop:16,fontSize:12,color:"#2a4a58"}}>3 fichiers/jour gratuits • Pro dès 7.99€/mois</div>
+          </section>
 
-      {/* CTA */}
-      <section style={{textAlign:"center",padding:"30px 28px 50px",position:"relative",zIndex:1}}>
-        <button className="b bm" onClick={()=>setPage("app")} style={{padding:"14px 32px",fontSize:15,borderRadius:12}}>🔒 Essayer MAT Cloak</button></section>
-      <Ft/></div>);
+          {/* Stats */}
+          <section style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:20,maxWidth:800,margin:"0 auto 60px",padding:"0 32px"}}>
+            {[{n:"100",l:"Versions max"},{n:"13",l:"Transformations"},{n:"22",l:"Localisations GPS"},{n:"8",l:"Fake Devices"}].map((s,i)=>(
+              <div key={i} style={{textAlign:"center",animation:`fadeIn ${.3+i*.07}s ease`}}>
+                <div style={{fontSize:38,fontWeight:900,color:"#f0fdfa"}}>{s.n}</div>
+                <div style={{fontSize:12,color:"#3d5a6a",marginTop:3}}>{s.l}</div></div>))}
+          </section>
 
+          {/* Features */}
+          <section style={{maxWidth:1060,margin:"0 auto 70px",padding:"0 32px"}}>
+            <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:32}}>Tout ce dont tu as besoin</h2>
+            <div className="feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
+              {[{icon:"🧠",t:"AI Noise",d:"Bruit simulant un vrai capteur photo"},{icon:"📐",t:"Perspective Warp",d:"Micro-déformation des coins"},{icon:"🌈",t:"LUT Cinématique",d:"5 courbes couleur aléatoires"},
+                {icon:"🧹",t:"Fake Device",d:"Simule 8 appareils différents"},{icon:"📍",t:"22 GPS Locations",d:"Spoof dans 22 villes mondiales"},{icon:"👁️",t:"Visual Diff",d:"Compare split / blink / overlay"},
+                {icon:"🎚️",t:"Humanizer",d:"Curseur naturel → agressif"},{icon:"🔗",t:"Webhooks",d:"Envoi auto Discord & Telegram"},{icon:"🛡️",t:"Privacy Audit",d:"Score de protection temps réel"},
+              ].map((f,i)=>(<div key={i} className="card" style={{padding:"22px 20px",animation:`fadeIn ${.2+i*.04}s ease`}}>
+                <div style={{fontSize:26,marginBottom:8}}>{f.icon}</div>
+                <div style={{fontSize:14,fontWeight:700,color:"#e0f0f8",marginBottom:4}}>{f.t}</div>
+                <div style={{fontSize:12,color:"#4a6a78",lineHeight:1.6}}>{f.d}</div></div>))}
+            </div></section>
 
-  // ═══ APP ═══
+          {/* Pricing */}
+          <section style={{maxWidth:900,margin:"0 auto 70px",padding:"0 32px"}}>
+            <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:28}}>Pricing simple</h2>
+            <div className="price-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
+              <div className="prc"><div style={{fontSize:17,fontWeight:700,color:"#e0f0f8",marginBottom:6}}>Free</div><div style={{fontSize:34,fontWeight:800,color:"#fff"}}>0€</div><div style={{fontSize:12,color:"#3d5a6a",marginBottom:18}}>Pour tester</div>
+                {["3 fichiers / jour","5 versions max","4 transformations"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8}}><span style={{color:"#5eead4",fontSize:12}}>✓</span><span style={{fontSize:13,color:"#8aa"}}>{f}</span></div>)}
+                <button className="btn btn-s" style={{width:"100%",marginTop:16,padding:12}} onClick={()=>setPg("app")}>Commencer</button></div>
+              <div className="prc ft"><div style={{fontSize:17,fontWeight:700,color:"#5eead4",marginBottom:6}}>Pro</div><div style={{fontSize:34,fontWeight:800,color:"#fff"}}>7.99€<span style={{fontSize:14,color:"#5a7a8a"}}>/mois</span></div><div style={{fontSize:12,color:"#3d5a6a",marginBottom:18}}>Sans engagement</div>
+                {["Illimité","100 versions","13 transformations","GPS + Fake Device","Webhooks"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8}}><span style={{color:"#5eead4",fontSize:12}}>✓</span><span style={{fontSize:13,color:"#ccc"}}>{f}</span></div>)}
+                <button className="btn btn-p" style={{width:"100%",marginTop:16,padding:12}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner</button></div>
+              <div className="prc" style={{borderColor:"rgba(251,191,36,.2)",background:"rgba(251,191,36,.012)"}}>
+                <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",padding:"4px 16px",borderRadius:100,fontSize:11,fontWeight:700}}>BEST DEAL</div>
+                <div style={{fontSize:17,fontWeight:700,color:"#fbbf24",marginBottom:6}}>À Vie</div><div style={{fontSize:34,fontWeight:800,color:"#fff"}}>44.99€</div><div style={{fontSize:12,color:"#3d5a6a",marginBottom:18}}>Paiement unique</div>
+                {["Tout le Pro","Pour toujours","Updates incluses","Support VIP"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8}}><span style={{color:"#fbbf24",fontSize:12}}>✓</span><span style={{fontSize:13,color:"#ccc"}}>{f}</span></div>)}
+                <button className="btn" style={{width:"100%",marginTop:16,padding:12,borderRadius:12,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,fontSize:14,border:"none",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter à vie</button></div>
+            </div></section>
+
+          {/* Testimonials */}
+          <section style={{maxWidth:1060,margin:"0 auto 70px",padding:"0 32px"}}>
+            <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:28}}>Ils utilisent Veilora</h2>
+            <div className="testi-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+              {TESTI.map((t,i)=>(<div key={i} className="card" style={{padding:"22px 20px",animation:`fadeIn ${.2+i*.05}s ease`}}>
+                <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+                  <div style={{width:40,height:40,borderRadius:12,background:"rgba(20,184,166,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{t.a}</div>
+                  <div><div style={{fontSize:13,fontWeight:700,color:"#e0f0f8"}}>{t.n}</div><div style={{fontSize:11,color:"#3d5a6a"}}>{t.r}</div></div></div>
+                <div style={{fontSize:13,color:"#6a8a9a",lineHeight:1.6,marginBottom:10}}>"{t.t}"</div>
+                <div style={{color:"#fbbf24",fontSize:13,letterSpacing:3}}>★★★★★</div></div>))}
+            </div></section>
+
+          {/* FAQ */}
+          <section style={{maxWidth:720,margin:"0 auto 70px",padding:"0 32px"}}>
+            <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:24}}>Questions fréquentes</h2>
+            {FAQ.slice(0,5).map((g,i)=><div key={i} className="faq-item" style={{animation:`fadeIn ${.15+i*.03}s ease`}}>
+              <div className={`faq-q ${faqO===i?"open":""}`} onClick={()=>setFaqO(faqO===i?null:i)}>
+                <span style={{flex:1,fontSize:14,fontWeight:600,color:faqO===i?"#5eead4":"#c0d6e0"}}>{g.q}</span>
+                <span style={{fontSize:11,color:"#3d5a6a",transition:"transform .2s",transform:faqO===i?"rotate(180deg)":""}}>▼</span>
+              </div>{faqO===i&&<div className="faq-a">{g.a}</div>}</div>)}
+            <div style={{textAlign:"center",marginTop:14}}><button className="btn btn-s" onClick={()=>setPg("docs")}>Voir toute la FAQ →</button></div>
+          </section>
+
+          <section style={{textAlign:"center",padding:"30px 32px 60px"}}><button className="btn btn-p" onClick={()=>setPg("app")} style={{padding:"16px 36px",fontSize:16,borderRadius:14}}>🔒 Lancer Veilora</button></section>
+        </main>
+      )}
+      <footer style={{padding:"18px 36px",borderTop:"1px solid rgba(255,255,255,.04)",textAlign:"center",position:"relative",zIndex:1}}>
+        <div style={{maxWidth:1200,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{fontSize:11,color:"#1a2a33"}}>Veilora © 2026</div>
+          <div style={{display:"flex",gap:16}}><span style={{fontSize:11,color:"#2a4550",cursor:"pointer"}} onClick={()=>setPg("docs")}>Documentation</span><span style={{fontSize:11,color:"#2a4550",cursor:"pointer"}} onClick={()=>setPricing(true)}>Pricing</span></div>
+        </div></footer></div>);
+
+  function PricingModal(){return <div className="ov" onClick={()=>setPricing(false)} style={{zIndex:200}}><div onClick={e=>e.stopPropagation()} style={{maxWidth:800,width:"92%",animation:"fadeIn .2s ease"}}>
+    <div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:24,fontWeight:800,color:"#fff"}}>Choisis ton plan</div></div>
+    <div className="price-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
+      <div className="prc"><div style={{fontSize:16,fontWeight:700,color:"#e0f0f8",marginBottom:6}}>Free</div><div style={{fontSize:30,fontWeight:800,color:"#fff"}}>0€</div><div style={{fontSize:12,color:"#3d5a6a",marginBottom:16}}>Pour tester</div>
+        {["3 fichiers/jour","5 versions max","4 transformations"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:7}}><span style={{color:"#5eead4"}}>✓</span><span style={{fontSize:13,color:"#8aa"}}>{f}</span></div>)}
+        <button className="btn btn-s" style={{width:"100%",marginTop:14,padding:11}} onClick={()=>setPricing(false)}>Continuer Free</button></div>
+      <div className="prc ft"><div style={{fontSize:16,fontWeight:700,color:"#5eead4",marginBottom:6}}>Pro</div><div style={{fontSize:30,fontWeight:800,color:"#fff"}}>7.99€<span style={{fontSize:13,color:"#5a7a8a"}}>/mois</span></div><div style={{fontSize:12,color:"#3d5a6a",marginBottom:16}}>Sans engagement</div>
+        {["Illimité","100 versions","13 transformations","GPS + Fake Device","Webhooks"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:7}}><span style={{color:"#5eead4"}}>✓</span><span style={{fontSize:13,color:"#ccc"}}>{f}</span></div>)}
+        <button className="btn btn-p" style={{width:"100%",marginTop:14,padding:11}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner</button></div>
+      <div className="prc" style={{borderColor:"rgba(251,191,36,.2)",background:"rgba(251,191,36,.012)"}}>
+        <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",padding:"4px 16px",borderRadius:100,fontSize:11,fontWeight:700}}>BEST DEAL</div>
+        <div style={{fontSize:16,fontWeight:700,color:"#fbbf24",marginBottom:6}}>À Vie</div><div style={{fontSize:30,fontWeight:800,color:"#fff"}}>44.99€</div><div style={{fontSize:12,color:"#3d5a6a",marginBottom:16}}>Paiement unique</div>
+        {["Tout le Pro","Pour toujours","Updates","VIP"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:7}}><span style={{color:"#fbbf24"}}>✓</span><span style={{fontSize:13,color:"#ccc"}}>{f}</span></div>)}
+        <button className="btn" style={{width:"100%",marginTop:14,padding:11,borderRadius:12,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,fontSize:14,border:"none",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter à vie</button></div>
+    </div><button className="btn btn-s" onClick={()=>setPricing(false)} style={{width:"100%",marginTop:14}}>Fermer</button></div></div>}
+
+  function AuthM(){return <div className="ov" onClick={()=>setAuth(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:400,width:"90%",animation:"fadeIn .2s ease"}}>
+    <div style={{textAlign:"center",marginBottom:20}}>
+      <div style={{width:48,height:48,borderRadius:14,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"inline-flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#021a16",fontSize:20,marginBottom:12}}>V</div>
+      <div style={{fontSize:20,fontWeight:800,color:"#fff"}}>{auth==="register"?"Créer un compte":"Connexion"}</div></div>
+    <div style={{display:"flex",flexDirection:"column",gap:12}}>
+      {auth==="register"&&<input className="inp" placeholder="Ton prénom" value={af.name} onChange={e=>setAf(f=>({...f,name:e.target.value}))}/>}
+      <input className="inp" type="email" placeholder="Email" value={af.email} onChange={e=>setAf(f=>({...f,email:e.target.value}))}/>
+      <input className="inp" type="password" placeholder="Mot de passe" value={af.pass} onChange={e=>setAf(f=>({...f,pass:e.target.value}))}/>
+      <button className="btn btn-p" style={{width:"100%",padding:14,borderRadius:12}} onClick={login}>{auth==="register"?"Créer mon compte":"Se connecter"}</button></div>
+    <div style={{textAlign:"center",marginTop:16}}>{auth==="login"?<span style={{fontSize:13,color:"#4a6a78"}}>Pas de compte ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>setAuth("register")}>S'inscrire</span></span>:
+      <span style={{fontSize:13,color:"#4a6a78"}}>Déjà inscrit ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>setAuth("login")}>Connexion</span></span>}</div></div></div>}
+
+  // ══════════════════════════
+  // APP — FULL SCREEN
+  // ══════════════════════════
   return(
-    <div style={{minHeight:"100vh",background:"#060a0c",color:"#a0b8c4",fontFamily:"'Segoe UI',system-ui,sans-serif"}}><style>{S}</style><div className="msh"/>
-      {showPricing&&<PricingM/>}{showAuth&&<AuthModal/>}
-      {preview&&(<div className="ov" onClick={()=>setPreview(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:700,width:"92%",animation:"i .2s ease"}}>
-        <div style={{display:"flex",gap:5,marginBottom:10,justifyContent:"center"}}>{["split","blink","overlay"].map(m=><button key={m} className="b bx" onClick={()=>setDiffMode(m)} style={{padding:"5px 12px",fontSize:10,background:diffMode===m?"rgba(20,184,166,.1)":"rgba(255,255,255,.03)",color:diffMode===m?"#5eead4":"#555"}}>{m==="split"?"↔ Split":m==="blink"?"⚡ Blink":"🔍 Overlay"}</button>)}</div>
-        {diffMode==="split"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}><div>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",borderRadius:10}}/>}<div style={{fontSize:9,color:"#3d5a6a",marginTop:4}}>Original</div></div><div>{preview.thumb&&<img src={preview.thumb} style={{width:"100%",borderRadius:10}}/>}<div style={{fontSize:9,color:"#5eead4",marginTop:4}}>v{preview.vi}</div></div></div>}
-        {diffMode==="blink"&&<div style={{marginBottom:10,textAlign:"center",position:"relative"}}>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{maxWidth:"100%",maxHeight:350,borderRadius:10}}/>}{preview.thumb&&<img src={preview.thumb} style={{position:"absolute",left:0,top:0,maxWidth:"100%",maxHeight:350,borderRadius:10,animation:"bl 1.2s infinite"}}/>}</div>}
-        {diffMode==="overlay"&&<div style={{marginBottom:10,position:"relative"}}>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",maxHeight:350,objectFit:"contain",borderRadius:10}}/>}{preview.thumb&&<img src={preview.thumb} style={{position:"absolute",inset:0,width:"100%",maxHeight:350,objectFit:"contain",borderRadius:10,opacity:.5,mixBlendMode:"difference"}}/>}</div>}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>{[{l:"Hash Orig",v:preview.origHash,c:"#6a8a9a"},{l:"Hash New",v:preview.hash,c:"#5eead4"},{l:"Dimensions",v:`${preview.w}×${preview.h}`,c:"#67e8f9"},{l:"Diff",v:preview.similarity+"%",c:preview.similarity>50?"#fb7185":"#5eead4"}].map((s,i)=><div key={i} style={{background:"rgba(255,255,255,.02)",padding:"7px 8px",borderRadius:7}}><div style={{fontSize:7,color:"#3d5a6a",textTransform:"uppercase"}}>{s.l}</div><div className="mn" style={{fontSize:10,fontWeight:700,color:s.c,marginTop:1}}>{s.v}</div></div>)}</div>
-        <div style={{display:"flex",gap:6,justifyContent:"center"}}><button className="b bm" style={{padding:"8px 20px",fontSize:12}} onClick={()=>{dl(preview);setPreview(null)}}>📥</button><button className="b bx" onClick={()=>setPreview(null)}>Fermer</button></div>
-      </div></div>)}
-      {showPanel&&(<div className="ov" onClick={()=>setShowPanel(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:460,width:"90%",maxHeight:"80vh",overflowY:"auto",animation:"i .2s ease"}}>
-        {showPanel==="audit"&&<><div style={{fontSize:15,fontWeight:700,color:"#fff",marginBottom:12}}>🛡️ Privacy Audit</div>{[{l:"EXIF",s:tf.metadata},{l:"GPS",s:tf.location},{l:"Device",s:tf.metaTemplate},{l:"Timeline",s:tf.fakeTimeline},{l:"Filename",s:tf.randomName},{l:"Pixels",s:tf.crop||tf.colors||tf.noise},{l:"Couleurs",s:tf.colors||tf.lut}].map((a,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 10px",borderRadius:7,background:"rgba(255,255,255,.02)",marginBottom:3}}><span style={{fontSize:11,color:"#8aa"}}>{a.l}</span><span style={{fontSize:10,fontWeight:600,color:a.s?"#5eead4":"#fbbf24"}}>{a.s?"✅ Protégé":"⚠️ Exposé"}</span></div>)}</>}
-        {showPanel==="webhook"&&<><div style={{fontSize:15,fontWeight:700,color:"#fff",marginBottom:12}}>🔗 Webhooks</div>
-          <div style={{marginBottom:12}}>
-            <div style={{display:"flex",gap:4,marginBottom:10}}>{["discord","telegram"].map(t=><button key={t} className="b bx" onClick={()=>setWebhook(w=>({...w,type:t}))} style={{flex:1,padding:"8px",fontSize:12,background:webhook.type===t?"rgba(20,184,166,.08)":"rgba(255,255,255,.02)",color:webhook.type===t?"#5eead4":"#5a7a8a"}}>{t==="discord"?"Discord":"Telegram"}</button>)}</div>
-            <input className="inp" placeholder={webhook.type==="discord"?"URL webhook Discord":"Bot token ou chat ID Telegram"} value={webhook.type==="discord"?webhook.discord:webhook.telegram} onChange={e=>setWebhook(w=>({...w,[w.type]:e.target.value}))} style={{marginBottom:8}}/>
-            <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:10}}>
-              <div onClick={()=>setWebhook(w=>({...w,enabled:!w.enabled}))} style={{width:40,height:22,borderRadius:11,background:webhook.enabled?"#14b8a6":"rgba(255,255,255,.08)",cursor:"pointer",position:"relative",transition:"all .15s"}}>
-                <div style={{width:18,height:18,borderRadius:9,background:"#fff",position:"absolute",top:2,left:webhook.enabled?20:2,transition:"left .15s"}}/></div>
-              <span style={{fontSize:12,color:webhook.enabled?"#5eead4":"#5a7a8a"}}>{webhook.enabled?"Activé":"Désactivé"}</span></div>
-            <button className="b bm" style={{width:"100%",padding:10}} onClick={saveWebhook}>Sauvegarder</button>
-          </div></>}
-        {showPanel==="history"&&<><div style={{fontSize:15,fontWeight:700,color:"#fff",marginBottom:12}}>📋 Historique</div>{!history.length&&<div style={{color:"#3d5a6a",fontSize:12}}>Aucun traitement</div>}{history.map((h,i)=><div key={i} style={{padding:"8px 10px",borderRadius:7,background:"rgba(255,255,255,.02)",marginBottom:4}}><div style={{fontSize:11,fontWeight:600,color:"#ddd"}}>{h.files} fichiers → {h.versions}v • {h.time}</div><div style={{fontSize:9,color:"#3d5a6a"}}>{h.date}</div></div>)}</>}
-        <button className="b bx" onClick={()=>setShowPanel(null)} style={{marginTop:10,width:"100%"}}>Fermer</button></div></div>)}
+    <div style={{minHeight:"100vh",height:"100vh",display:"flex",flexDirection:"column",background:"#060a0c",color:"#b0c0c8"}}><style>{S}</style><div className="mesh"/>
+      {pricing&&<PricingModal/>}{auth&&<AuthM/>}
+      {preview&&(<div className="ov" onClick={()=>setPreview(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:750,width:"92%"}}>
+        <div style={{display:"flex",gap:6,marginBottom:12,justifyContent:"center"}}>{["split","blink","overlay"].map(m=><button key={m} className="btn btn-s" onClick={()=>setDm(m)} style={{padding:"6px 14px",fontSize:12,background:dm===m?"rgba(20,184,166,.12)":"rgba(255,255,255,.03)",color:dm===m?"#5eead4":"#666"}}>{m==="split"?"↔ Split":m==="blink"?"⚡ Blink":"🔍 Overlay"}</button>)}</div>
+        {dm==="split"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}><div>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",borderRadius:12}}/>}<div style={{fontSize:11,color:"#3d5a6a",marginTop:4}}>Original</div></div><div>{preview.thumb&&<img src={preview.thumb} style={{width:"100%",borderRadius:12}}/>}<div style={{fontSize:11,color:"#5eead4",marginTop:4}}>v{preview.vi}</div></div></div>}
+        {dm==="blink"&&<div style={{marginBottom:12,textAlign:"center",position:"relative"}}>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{maxWidth:"100%",maxHeight:400,borderRadius:12}}/>}{preview.thumb&&<img src={preview.thumb} style={{position:"absolute",left:0,top:0,maxWidth:"100%",maxHeight:400,borderRadius:12,animation:"blink 1.2s infinite"}}/>}</div>}
+        {dm==="overlay"&&<div style={{marginBottom:12,position:"relative"}}>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",maxHeight:400,objectFit:"contain",borderRadius:12}}/>}{preview.thumb&&<img src={preview.thumb} style={{position:"absolute",inset:0,width:"100%",maxHeight:400,objectFit:"contain",borderRadius:12,opacity:.5,mixBlendMode:"difference"}}/>}</div>}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:12}}>{[{l:"Hash Orig",v:preview.origHash,c:"#7a9aaa"},{l:"Hash New",v:preview.hash,c:"#5eead4"},{l:"Size",v:`${preview.w}×${preview.h}`,c:"#67e8f9"},{l:"Diff",v:preview.similarity+"%",c:preview.similarity>50?"#fb7185":"#5eead4"}].map((s,i)=><div key={i} style={{background:"rgba(255,255,255,.025)",padding:"10px",borderRadius:10}}><div style={{fontSize:9,color:"#3d5a6a",textTransform:"uppercase"}}>{s.l}</div><div className="mono" style={{fontSize:13,fontWeight:700,color:s.c,marginTop:2}}>{s.v}</div></div>)}</div>
+        <div style={{display:"flex",gap:8,justifyContent:"center"}}><button className="btn btn-p" style={{padding:"10px 24px"}} onClick={()=>{dl(preview);setPreview(null)}}>📥 Download</button><button className="btn btn-s" onClick={()=>setPreview(null)}>Fermer</button></div></div></div>)}
+      {panel&&(<div className="ov" onClick={()=>setPanel(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:500,width:"90%",maxHeight:"80vh",overflowY:"auto"}}>
+        {panel==="audit"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>🛡️ Privacy Audit</h3>{[{l:"EXIF",s:tf.metadata},{l:"GPS",s:tf.location},{l:"Device",s:tf.metaTemplate},{l:"Timeline",s:tf.fakeTimeline},{l:"Filename",s:tf.randomName},{l:"Pixels",s:tf.crop||tf.colors||tf.noise},{l:"Couleurs",s:tf.colors||tf.lut}].map((a,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:4}}><span style={{fontSize:13,color:"#9ab"}}>{a.l}</span><span style={{fontSize:12,fontWeight:600,color:a.s?"#5eead4":"#fbbf24"}}>{a.s?"✅ Protégé":"⚠️ Exposé"}</span></div>)}
+          <div style={{marginTop:12,padding:14,borderRadius:10,background:activeT>=10?"rgba(94,234,212,.04)":"rgba(251,191,36,.04)"}}><div style={{fontSize:14,fontWeight:700,color:activeT>=10?"#5eead4":"#fbbf24"}}>Protection: {Math.round(activeT/Object.keys(TF).length*100)}%</div></div></>}
+        {panel==="webhook"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>🔗 Webhooks</h3>
+          <div style={{display:"flex",gap:6,marginBottom:12}}>{["discord","telegram"].map(t=><button key={t} className="btn btn-s" onClick={()=>setWh(w=>({...w,type:t}))} style={{flex:1,padding:10,fontSize:13,background:wh.type===t?"rgba(20,184,166,.1)":"rgba(255,255,255,.02)",color:wh.type===t?"#5eead4":"#5a7a8a"}}>{t==="discord"?"Discord":"Telegram"}</button>)}</div>
+          <input className="inp" placeholder={wh.type==="discord"?"URL webhook Discord":"Chat ID Telegram"} value={wh.type==="discord"?wh.discord:wh.telegram} onChange={e=>setWh(w=>({...w,[w.type]:e.target.value}))} style={{marginBottom:10}}/>
+          <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
+            <div onClick={()=>setWh(w=>({...w,on:!w.on}))} style={{width:46,height:26,borderRadius:13,background:wh.on?"#14b8a6":"rgba(255,255,255,.1)",cursor:"pointer",position:"relative",transition:"all .15s"}}>
+              <div style={{width:22,height:22,borderRadius:11,background:"#fff",position:"absolute",top:2,left:wh.on?22:2,transition:"left .15s"}}/></div>
+            <span style={{fontSize:13,color:wh.on?"#5eead4":"#5a7a8a"}}>{wh.on?"Activé":"Désactivé"}</span></div>
+          <button className="btn btn-p" style={{width:"100%",padding:12}} onClick={()=>{try{localStorage.setItem("v_wh",JSON.stringify(wh))}catch(e){}}}>Sauvegarder</button></>}
+        {panel==="history"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>📋 Historique</h3>{!hist.length&&<div style={{color:"#3d5a6a",fontSize:13}}>Aucun traitement</div>}{hist.map((h,i)=><div key={i} style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:5}}><div style={{fontSize:13,fontWeight:600,color:"#ddd"}}>{h.files} fichiers → {h.versions}v • {h.time}</div><div style={{fontSize:10,color:"#3d5a6a"}}>{h.date}</div></div>)}</>}
+        <button className="btn btn-s" onClick={()=>setPanel(null)} style={{marginTop:12,width:"100%"}}>Fermer</button></div></div>)}
 
-      {/* App Header */}
-      <header style={{padding:"10px 16px",borderBottom:"1px solid rgba(255,255,255,.04)",position:"relative",zIndex:2}}>
-        <div className="hd" style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}} onClick={()=>setPage("landing")}>
-            <div style={{width:28,height:28,borderRadius:7,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#021a16",fontSize:11}}>M</div>
-            <span style={{fontWeight:800,fontSize:14,color:"#f0fdfa",letterSpacing:"-.8px"}}>MAT CLOAK</span>
-            {isPro?<span className="bdg bt" style={{fontSize:8}}>PRO</span>:<span className="bdg ba" style={{fontSize:8}}>FREE {dailyUsed}/{FREE_LIMIT}</span>}
+      {/* APP HEADER — compact */}
+      <header style={{padding:"10px 20px",borderBottom:"1px solid rgba(255,255,255,.05)",flexShrink:0,position:"relative",zIndex:2}}>
+        <div className="app-header" style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setPg("landing")}>
+            <div style={{width:30,height:30,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,color:"#021a16",fontSize:13}}>V</div>
+            <span style={{fontWeight:800,fontSize:16,color:"#f0fdfa",letterSpacing:"-.8px"}}>Veilora</span>
+            {pro?<span className="badge bt" style={{fontSize:10}}>PRO</span>:<span className="badge ba" style={{fontSize:10}}>FREE {du}/{FREE_LIMIT}</span>}
           </div>
-          <div style={{display:"flex",gap:3,alignItems:"center"}}>
-            <button className="b bx" style={{padding:"3px 8px",fontSize:9}} onClick={()=>setShowPanel("audit")}>🛡️</button>
-            <button className="b bx" style={{padding:"3px 8px",fontSize:9}} onClick={()=>setShowPanel("webhook")}>🔗</button>
-            <button className="b bx" style={{padding:"3px 8px",fontSize:9}} onClick={()=>setShowPanel("history")}>📋</button>
-            {!isPro&&<button className="b" style={{padding:"3px 10px",fontSize:9,borderRadius:7,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontWeight:700,border:"none"}} onClick={()=>setShowPricing(true)}>⚡ Pro</button>}
-            {user&&<span style={{fontSize:10,color:"#3d5a6a"}}>{user.name}</span>}
-            {files.length>0&&<button className="b bx" style={{padding:"3px 8px",fontSize:9}} onClick={clr}>✕</button>}
+          <div style={{display:"flex",gap:4,alignItems:"center"}}>
+            <button className="btn btn-s" style={{padding:"5px 10px",fontSize:11}} onClick={()=>setPanel("audit")}>🛡️ Audit</button>
+            <button className="btn btn-s" style={{padding:"5px 10px",fontSize:11}} onClick={()=>setPanel("webhook")}>🔗 Webhook</button>
+            <button className="btn btn-s" style={{padding:"5px 10px",fontSize:11}} onClick={()=>setPanel("history")}>📋</button>
+            {!pro&&<button className="btn" style={{padding:"5px 12px",fontSize:11,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontWeight:700,border:"none"}} onClick={()=>setPricing(true)}>⚡ Pro</button>}
+            {files.length>0&&<button className="btn btn-s" style={{padding:"5px 10px",fontSize:11}} onClick={clr}>✕ Clear</button>}
           </div></div></header>
 
-      <main style={{padding:"12px 16px",position:"relative",zIndex:1}}>
-        <div style={{display:"flex",gap:3,background:"rgba(255,255,255,.015)",padding:2,borderRadius:9,maxWidth:220,margin:"0 auto 10px",border:"1px solid rgba(255,255,255,.04)"}}>
-          {[["photo","📸 Photos"],["video","🎬 Vidéos"]].map(([m,l])=><button key={m} className="b" onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"7px 0",fontSize:11,fontWeight:700,borderRadius:7,background:mode===m?"linear-gradient(135deg,#0d9488,#14b8a6)":"transparent",color:mode===m?"#021a16":"#3d5a6a"}}>{l}</button>)}</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:4,maxWidth:550,margin:"0 auto 12px"}}>
-          {PRESETS.map(p=><div key={p.id} className={`pc ${preset?.id===p.id?"on":""}`} onClick={()=>applyPreset(p)} style={{padding:"8px 4px"}}><div style={{fontSize:16}}>{p.icon}</div><div style={{fontSize:9,fontWeight:700,color:preset?.id===p.id?"#5eead4":"#6a8a9a",marginTop:1}}>{p.name}</div></div>)}</div>
-        {res.length>0&&<div style={{display:"flex",gap:4,marginBottom:10,justifyContent:"center"}}><button className={`b ${view==="config"?"bm":"bx"}`} style={{padding:"6px 14px",fontSize:10}} onClick={()=>setView("config")}>⚙️</button><button className={`b ${view==="results"?"bm":"bx"}`} style={{padding:"6px 14px",fontSize:10}} onClick={()=>setView("results")}>✅ {totV}</button></div>}
+      {/* APP BODY — fills remaining space */}
+      <main style={{flex:1,overflow:"auto",padding:"16px 24px",position:"relative",zIndex:1}}>
 
-        {view==="config"&&(<div className="ly" style={{display:"grid",gridTemplateColumns:"260px 1fr",gap:12,animation:"i .2s ease"}}>
-          <aside className="sd" style={{display:"flex",flexDirection:"column",gap:7}}>
-            <div className="c" style={{padding:"12px 14px"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span style={{fontSize:11,fontWeight:700,color:"#e0f0f8"}}>🎚️ Humanizer</span><span style={{fontSize:10,fontWeight:700,color:intColor}}>{intLabel}</span></div><input type="range" className="sl" min="0" max="1" step=".01" value={intensity} onChange={e=>setIntensity(+e.target.value)}/></div>
-            <div className="c" style={{padding:"10px 14px"}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:11,fontWeight:700,color:"#ddd"}}>Versions</span><div style={{display:"flex",alignItems:"center",gap:4}}><button className="cn" style={{width:28,height:28,fontSize:12}} onClick={()=>setVer(v=>Math.max(1,v-1))}>−</button><div key={ver} className="mn" style={{fontSize:20,fontWeight:700,color:"#5eead4",width:36,textAlign:"center",animation:"po .1s ease"}}>{ver}</div><button className="cn" style={{width:28,height:28,fontSize:12}} onClick={()=>setVer(v=>Math.min(isPro?100:5,v+1))}>+</button></div></div>
-              <div style={{display:"flex",gap:2}}>{[1,5,10,20,50,100].map(n=><button key={n} className="b bx" onClick={()=>{if(!isPro&&n>5){setShowPricing(true);return}setVer(n)}} style={{flex:1,padding:"3px 0",fontSize:8,background:ver===n?"rgba(20,184,166,.1)":"rgba(255,255,255,.02)",color:ver===n?"#5eead4":"#3d5a6a",opacity:!isPro&&n>5?.35:1}}>{n}</button>)}</div></div>
-            {tf.location&&<div className="c" style={{padding:"10px 12px"}}><div style={{fontSize:10,fontWeight:700,color:"#ddd",marginBottom:5}}>📍 GPS</div><div style={{display:"flex",flexWrap:"wrap",gap:2}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!isPro&&i>2){setShowPricing(true);return}setLoc(l)}} style={{opacity:!isPro&&i>2?.35:1}}>{l.city}</button>)}</div></div>}
-            {tf.metaTemplate&&<div className="c" style={{padding:"10px 12px"}}><div style={{fontSize:10,fontWeight:700,color:"#ddd",marginBottom:5}}>🧹 Device</div><div style={{display:"flex",flexWrap:"wrap",gap:2}}>{META_TPL.map((m,i)=><button key={m.id} className={`lb ${metaTpl.id===m.id?"on":""}`} onClick={()=>{if(!isPro&&i>1){setShowPricing(true);return}setMetaTpl(m)}} style={{fontSize:9,opacity:!isPro&&i>1?.35:1}}>{m.name}</button>)}</div></div>}
-            <div className="c" style={{padding:"8px 6px",flex:1}}><div style={{display:"flex",justifyContent:"space-between",padding:"0 6px",marginBottom:3}}><span style={{fontSize:10,fontWeight:700,color:"#ddd"}}>Transformations</span><span className="bdg bt" style={{fontSize:8}}>{activeT}</span></div>
-              <div style={{maxHeight:200,overflowY:"auto"}}>{Object.entries(TF_META).map(([k,m])=>{const on=tf[k];const lk=!isPro&&m.p;return <div key={k} className={`ck ${on&&!lk?"on":""}`} onClick={()=>{if(lk){setShowPricing(true);return}setTf(t=>({...t,[k]:!t[k]}))}} style={{opacity:lk?.3:1}}><div className={`dt ${on&&!lk?"on":""}`}>{on&&!lk?"✓":lk?"🔒":""}</div><div style={{fontSize:10,fontWeight:600,color:on&&!lk?"#5eead4":"#4a6a78"}}>{m.i} {m.l}</div></div>})}</div></div>
+        {/* Mode + Presets */}
+        <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:4,borderRadius:12,maxWidth:260,margin:"0 auto 14px",border:"1px solid rgba(255,255,255,.05)"}}>
+          {[["photo","📸 Photos"],["video","🎬 Vidéos"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"9px 0",fontSize:13,fontWeight:700,borderRadius:9,background:mode===m?"linear-gradient(135deg,#0d9488,#14b8a6)":"transparent",color:mode===m?"#021a16":"#4a6a78"}}>{l}</button>)}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6,maxWidth:640,margin:"0 auto 16px"}}>
+          {PRESETS.map(p=><div key={p.id} className={`pc ${preset?.id===p.id?"on":""}`} onClick={()=>applyP(p)}>
+            <div style={{fontSize:20,marginBottom:2}}>{p.icon}</div>
+            <div style={{fontSize:11,fontWeight:700,color:preset?.id===p.id?"#5eead4":"#6a8a9a"}}>{p.name}</div></div>)}
+        </div>
+
+        {res.length>0&&<div style={{display:"flex",gap:6,marginBottom:14,justifyContent:"center"}}>
+          <button className={`btn ${vw==="config"?"btn-p":"btn-s"}`} style={{padding:"8px 18px",fontSize:12}} onClick={()=>setVw("config")}>⚙️ Config</button>
+          <button className={`btn ${vw==="results"?"btn-p":"btn-s"}`} style={{padding:"8px 18px",fontSize:12}} onClick={()=>setVw("results")}>✅ Résultats ({totV})</button></div>}
+
+        {/* CONFIG */}
+        {vw==="config"&&(<div className="app-layout" style={{display:"grid",gridTemplateColumns:"320px 1fr",gap:18,animation:"fadeIn .2s ease"}}>
+          <aside className="app-side" style={{display:"flex",flexDirection:"column",gap:10}}>
+            {/* Humanizer */}
+            <div className="card" style={{padding:"16px 18px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><span style={{fontSize:14,fontWeight:700,color:"#e8f4f8"}}>🎚️ Humanizer</span><span style={{fontSize:13,fontWeight:700,color:iC}}>{iL}</span></div>
+              <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)}/></div>
+            {/* Versions */}
+            <div className="card" style={{padding:"14px 18px"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+                <span style={{fontSize:14,fontWeight:700,color:"#e0e8f0"}}>Versions</span>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <button className="cnt" onClick={()=>setVer(v=>Math.max(1,v-1))}>−</button>
+                  <div key={ver} className="mono" style={{fontSize:28,fontWeight:700,color:"#5eead4",width:48,textAlign:"center"}}>{ver}</div>
+                  <button className="cnt" onClick={()=>setVer(v=>Math.min(pro?100:5,v+1))}>+</button></div></div>
+              <div style={{display:"flex",gap:3}}>{[1,5,10,20,50,100].map(n=><button key={n} className="btn btn-s" onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{flex:1,padding:"5px 0",fontSize:10,fontWeight:700,background:ver===n?"rgba(20,184,166,.12)":"rgba(255,255,255,.02)",color:ver===n?"#5eead4":"#4a6a78",opacity:!pro&&n>5?.35:1}}>{n}</button>)}</div></div>
+            {/* GPS */}
+            {tf.location&&<div className="card" style={{padding:"14px 16px"}}>
+              <div style={{fontSize:13,fontWeight:700,color:"#e0e8f0",marginBottom:8}}>📍 GPS Spoofing</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:4}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{opacity:!pro&&i>3?.35:1}}>{l.city}</button>)}</div></div>}
+            {/* Device */}
+            {tf.metaTemplate&&<div className="card" style={{padding:"14px 16px"}}>
+              <div style={{fontSize:13,fontWeight:700,color:"#e0e8f0",marginBottom:8}}>🧹 Fake Device</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:4}}>{MTPL.map((m,i)=><button key={m.id} className={`lb ${mtpl.id===m.id?"on":""}`} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{opacity:!pro&&i>2?.35:1}}>{m.name}</button>)}</div></div>}
+            {/* Transforms */}
+            <div className="card" style={{padding:"12px 10px",flex:1}}>
+              <div style={{display:"flex",justifyContent:"space-between",padding:"0 8px",marginBottom:6}}>
+                <span style={{fontSize:13,fontWeight:700,color:"#e0e8f0"}}>Transformations</span>
+                <span className="badge bt">{activeT}</span></div>
+              <div style={{maxHeight:280,overflowY:"auto"}}>{Object.entries(TF).map(([k,m])=>{const on=tf[k];const lk=!pro&&m.p;return(
+                <div key={k} className={`chk ${on&&!lk?"on":""}`} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{opacity:lk?.3:1}}>
+                  <div className={`dot ${on&&!lk?"on":""}`}>{on&&!lk?"✓":lk?"🔒":""}</div>
+                  <div style={{fontSize:13,fontWeight:600,color:on&&!lk?"#5eead4":"#4a6a78"}}>{m.i} {m.l}</div></div>)})}</div></div>
           </aside>
-          <div>
-            <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!checkLimit())return;add(e.dataTransfer.files)}} onClick={()=>{if(!checkLimit())return;ir.current?.click()}} className="c" style={{padding:files.length?"24px 14px":"44px 14px",textAlign:"center",cursor:"pointer",borderColor:drag?"rgba(20,184,166,.3)":undefined,transition:"all .2s",marginBottom:10}}>
-              <div style={{fontSize:files.length?22:34,marginBottom:6,animation:"fl 3s ease infinite"}}>{drag?"📥":mode==="photo"?"📸":"🎬"}</div>
-              <div style={{fontSize:13,fontWeight:700,color:"#f0fdfa"}}>{drag?"Lâche ici":`Drop tes ${mode==="photo"?"photos":"vidéos"}`}</div>
-              <div className="mn" style={{fontSize:10,color:"#2a4a58"}}>{mode==="photo"?"JPG • PNG • WEBP":"MP4 • MOV • WEBM"}</div>
-              <input ref={ir} type="file" multiple accept={mode==="photo"?"image/*":"video/*"} style={{display:"none"}} onChange={e=>{if(!checkLimit())return;add(e.target.files)}}/></div>
-            {files.length>0&&<div className="sg" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,marginBottom:8}}>{[{l:"Fichiers",v:files.length,c:"#5eead4"},{l:"Versions",v:files.length*ver,c:"#a78bfa"},{l:"Taille",v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24"},{l:"Mode",v:intLabel,c:intColor}].map((s,i)=><div key={i} className="c" style={{padding:"7px 8px"}}><div style={{fontSize:7,color:"#2a4a58",textTransform:"uppercase",letterSpacing:.5}}>{s.l}</div><div className="mn" style={{fontSize:14,fontWeight:700,color:s.c}}>{s.v}</div></div>)}</div>}
-            {files.length>0&&<div style={{maxHeight:260,overflowY:"auto",marginBottom:8}}>{files.map((f,i)=><div key={f.id} className="rw" style={{animation:`i ${.05+i*.02}s ease`}}>{thumbs[f.id]?<img src={thumbs[f.id]} className="th"/>:<div className="th" style={{display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>🎬</div>}<div style={{flex:1,minWidth:0}}><div style={{fontSize:11,fontWeight:600,color:"#ddd",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{f.name}</div><div className="mn" style={{fontSize:9,color:"#3d5a6a"}}>{fb(f.size)} → ×{ver}</div></div><button className="b bx" style={{padding:"2px 6px",fontSize:8,color:"#fb7185"}} onClick={()=>setFiles(p=>p.filter(x=>x.id!==f.id))}>✕</button></div>)}</div>}
-            <button className="b bm" onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:12,fontSize:13,borderRadius:10}}>{proc?"⏳ En cours...":`🔒 Traiter → ${files.length*ver} versions`}</button>
-            {webhook.enabled&&<div style={{textAlign:"center",fontSize:10,color:"#14b8a6",marginTop:6}}>🔗 Webhook {webhook.type} activé — envoi automatique</div>}
+
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {/* Drop */}
+            <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}
+              onClick={()=>{if(!ck())return;ir.current?.click()}} className="card"
+              style={{padding:files.length?"32px 20px":"56px 20px",textAlign:"center",cursor:"pointer",borderColor:drag?"rgba(20,184,166,.3)":undefined,transition:"all .2s"}}>
+              <div style={{fontSize:files.length?28:44,marginBottom:8,animation:"float 3.5s ease infinite"}}>{drag?"📥":mode==="photo"?"📸":"🎬"}</div>
+              <div style={{fontSize:17,fontWeight:700,color:"#f0fdfa",marginBottom:4}}>{drag?"Lâche ici":`Drop tes ${mode==="photo"?"photos":"vidéos"}`}</div>
+              <div className="mono" style={{fontSize:13,color:"#2a4a58"}}>{mode==="photo"?"JPG • PNG • WEBP":"MP4 • MOV • WEBM"}</div>
+              <input ref={ir} type="file" multiple accept={mode==="photo"?"image/*":"video/*"} style={{display:"none"}} onChange={e=>{if(!ck())return;add(e.target.files)}}/></div>
+
+            {/* Stats */}
+            {files.length>0&&<div className="stat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+              {[{l:"Fichiers",v:files.length,c:"#5eead4"},{l:"Versions",v:files.length*ver,c:"#a78bfa"},{l:"Taille",v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24"},{l:"Intensité",v:iL,c:iC}].map((s,i)=>(
+                <div key={i} className="card" style={{padding:"10px 12px"}}><div style={{fontSize:10,color:"#2a4a58",textTransform:"uppercase",letterSpacing:.8}}>{s.l}</div><div className="mono" style={{fontSize:20,fontWeight:700,color:s.c,marginTop:2}}>{s.v}</div></div>))}</div>}
+
+            {/* File list */}
+            {files.length>0&&<div style={{flex:1,overflow:"auto"}}>{files.map((f,i)=>(
+              <div key={f.id} className="row" style={{animation:`fadeIn ${.05+i*.02}s ease`}}>
+                {thumbs[f.id]?<img src={thumbs[f.id]} className="thumb"/>:<div className="thumb" style={{display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>🎬</div>}
+                <div style={{flex:1,minWidth:0}}><div style={{fontSize:14,fontWeight:600,color:"#e0e8f0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{f.name}</div>
+                  <div className="mono" style={{fontSize:12,color:"#3d5a6a"}}>{fb(f.size)} <span style={{color:"#5eead4"}}>→ ×{ver}</span></div></div>
+                <button className="btn btn-s" style={{padding:"4px 10px",fontSize:11,color:"#fb7185"}} onClick={()=>setFiles(p=>p.filter(x=>x.id!==f.id))}>✕</button></div>))}</div>}
+
+            {/* Process */}
+            <button className="btn btn-p" onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:16,fontSize:16,borderRadius:14}}>
+              {proc?"⏳ Traitement en cours...":`🔒 Traiter ${files.length||0} fichier${files.length>1?"s":""} → ${(files.length||0)*ver} versions`}</button>
+            {wh.on&&<div style={{textAlign:"center",fontSize:12,color:"#14b8a6",marginTop:4}}>🔗 Webhook {wh.type} activé</div>}
           </div></div>)}
 
-        {view==="results"&&(<div style={{animation:"i .2s ease"}}>
-          {proc&&<div className="c" style={{padding:"36px 20px",textAlign:"center",marginBottom:12}}><div style={{fontSize:26,marginBottom:8}}><span style={{display:"inline-block",animation:"sp 1s linear infinite"}}>⚙️</span></div><div style={{fontSize:13,fontWeight:700,color:"#fff"}}>{prog.f} — v{prog.v}/{ver}</div><div className="pb" style={{maxWidth:350,margin:"10px auto"}}><div className="pf" style={{width:`${prog.t?(prog.c/prog.t)*100:0}%`}}/></div><div className="mn" style={{fontSize:9,color:"#3d5a6a"}}>{prog.c}/{prog.t}</div></div>}
-          {!proc&&totV>0&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,flexWrap:"wrap",gap:6}}><div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}><span style={{fontSize:12,fontWeight:700,color:"#fff"}}>✅ {totV} versions</span><span className="bdg bg2">Uniques</span><span className="bdg bt">🛡️</span>{webhook.enabled&&<span className="bdg bt">🔗 Envoyé</span>}</div><button className="b bm" style={{padding:"7px 16px",fontSize:11}} onClick={dlAll}>📥 Tout ({totV})</button></div>}
-          {res.map((g,gi)=><div key={gi} className="c" style={{marginBottom:7,animation:`i ${.06+gi*.03}s ease`}}>
-            <div style={{padding:"9px 12px",borderBottom:"1px solid rgba(255,255,255,.03)",display:"flex",alignItems:"center",gap:10}}>{thumbs[g.orig.id]?<img src={thumbs[g.orig.id]} style={{width:36,height:36,borderRadius:8,objectFit:"cover"}}/>:null}<div style={{flex:1}}><div style={{fontSize:11,fontWeight:600,color:"#eee"}}>{g.orig.name}</div><div className="mn" style={{fontSize:8,color:"#3d5a6a"}}>{fb(g.orig.size)} • {g.vers.length}v</div></div></div>
-            <div className="vg" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(110px,1fr))",gap:4,padding:"8px 8px"}}>{g.vers.map((v,vi)=><div key={vi} className="vc" onClick={()=>v.thumb?setPreview({...v,vi:vi+1,origId:g.orig.id,origName:g.orig.name,origSize:g.orig.size}):dl(v)}>{v.thumb&&<img src={v.thumb} style={{width:"100%",height:55,objectFit:"cover",borderRadius:7,marginBottom:3,display:"block"}}/>}<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span className="bdg bt" style={{fontSize:7,padding:"1px 5px"}}>v{vi+1}</span>{v.similarity!=null&&<span className="mn" style={{fontSize:7,color:v.similarity>50?"#fb7185":"#5eead4"}}>{v.similarity}%</span>}</div></div>)}</div>
-          </div>)}</div>)}
+        {/* RESULTS */}
+        {vw==="results"&&(<div style={{animation:"fadeIn .2s ease"}}>
+          {proc&&<div className="card" style={{padding:"48px 24px",textAlign:"center",marginBottom:16}}>
+            <div style={{fontSize:32,marginBottom:12}}><span style={{display:"inline-block",animation:"spin 1s linear infinite"}}>⚙️</span></div>
+            <div style={{fontSize:16,fontWeight:700,color:"#fff",marginBottom:6}}>Randomisation...</div>
+            <div className="mono" style={{fontSize:13,color:"#3d5a6a",marginBottom:16}}>{prog.f} — v{prog.v}/{ver}</div>
+            <div className="pbar" style={{maxWidth:500,margin:"0 auto"}}><div className="pfill" style={{width:`${prog.t?(prog.c/prog.t)*100:0}%`}}/></div>
+            <div className="mono" style={{fontSize:12,color:"#3d5a6a",marginTop:8}}>{prog.c}/{prog.t}</div></div>}
+          {!proc&&totV>0&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
+            <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+              <span style={{fontSize:15,fontWeight:700,color:"#fff"}}>✅ {totV} versions générées</span>
+              <span className="badge bg">Uniques</span><span className="badge bt">🛡️ Clean</span>
+              {wh.on&&<span className="badge bt">🔗 Envoyé</span>}</div>
+            <button className="btn btn-p" style={{padding:"10px 22px",fontSize:13}} onClick={dlAll}>📥 Tout télécharger ({totV})</button></div>}
+          {res.map((g,gi)=><div key={gi} className="card" style={{marginBottom:10,animation:`fadeIn ${.06+gi*.03}s ease`}}>
+            <div style={{padding:"12px 18px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",gap:12}}>
+              {thumbs[g.orig.id]?<img src={thumbs[g.orig.id]} style={{width:44,height:44,borderRadius:10,objectFit:"cover"}}/>:null}
+              <div style={{flex:1}}><div style={{fontSize:14,fontWeight:600,color:"#eee"}}>{g.orig.name}</div><div className="mono" style={{fontSize:11,color:"#3d5a6a"}}>{fb(g.orig.size)} • {g.vers.length} versions</div></div></div>
+            <div className="ver-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:6,padding:"12px 14px"}}>{g.vers.map((v,vi)=>(
+              <div key={vi} className="vc" onClick={()=>v.thumb?setPreview({...v,vi:vi+1,origId:g.orig.id,origName:g.orig.name,origSize:g.orig.size}):dl(v)}>
+                {v.thumb&&<img src={v.thumb} style={{width:"100%",height:70,objectFit:"cover",borderRadius:9,marginBottom:5,display:"block"}}/>}
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span className="badge bt" style={{fontSize:9}}>v{vi+1}</span>
+                  {v.similarity!=null&&<span className="mono" style={{fontSize:9,color:v.similarity>50?"#fb7185":"#5eead4"}}>{v.similarity}%</span>}</div></div>))}</div>
+          </div>)}
+          {!proc&&totV>0&&<button className="btn btn-s" onClick={dlAll} style={{width:"100%",padding:14,fontSize:14,marginTop:8}}>📥 Télécharger les {totV} fichiers</button>}
+        </div>)}
       </main></div>);
 }
