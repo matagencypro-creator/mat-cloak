@@ -23,7 +23,7 @@ const MTPL=[
 const LUTS=[{r:3,g:1,b:-3,t:3,c:2},{r:-2,g:1,b:2,t:-3,c:1},{r:2,g:0,b:-1,t:1,c:-3},{r:5,g:2,b:-3,t:5,c:1},{r:1,g:-1,b:1,t:0,c:-4}];
 const PRESETS=[
   {id:"ig",name:"Instagram",icon:"📸",ver:12,int:.5},{id:"reddit",name:"Reddit",icon:"🟠",ver:8,int:.5},
-  {id:"tiktok",name:"TikTok",icon:"🎵",ver:5,int:.4},{id:"of",name:"OnlyFans",icon:"💎",ver:3,int:.2},
+  {id:"tiktok",name:"TikTok",icon:"🎵",ver:5,int:.4},
   {id:"x",name:"Twitter",icon:"🐦",ver:6,int:.45},{id:"custom",name:"Custom",icon:"⚙️",ver:5,int:.5},
 ];
 const TF={
@@ -203,8 +203,8 @@ export default function App(){
             <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"6px 16px",borderRadius:100,border:"1px solid rgba(20,184,166,.12)",background:"rgba(20,184,166,.03)",fontSize:12,color:"#5eead4",fontWeight:600,marginBottom:28}}>
               <span style={{width:6,height:6,borderRadius:"50%",background:"#34d399"}}/>100% local — aucun upload</div>
             <h1 style={{fontSize:52,fontWeight:900,color:"#f0fdfa",lineHeight:1.08,letterSpacing:"-2.5px",marginBottom:22}}>
-              Poste le même contenu sur<br/><span style={{background:"linear-gradient(135deg,#14b8a6,#67e8f9)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>100 comptes</span> sans détection</h1>
-            <p style={{fontSize:16,color:"#4a6a78",maxWidth:540,margin:"0 auto 36px",lineHeight:1.7}}>Veilora randomise chaque pixel, chaque metadata, chaque hash. Invisible aux algorithmes.</p>
+              Un fichier. <span style={{background:"linear-gradient(135deg,#14b8a6,#67e8f9)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>100 versions uniques.</span><br/>Zéro trace.</h1>
+            <p style={{fontSize:16,color:"#4a6a78",maxWidth:540,margin:"0 auto 36px",lineHeight:1.7}}>Chaque pixel, chaque metadata, chaque hash — randomisé. Les algorithmes ne voient rien.</p>
             <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="btn btn-p" onClick={()=>setPg("app")} style={{padding:"16px 36px",fontSize:16,borderRadius:14}}>Essayer gratuitement</button>
               <button className="btn" onClick={()=>window.open(STRIPE.lifetime,"_blank")} style={{padding:"16px 28px",fontSize:15,borderRadius:14,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,border:"none"}}>À vie — 44.99€</button>
@@ -222,13 +222,15 @@ export default function App(){
 
           {/* Features */}
           <section style={{maxWidth:1060,margin:"0 auto 70px",padding:"0 32px"}}>
-            <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:32}}>Tout ce dont tu as besoin</h2>
+            <div style={{textAlign:"center",marginBottom:32}}>
+              <h2 style={{fontSize:28,fontWeight:800,color:"#f0fdfa",marginBottom:8}}>Construit pour être invisible</h2>
+              <p style={{fontSize:14,color:"#3d5a6a"}}>13 couches de randomisation. Aucune plateforme ne voit la différence.</p></div>
             <div className="feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
-              {[{icon:"🧠",t:"AI Noise",d:"Bruit simulant un vrai capteur photo"},{icon:"📐",t:"Perspective Warp",d:"Micro-déformation des coins"},{icon:"🌈",t:"LUT Cinématique",d:"5 courbes couleur aléatoires"},
-                {icon:"🧹",t:"Fake Device",d:"Simule 8 appareils différents"},{icon:"📍",t:"22 GPS Locations",d:"Spoof dans 22 villes mondiales"},{icon:"👁️",t:"Visual Diff",d:"Compare split / blink / overlay"},
-                {icon:"🎚️",t:"Humanizer",d:"Curseur naturel → agressif"},{icon:"🔗",t:"Webhooks",d:"Envoi auto Discord & Telegram"},{icon:"🛡️",t:"Privacy Audit",d:"Score de protection temps réel"},
+              {[{ic:"⬡",t:"AI Noise",d:"Bruit gaussien simulant un vrai capteur photo"},{ic:"◇",t:"Perspective Warp",d:"Micro-déformation des coins imperceptible"},{ic:"◈",t:"LUT Cinématique",d:"5 courbes couleur appliquées aléatoirement"},
+                {ic:"⎔",t:"Fake Device",d:"Simule 8 appareils — iPhone, Canon, Sony..."},{ic:"⊕",t:"22 GPS Locations",d:"Spoof coordonnées dans 22 villes mondiales"},{ic:"◉",t:"Visual Diff",d:"Compare original vs version en split / blink / overlay"},
+                {ic:"≡",t:"Humanizer",d:"Curseur d'intensité — naturel à agressif"},{ic:"⤳",t:"Webhooks",d:"Envoi automatique Discord & Telegram"},{ic:"◎",t:"Privacy Audit",d:"Score de protection en temps réel"},
               ].map((f,i)=>(<div key={i} className="card" style={{padding:"22px 20px",animation:`fadeIn ${.2+i*.04}s ease`}}>
-                <div style={{fontSize:26,marginBottom:8}}>{f.icon}</div>
+                <div style={{fontSize:22,marginBottom:8,color:"#14b8a6",fontWeight:300}}>{f.ic}</div>
                 <div style={{fontSize:14,fontWeight:700,color:"#e0f0f8",marginBottom:4}}>{f.t}</div>
                 <div style={{fontSize:12,color:"#4a6a78",lineHeight:1.6}}>{f.d}</div></div>))}
             </div></section>
@@ -283,7 +285,12 @@ export default function App(){
         </div></footer></div>);
 
   function PricingModal(){return <div className="ov" onClick={()=>setPricing(false)} style={{zIndex:200}}><div onClick={e=>e.stopPropagation()} style={{maxWidth:800,width:"92%",animation:"fadeIn .2s ease"}}>
-    <div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:24,fontWeight:800,color:"#fff"}}>Choisis ton plan</div></div>
+    <div style={{textAlign:"center",marginBottom:24}}>
+      <div style={{display:"inline-flex",alignItems:"center",gap:10,marginBottom:12}}>
+        <div style={{width:38,height:38,borderRadius:10,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:6}} alt="V"/></div>
+        <span style={{fontWeight:800,fontSize:22,color:"#f0fdfa",letterSpacing:"-1px"}}>Veilora</span></div>
+      <div style={{fontSize:24,fontWeight:800,color:"#fff"}}>Choisis ton plan</div>
+      <div style={{fontSize:13,color:"#3d5a6a",marginTop:6}}>Débloquez toute la puissance de Veilora</div></div>
     <div className="price-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
       <div className="prc"><div style={{fontSize:16,fontWeight:700,color:"#e0f0f8",marginBottom:6}}>Free</div><div style={{fontSize:30,fontWeight:800,color:"#fff"}}>0€</div><div style={{fontSize:12,color:"#3d5a6a",marginBottom:16}}>Pour tester</div>
         {["3 fichiers/jour","5 versions max","4 transformations"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:7}}><span style={{color:"#5eead4"}}>✓</span><span style={{fontSize:13,color:"#8aa"}}>{f}</span></div>)}
@@ -360,7 +367,7 @@ export default function App(){
         <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:4,borderRadius:12,maxWidth:260,margin:"0 auto 14px",border:"1px solid rgba(255,255,255,.05)"}}>
           {[["photo","📸 Photos"],["video","🎬 Vidéos"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"9px 0",fontSize:13,fontWeight:700,borderRadius:9,background:mode===m?"linear-gradient(135deg,#0d9488,#14b8a6)":"transparent",color:mode===m?"#021a16":"#4a6a78"}}>{l}</button>)}
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6,maxWidth:640,margin:"0 auto 16px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6,maxWidth:640,margin:"0 auto 16px"}}>
           {PRESETS.map(p=><div key={p.id} className={`pc ${preset?.id===p.id?"on":""}`} onClick={()=>applyP(p)}>
             <div style={{fontSize:20,marginBottom:2}}>{p.icon}</div>
             <div style={{fontSize:11,fontWeight:700,color:preset?.id===p.id?"#5eead4":"#6a8a9a"}}>{p.name}</div></div>)}
