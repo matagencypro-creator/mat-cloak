@@ -74,7 +74,7 @@ c.toBlob(b=>{URL.revokeObjectURL(img.src);res({blob:b,w:ow,h:oh})},"image/jpeg",
 const rn=ext=>`IMG_${Date.now().toString(36)}_${Array.from({length:10},()=>"abcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(Math.random()*36)]).join("")}.${ext}`;
 const fb=b=>{if(!b)return"0 B";const u=["B","KB","MB","GB"];const i=Math.floor(Math.log(b)/Math.log(1024));return(b/Math.pow(1024,i)).toFixed(1)+" "+u[i]};
 const pH=async b=>{const buf=await b.arrayBuffer();const h=await crypto.subtle.digest("SHA-256",buf);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,"0")).join("")};
-const STRIPE={monthly:"https://buy.stripe.com/YOUR_MONTHLY",lifetime:"https://buy.stripe.com/YOUR_LIFETIME"};
+const STRIPE={monthly:"https://buy.stripe.com/6oU9AT4Zj4gf1XA8tr8Vi00",lifetime:"https://buy.stripe.com/4gMcN563naED59MaBz8Vi01"};
 const FREE_LIMIT=3;
 async function sendWH(url,blob,name,type){if(!url)return;try{const fd=new FormData();fd.append("file",blob,name);if(type==="discord")fd.append("payload_json",JSON.stringify({content:`🔒 **Veilora** — ${name}`}));await fetch(url,{method:"POST",body:fd})}catch(e){}}
 
