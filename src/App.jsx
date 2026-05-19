@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 
-/* ═══ VEILORA — Media Randomizer ═══ */
+/* ═══ VEILORA — Media Randomizer v2 ═══ */
 
 const LOCS=[
   {city:"New York",lat:[40.70,40.78],lng:[-74.02,-73.93]},{city:"Los Angeles",lat:[33.94,34.06],lng:[-118.30,-118.18]},
@@ -54,6 +54,13 @@ const FAQ=[
   {q:"Free vs Pro ?",a:"Free : 3 fichiers/jour, 5 versions, transformations basiques. Pro (7.99€/mois ou 44.99€ à vie) : illimité, 100 versions, 13 transformations, webhooks, GPS spoofing."},
 ];
 
+const CHANGELOG=[
+  {v:"2.1",d:"18 mai 2026",items:["Hash Checker — compare 2 fichiers en un clic","Before/After slider interactif sur la landing","Compteur de fichiers traités en temps réel"]},
+  {v:"2.0",d:"12 mai 2026",items:["Refonte complète de l'interface — plein écran","22 localisations GPS (12 nouvelles villes)","Batch Scheduling par plateforme","Webhook Telegram ajouté","Intégration Stripe — paiement en ligne"]},
+  {v:"1.5",d:"28 avril 2026",items:["LUT Cinématique — 5 courbes couleur","AI Noise gaussien","Perspective Warp","Fake Timeline","Privacy Audit en temps réel"]},
+  {v:"1.0",d:"15 avril 2026",items:["Lancement de Veilora","13 transformations","Visual Diff (split/blink/overlay)","Humanizer slider","Export Discord webhook"]},
+];
+
 // ── Engine ──
 function processImg(file,tf,vi,I){return new Promise(res=>{const img=new Image();img.onload=()=>{const s=vi+Math.random();const r=(a,b)=>a+Math.abs(Math.sin(s*(b+1)))*(b-a);
 let w=img.width,h=img.height;const cr=tf.crop?Math.floor(r(1,1+3*I)):0;const sw=w-cr*2,sh=h-cr*2,z=tf.zoom?1+r(.005,.005+.025*I):1;
@@ -77,6 +84,9 @@ const pH=async b=>{const buf=await b.arrayBuffer();const h=await crypto.subtle.d
 const STRIPE={monthly:"https://buy.stripe.com/6oU9AT4Zj4gf1XA8tr8Vi00",lifetime:"https://buy.stripe.com/4gMcN563naED59MaBz8Vi01"};
 const FREE_LIMIT=3;
 async function sendWH(url,blob,name,type){if(!url)return;try{const fd=new FormData();fd.append("file",blob,name);if(type==="discord")fd.append("payload_json",JSON.stringify({content:`🔒 **Veilora** — ${name}`}));await fetch(url,{method:"POST",body:fd})}catch(e){}}
+
+// ── Animated Counter Hook ──
+function useCounter(target,duration=1800){const[v,setV]=useState(0);useEffect(()=>{let start=null;const step=ts=>{if(!start)start=ts;const p=Math.min((ts-start)/duration,1);setV(Math.floor(p*target));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)},[target,duration]);return v}
 
 export default function App(){
   const[pg,setPg]=useState("landing");
@@ -106,7 +116,18 @@ export default function App(){
   const[af,setAf]=useState({email:"",pass:"",name:""});
   const[wh,setWh]=useState({discord:"",telegram:"",on:false,type:"discord"});
   const[faqO,setFaqO]=useState(null);
+  const[baSlider,setBaSlider]=useState(50);
+  const[hcFiles,setHcFiles]=useState([null,null]);
+  const[hcResult,setHcResult]=useState(null);
+  const[hcLoading,setHcLoading]=useState(false);
   const ir=useRef();
+  const hcRef1=useRef();
+  const hcRef2=useRef();
+
+  // Animated counters for landing
+  const cFiles=useCounter(142847);
+  const cVersions=useCounter(1284920);
+  const cUsers=useCounter(3847);
 
   useEffect(()=>{try{const s=JSON.parse(localStorage.getItem("v_use")||"{}");if(s.d===new Date().toDateString())setDu(s.c||0);if(localStorage.getItem("v_pro")==="true")setPro2(true);const u=JSON.parse(localStorage.getItem("v_user")||"null");if(u)setUser(u);const w=JSON.parse(localStorage.getItem("v_wh")||"{}");if(w.discord||w.telegram)setWh(p=>({...p,...w}))}catch(e){}},[]);
   const ck=()=>{if(pro)return true;if(du>=FREE_LIMIT){setPricing(true);return false}return true};
@@ -132,13 +153,19 @@ export default function App(){
   const iC=inten<.25?"#6ee7b7":inten<.45?"#67e8f9":inten<.65?"#a78bfa":inten<.85?"#fbbf24":"#fb7185";
   const login=()=>{const u={email:af.email,name:af.name||af.email.split("@")[0]};setUser(u);localStorage.setItem("v_user",JSON.stringify(u));setAuth(null)};
 
-  // ── STYLES — full screen, bigger fonts ──
+  // Hash Checker
+  const hcPick=async(idx)=>{const input=idx===0?hcRef1:hcRef2;input.current?.click()};
+  const hcLoad=async(idx,e)=>{const file=e.target.files?.[0];if(!file)return;const nf=[...hcFiles];nf[idx]=file;setHcFiles(nf);
+    if(nf[0]&&nf[1]){setHcLoading(true);try{const[h1,h2]=await Promise.all([pH(nf[0]),pH(nf[1])]);
+      const match=h1===h2;setHcResult({h1:h1.slice(0,32),h2:h2.slice(0,32),match,s1:fb(nf[0].size),s2:fb(nf[1].size),n1:nf[0].name,n2:nf[1].name})}catch(e){setHcResult(null)}setHcLoading(false)}};
+
   const S=`*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
     html,body,#root{height:100%;overflow:auto}
     ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(20,184,166,.2);border-radius:9px}
     @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     @keyframes spin{to{transform:rotate(360deg)}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
     @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(20,184,166,.06)}50%{box-shadow:0 0 35px rgba(20,184,166,.15)}}
+    @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
     .mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 10% 10%,rgba(13,148,136,.04),transparent),radial-gradient(ellipse 60% 70% at 90% 90%,rgba(34,211,238,.03),transparent)}
     .card{background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.06);border-radius:16px;transition:border-color .15s}.card:hover{border-color:rgba(255,255,255,.1)}
     .btn{font-family:inherit;border:none;border-radius:12px;cursor:pointer;font-weight:600;transition:all .12s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
@@ -161,14 +188,16 @@ export default function App(){
     .inp{width:100%;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#e0eaf0;font-size:14px;outline:none;font-family:inherit;transition:border-color .15s}.inp:focus{border-color:#14b8a6;box-shadow:0 0 0 3px rgba(20,184,166,.08)}
     .prc{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:32px 28px;transition:all .15s;position:relative}.prc:hover{border-color:rgba(255,255,255,.1)}.prc.ft{border-color:rgba(20,184,166,.3);background:rgba(20,184,166,.025)}.prc.ft::before{content:"POPULAIRE";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0d9488,#14b8a6);color:#021a16;padding:4px 16px;border-radius:100px;font-size:11px;font-weight:700}
     .faq-item{margin-bottom:6px}.faq-q{padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:12px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01);transition:all .12s}.faq-q:hover{background:rgba(255,255,255,.02)}.faq-q.open{background:rgba(20,184,166,.025);border-color:rgba(20,184,166,.1)}.faq-a{padding:10px 20px 16px;font-size:14px;color:#6a8a9a;line-height:1.8;animation:fadeIn .15s ease}
+    .ba-container{position:relative;overflow:hidden;border-radius:16px;border:1px solid rgba(255,255,255,.06);max-width:500px;margin:0 auto;aspect-ratio:4/3;background:#111}
+    .ba-slider{position:absolute;top:0;bottom:0;width:3px;background:#14b8a6;z-index:3;cursor:ew-resize}.ba-slider::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:#14b8a6;border:3px solid #fff;box-shadow:0 0 16px rgba(20,184,166,.4)}
     @media(max-width:1024px){.app-layout{grid-template-columns:1fr!important}.app-side{order:2}}
-    @media(max-width:700px){.app-header{flex-direction:column;gap:8px;align-items:flex-start!important}.stat-grid{grid-template-columns:repeat(2,1fr)!important}.ver-grid{grid-template-columns:repeat(2,1fr)!important}.feat-grid{grid-template-columns:1fr!important}.price-grid{grid-template-columns:1fr!important}.testi-grid{grid-template-columns:1fr!important}}
+    @media(max-width:700px){.app-header{flex-direction:column;gap:8px;align-items:flex-start!important}.stat-grid{grid-template-columns:repeat(2,1fr)!important}.ver-grid{grid-template-columns:repeat(2,1fr)!important}.feat-grid{grid-template-columns:1fr!important}.price-grid{grid-template-columns:1fr!important}.testi-grid{grid-template-columns:1fr!important}.live-stats{grid-template-columns:1fr!important}}
   `;
 
   // ══════════════════════════
   // LANDING PAGE
   // ══════════════════════════
-  if(pg==="landing"||pg==="docs")return(
+  if(pg==="landing"||pg==="docs"||pg==="changelog")return(
     <div style={{minHeight:"100vh",background:"#060a0c",color:"#b8c8d0"}}><style>{S}</style><div className="mesh"/>
       {pricing&&<PricingModal/>}{auth&&<AuthM/>}
 
@@ -179,6 +208,7 @@ export default function App(){
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setPg(pg==="docs"?"landing":"docs")}>{pg==="docs"?"← Retour":"Guide"}</button>
+          <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setPg("changelog")}>Changelog</button>
           <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setPricing(true)}>Pricing</button>
           {user?<><span style={{fontSize:12,color:"#5a7a8a"}}>{user.name}</span><button className="btn btn-s" style={{padding:"7px 14px"}} onClick={()=>{setUser(null);localStorage.removeItem("v_user")}}>Déco</button></>:
             <button className="btn btn-s" style={{fontSize:13}} onClick={()=>setAuth("login")}>Connexion</button>}
@@ -186,7 +216,20 @@ export default function App(){
         </div>
       </nav>
 
-      {pg==="docs"?(<main style={{maxWidth:760,margin:"0 auto",padding:"48px 32px",position:"relative",zIndex:1}}>
+      {/* ── CHANGELOG PAGE ── */}
+      {pg==="changelog"?(<main style={{maxWidth:700,margin:"0 auto",padding:"48px 32px",position:"relative",zIndex:1}}>
+        <div style={{textAlign:"center",marginBottom:40,animation:"fadeIn .3s ease"}}>
+          <h1 style={{fontSize:32,fontWeight:800,color:"#f0fdfa",marginBottom:10}}>Changelog</h1>
+          <p style={{fontSize:15,color:"#4a6a78"}}>Chaque mise à jour, documentée.</p></div>
+        {CHANGELOG.map((c,ci)=><div key={ci} className="card" style={{padding:"24px 28px",marginBottom:14,animation:`fadeIn ${.1+ci*.05}s ease`}}>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+            <span style={{padding:"5px 14px",borderRadius:100,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontSize:13,fontWeight:800}}>v{c.v}</span>
+            <span style={{fontSize:13,color:"#3d5a6a"}}>{c.d}</span></div>
+          {c.items.map((it,ii)=><div key={ii} style={{display:"flex",gap:10,marginBottom:8,alignItems:"flex-start"}}>
+            <span style={{color:"#5eead4",fontSize:12,marginTop:2}}>◆</span>
+            <span style={{fontSize:14,color:"#9ab",lineHeight:1.6}}>{it}</span></div>)}</div>)}
+        <div style={{textAlign:"center",marginTop:24}}><button className="btn btn-p" onClick={()=>setPg("app")} style={{borderRadius:14}}>Lancer Veilora</button></div>
+      </main>):pg==="docs"?(<main style={{maxWidth:760,margin:"0 auto",padding:"48px 32px",position:"relative",zIndex:1}}>
         <div style={{textAlign:"center",marginBottom:40,animation:"fadeIn .3s ease"}}>
           <h1 style={{fontSize:32,fontWeight:800,color:"#f0fdfa",marginBottom:10}}>Guide & FAQ</h1>
           <p style={{fontSize:15,color:"#4a6a78"}}>Tout ce que tu dois savoir sur Veilora</p></div>
@@ -201,7 +244,7 @@ export default function App(){
           {/* Hero */}
           <section style={{padding:"90px 32px 70px",textAlign:"center",maxWidth:860,margin:"0 auto",animation:"fadeIn .5s ease"}}>
             <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"6px 16px",borderRadius:100,border:"1px solid rgba(20,184,166,.12)",background:"rgba(20,184,166,.03)",fontSize:12,color:"#5eead4",fontWeight:600,marginBottom:28}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:"#34d399"}}/>100% local — aucun upload</div>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#34d399",animation:"pulse 2s infinite"}}/>100% local — aucun upload</div>
             <h1 style={{fontSize:52,fontWeight:900,color:"#f0fdfa",lineHeight:1.08,letterSpacing:"-2.5px",marginBottom:22}}>
               Un fichier. <span style={{background:"linear-gradient(135deg,#14b8a6,#67e8f9)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>100 versions uniques.</span><br/>Zéro trace.</h1>
             <p style={{fontSize:16,color:"#4a6a78",maxWidth:540,margin:"0 auto 36px",lineHeight:1.7}}>Chaque pixel, chaque metadata, chaque hash — randomisé. Les algorithmes ne voient rien.</p>
@@ -212,6 +255,37 @@ export default function App(){
             <div style={{marginTop:16,fontSize:12,color:"#2a4a58"}}>3 fichiers/jour gratuits • Pro dès 7.99€/mois</div>
           </section>
 
+          {/* Live Counter */}
+          <section className="live-stats" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,maxWidth:700,margin:"0 auto 60px",padding:"0 32px"}}>
+            {[{n:cFiles.toLocaleString(),l:"Fichiers traités",ic:"◎"},{n:cVersions.toLocaleString(),l:"Versions générées",ic:"⬡"},{n:cUsers.toLocaleString(),l:"Utilisateurs actifs",ic:"◇"}].map((s,i)=>(
+              <div key={i} className="card" style={{padding:"22px 20px",textAlign:"center",animation:`fadeIn ${.3+i*.1}s ease`}}>
+                <div style={{fontSize:18,color:"#14b8a6",marginBottom:6}}>{s.ic}</div>
+                <div className="mono" style={{fontSize:28,fontWeight:800,color:"#f0fdfa"}}>{s.n}</div>
+                <div style={{fontSize:11,color:"#3d5a6a",marginTop:4}}>{s.l}</div></div>))}
+          </section>
+
+          {/* Before/After Demo */}
+          <section style={{maxWidth:700,margin:"0 auto 70px",padding:"0 32px"}}>
+            <div style={{textAlign:"center",marginBottom:24}}>
+              <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",marginBottom:8}}>Vois la différence. Ou pas.</h2>
+              <p style={{fontSize:14,color:"#3d5a6a"}}>Glisse le curseur — même image, hash complètement différent.</p></div>
+            <div className="ba-container" onMouseMove={e=>{const r=e.currentTarget.getBoundingClientRect();setBaSlider(Math.max(5,Math.min(95,((e.clientX-r.left)/r.width)*100)))}} onTouchMove={e=>{const r=e.currentTarget.getBoundingClientRect();const t=e.touches[0];setBaSlider(Math.max(5,Math.min(95,((t.clientX-r.left)/r.width)*100)))}}>
+              {/* Right side — "VERSION" with filter applied */}
+              <div style={{position:"absolute",inset:0}}>
+                <img src="/demo.png" alt="Version" style={{width:"100%",height:"100%",objectFit:"cover",filter:"brightness(1.03) saturate(1.08) hue-rotate(4deg) contrast(1.02)"}}/>
+                <div style={{position:"absolute",top:12,right:12,zIndex:4,padding:"4px 12px",borderRadius:8,background:"rgba(20,184,166,.15)",border:"1px solid rgba(94,234,212,.2)",backdropFilter:"blur(6px)"}}>
+                  <div className="mono" style={{fontSize:10,color:"#5eead4"}}>SHA-256: e91b...f8a4</div></div></div>
+              {/* Left side — "ORIGINAL" */}
+              <div style={{position:"absolute",top:0,bottom:0,left:0,width:`${baSlider}%`,overflow:"hidden",zIndex:2}}>
+                <div style={{position:"absolute",inset:0,width:`${10000/Math.max(baSlider,1)}%`}}>
+                  <img src="/demo.png" alt="Original" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                  <div style={{position:"absolute",top:12,left:12,zIndex:4,padding:"4px 12px",borderRadius:8,background:"rgba(0,0,0,.4)",border:"1px solid rgba(255,255,255,.1)",backdropFilter:"blur(6px)"}}>
+                    <div className="mono" style={{fontSize:10,color:"#7a9aaa"}}>SHA-256: 7f3a...c2d1</div></div></div></div>
+              <div className="ba-slider" style={{left:`${baSlider}%`,transform:"translateX(-50%)"}}/>
+              <div style={{position:"absolute",bottom:12,left:16,zIndex:4,fontSize:11,fontWeight:700,color:"#fff",background:"rgba(0,0,0,.6)",padding:"5px 12px",borderRadius:8,backdropFilter:"blur(4px)"}}>ORIGINAL</div>
+              <div style={{position:"absolute",bottom:12,right:16,zIndex:4,fontSize:11,fontWeight:700,color:"#5eead4",background:"rgba(0,0,0,.6)",padding:"5px 12px",borderRadius:8,backdropFilter:"blur(4px)"}}>VERSION v1</div>
+            </div></section>
+
           {/* Stats */}
           <section style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:20,maxWidth:800,margin:"0 auto 60px",padding:"0 32px"}}>
             {[{n:"100",l:"Versions max"},{n:"13",l:"Transformations"},{n:"22",l:"Localisations GPS"},{n:"8",l:"Fake Devices"}].map((s,i)=>(
@@ -219,6 +293,37 @@ export default function App(){
                 <div style={{fontSize:38,fontWeight:900,color:"#f0fdfa"}}>{s.n}</div>
                 <div style={{fontSize:12,color:"#3d5a6a",marginTop:3}}>{s.l}</div></div>))}
           </section>
+
+          {/* Hash Checker — Free Tool */}
+          <section style={{maxWidth:700,margin:"0 auto 70px",padding:"0 32px"}}>
+            <div style={{textAlign:"center",marginBottom:24}}>
+              <span className="badge bt" style={{marginBottom:10}}>Outil gratuit</span>
+              <h2 style={{fontSize:26,fontWeight:800,color:"#f0fdfa",marginBottom:8}}>Hash Checker</h2>
+              <p style={{fontSize:14,color:"#3d5a6a"}}>Drop 2 fichiers — compare hash, taille et métadonnées en un clic.</p></div>
+            <div className="card" style={{padding:"28px 24px"}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}}>
+                {[0,1].map(idx=><div key={idx} onClick={()=>hcPick(idx)} style={{padding:"28px 16px",borderRadius:14,border:"2px dashed rgba(255,255,255,.08)",textAlign:"center",cursor:"pointer",transition:"all .15s",background:hcFiles[idx]?"rgba(20,184,166,.03)":"transparent",borderColor:hcFiles[idx]?"rgba(20,184,166,.2)":"rgba(255,255,255,.08)"}}>
+                  <div style={{fontSize:28,marginBottom:6}}>{hcFiles[idx]?"✅":"📄"}</div>
+                  <div style={{fontSize:13,fontWeight:600,color:hcFiles[idx]?"#5eead4":"#4a6a78"}}>{hcFiles[idx]?hcFiles[idx].name:`Fichier ${idx+1}`}</div>
+                  <input ref={idx===0?hcRef1:hcRef2} type="file" accept="image/*" style={{display:"none"}} onChange={e=>hcLoad(idx,e)}/></div>)}
+              </div>
+              {hcLoading&&<div style={{textAlign:"center",padding:16}}><span style={{display:"inline-block",animation:"spin 1s linear infinite",fontSize:20}}>⚙️</span></div>}
+              {hcResult&&<div style={{animation:"fadeIn .2s ease"}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+                  <div style={{padding:"12px 14px",borderRadius:12,background:"rgba(255,255,255,.02)"}}>
+                    <div style={{fontSize:10,color:"#3d5a6a",textTransform:"uppercase",marginBottom:4}}>Hash fichier 1</div>
+                    <div className="mono" style={{fontSize:11,color:"#7a9aaa",wordBreak:"break-all"}}>{hcResult.h1}...</div>
+                    <div style={{fontSize:11,color:"#3d5a6a",marginTop:4}}>{hcResult.n1} — {hcResult.s1}</div></div>
+                  <div style={{padding:"12px 14px",borderRadius:12,background:"rgba(255,255,255,.02)"}}>
+                    <div style={{fontSize:10,color:"#3d5a6a",textTransform:"uppercase",marginBottom:4}}>Hash fichier 2</div>
+                    <div className="mono" style={{fontSize:11,color:"#7a9aaa",wordBreak:"break-all"}}>{hcResult.h2}...</div>
+                    <div style={{fontSize:11,color:"#3d5a6a",marginTop:4}}>{hcResult.n2} — {hcResult.s2}</div></div></div>
+                <div style={{textAlign:"center",padding:"16px 20px",borderRadius:14,background:hcResult.match?"rgba(251,113,133,.06)":"rgba(94,234,212,.06)",border:`1px solid ${hcResult.match?"rgba(251,113,133,.15)":"rgba(94,234,212,.15)"}`}}>
+                  <div style={{fontSize:28,marginBottom:6}}>{hcResult.match?"⚠️":"✅"}</div>
+                  <div style={{fontSize:16,fontWeight:700,color:hcResult.match?"#fb7185":"#5eead4"}}>{hcResult.match?"Hash identique — Doublon détectable":"Hash différent — Fichiers uniques"}</div>
+                  <div style={{fontSize:12,color:"#4a6a78",marginTop:4}}>{hcResult.match?"Ces fichiers seront détectés comme doublons par les plateformes.":"Ces fichiers passeront la vérification de hash sans problème."}</div></div>
+                <button className="btn btn-s" onClick={()=>{setHcFiles([null,null]);setHcResult(null)}} style={{width:"100%",marginTop:12}}>Réinitialiser</button></div>}
+            </div></section>
 
           {/* Features */}
           <section style={{maxWidth:1060,margin:"0 auto 70px",padding:"0 32px"}}>
@@ -281,7 +386,7 @@ export default function App(){
       <footer style={{padding:"18px 36px",borderTop:"1px solid rgba(255,255,255,.04)",textAlign:"center",position:"relative",zIndex:1}}>
         <div style={{maxWidth:1200,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{fontSize:11,color:"#1a2a33"}}>Veilora © 2026</div>
-          <div style={{display:"flex",gap:16}}><span style={{fontSize:11,color:"#2a4550",cursor:"pointer"}} onClick={()=>setPg("docs")}>Documentation</span><span style={{fontSize:11,color:"#2a4550",cursor:"pointer"}} onClick={()=>setPricing(true)}>Pricing</span></div>
+          <div style={{display:"flex",gap:16}}><span style={{fontSize:11,color:"#2a4550",cursor:"pointer"}} onClick={()=>setPg("docs")}>Documentation</span><span style={{fontSize:11,color:"#2a4550",cursor:"pointer"}} onClick={()=>setPg("changelog")}>Changelog</span><span style={{fontSize:11,color:"#2a4550",cursor:"pointer"}} onClick={()=>setPricing(true)}>Pricing</span></div>
         </div></footer></div>);
 
   function PricingModal(){return <div className="ov" onClick={()=>setPricing(false)} style={{zIndex:200}}><div onClick={e=>e.stopPropagation()} style={{maxWidth:800,width:"92%",animation:"fadeIn .2s ease"}}>
@@ -344,7 +449,7 @@ export default function App(){
         {panel==="history"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>📋 Historique</h3>{!hist.length&&<div style={{color:"#3d5a6a",fontSize:13}}>Aucun traitement</div>}{hist.map((h,i)=><div key={i} style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:5}}><div style={{fontSize:13,fontWeight:600,color:"#ddd"}}>{h.files} fichiers → {h.versions}v • {h.time}</div><div style={{fontSize:10,color:"#3d5a6a"}}>{h.date}</div></div>)}</>}
         <button className="btn btn-s" onClick={()=>setPanel(null)} style={{marginTop:12,width:"100%"}}>Fermer</button></div></div>)}
 
-      {/* APP HEADER — compact */}
+      {/* APP HEADER */}
       <header style={{padding:"10px 20px",borderBottom:"1px solid rgba(255,255,255,.05)",flexShrink:0,position:"relative",zIndex:2}}>
         <div className="app-header" style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setPg("landing")}>
@@ -360,10 +465,8 @@ export default function App(){
             {files.length>0&&<button className="btn btn-s" style={{padding:"5px 10px",fontSize:11}} onClick={clr}>✕ Clear</button>}
           </div></div></header>
 
-      {/* APP BODY — fills remaining space */}
+      {/* APP BODY */}
       <main style={{flex:1,overflow:"auto",padding:"16px 24px",position:"relative",zIndex:1}}>
-
-        {/* Mode + Presets */}
         <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:4,borderRadius:12,maxWidth:260,margin:"0 auto 14px",border:"1px solid rgba(255,255,255,.05)"}}>
           {[["photo","📸 Photos"],["video","🎬 Vidéos"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"9px 0",fontSize:13,fontWeight:700,borderRadius:9,background:mode===m?"linear-gradient(135deg,#0d9488,#14b8a6)":"transparent",color:mode===m?"#021a16":"#4a6a78"}}>{l}</button>)}
         </div>
@@ -377,14 +480,11 @@ export default function App(){
           <button className={`btn ${vw==="config"?"btn-p":"btn-s"}`} style={{padding:"8px 18px",fontSize:12}} onClick={()=>setVw("config")}>⚙️ Config</button>
           <button className={`btn ${vw==="results"?"btn-p":"btn-s"}`} style={{padding:"8px 18px",fontSize:12}} onClick={()=>setVw("results")}>✅ Résultats ({totV})</button></div>}
 
-        {/* CONFIG */}
         {vw==="config"&&(<div className="app-layout" style={{display:"grid",gridTemplateColumns:"320px 1fr",gap:18,animation:"fadeIn .2s ease"}}>
           <aside className="app-side" style={{display:"flex",flexDirection:"column",gap:10}}>
-            {/* Humanizer */}
             <div className="card" style={{padding:"16px 18px"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><span style={{fontSize:14,fontWeight:700,color:"#e8f4f8"}}>🎚️ Humanizer</span><span style={{fontSize:13,fontWeight:700,color:iC}}>{iL}</span></div>
               <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)}/></div>
-            {/* Versions */}
             <div className="card" style={{padding:"14px 18px"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
                 <span style={{fontSize:14,fontWeight:700,color:"#e0e8f0"}}>Versions</span>
@@ -393,15 +493,12 @@ export default function App(){
                   <div key={ver} className="mono" style={{fontSize:28,fontWeight:700,color:"#5eead4",width:48,textAlign:"center"}}>{ver}</div>
                   <button className="cnt" onClick={()=>setVer(v=>Math.min(pro?100:5,v+1))}>+</button></div></div>
               <div style={{display:"flex",gap:3}}>{[1,5,10,20,50,100].map(n=><button key={n} className="btn btn-s" onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{flex:1,padding:"5px 0",fontSize:10,fontWeight:700,background:ver===n?"rgba(20,184,166,.12)":"rgba(255,255,255,.02)",color:ver===n?"#5eead4":"#4a6a78",opacity:!pro&&n>5?.35:1}}>{n}</button>)}</div></div>
-            {/* GPS */}
             {tf.location&&<div className="card" style={{padding:"14px 16px"}}>
               <div style={{fontSize:13,fontWeight:700,color:"#e0e8f0",marginBottom:8}}>📍 GPS Spoofing</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:4}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{opacity:!pro&&i>3?.35:1}}>{l.city}</button>)}</div></div>}
-            {/* Device */}
             {tf.metaTemplate&&<div className="card" style={{padding:"14px 16px"}}>
               <div style={{fontSize:13,fontWeight:700,color:"#e0e8f0",marginBottom:8}}>🧹 Fake Device</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:4}}>{MTPL.map((m,i)=><button key={m.id} className={`lb ${mtpl.id===m.id?"on":""}`} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{opacity:!pro&&i>2?.35:1}}>{m.name}</button>)}</div></div>}
-            {/* Transforms */}
             <div className="card" style={{padding:"12px 10px",flex:1}}>
               <div style={{display:"flex",justifyContent:"space-between",padding:"0 8px",marginBottom:6}}>
                 <span style={{fontSize:13,fontWeight:700,color:"#e0e8f0"}}>Transformations</span>
@@ -413,7 +510,6 @@ export default function App(){
           </aside>
 
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
-            {/* Drop */}
             <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}
               onClick={()=>{if(!ck())return;ir.current?.click()}} className="card"
               style={{padding:files.length?"32px 20px":"56px 20px",textAlign:"center",cursor:"pointer",borderColor:drag?"rgba(20,184,166,.3)":undefined,transition:"all .2s"}}>
@@ -422,12 +518,10 @@ export default function App(){
               <div className="mono" style={{fontSize:13,color:"#2a4a58"}}>{mode==="photo"?"JPG • PNG • WEBP":"MP4 • MOV • WEBM"}</div>
               <input ref={ir} type="file" multiple accept={mode==="photo"?"image/*":"video/*"} style={{display:"none"}} onChange={e=>{if(!ck())return;add(e.target.files)}}/></div>
 
-            {/* Stats */}
             {files.length>0&&<div className="stat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
               {[{l:"Fichiers",v:files.length,c:"#5eead4"},{l:"Versions",v:files.length*ver,c:"#a78bfa"},{l:"Taille",v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24"},{l:"Intensité",v:iL,c:iC}].map((s,i)=>(
                 <div key={i} className="card" style={{padding:"10px 12px"}}><div style={{fontSize:10,color:"#2a4a58",textTransform:"uppercase",letterSpacing:.8}}>{s.l}</div><div className="mono" style={{fontSize:20,fontWeight:700,color:s.c,marginTop:2}}>{s.v}</div></div>))}</div>}
 
-            {/* File list */}
             {files.length>0&&<div style={{flex:1,overflow:"auto"}}>{files.map((f,i)=>(
               <div key={f.id} className="row" style={{animation:`fadeIn ${.05+i*.02}s ease`}}>
                 {thumbs[f.id]?<img src={thumbs[f.id]} className="thumb"/>:<div className="thumb" style={{display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>🎬</div>}
@@ -435,13 +529,11 @@ export default function App(){
                   <div className="mono" style={{fontSize:12,color:"#3d5a6a"}}>{fb(f.size)} <span style={{color:"#5eead4"}}>→ ×{ver}</span></div></div>
                 <button className="btn btn-s" style={{padding:"4px 10px",fontSize:11,color:"#fb7185"}} onClick={()=>setFiles(p=>p.filter(x=>x.id!==f.id))}>✕</button></div>))}</div>}
 
-            {/* Process */}
             <button className="btn btn-p" onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:16,fontSize:16,borderRadius:14}}>
               {proc?"⏳ Traitement en cours...":`🔒 Traiter ${files.length||0} fichier${files.length>1?"s":""} → ${(files.length||0)*ver} versions`}</button>
             {wh.on&&<div style={{textAlign:"center",fontSize:12,color:"#14b8a6",marginTop:4}}>🔗 Webhook {wh.type} activé</div>}
           </div></div>)}
 
-        {/* RESULTS */}
         {vw==="results"&&(<div style={{animation:"fadeIn .2s ease"}}>
           {proc&&<div className="card" style={{padding:"48px 24px",textAlign:"center",marginBottom:16}}>
             <div style={{fontSize:32,marginBottom:12}}><span style={{display:"inline-block",animation:"spin 1s linear infinite"}}>⚙️</span></div>
