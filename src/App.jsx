@@ -140,7 +140,7 @@ export default function App(){
   const[prog,setProg]=useState({c:0,t:0,f:"",v:0});const[res,setRes]=useState([]);const[vw,setVw]=useState("config");
   const[drag,setDrag]=useState(false);const[thumbs,setThumbs]=useState({});const[preview,setPreview]=useState(null);
   const[dm,setDm]=useState("split");const[panel,setPanel]=useState(null);const[hist,setHist]=useState([]);
-  const[pricing,setPricing]=useState(false);const[auth,setAuth]=useState(null);
+  const[pricing,setPricing]=useState(false);const[auth,setAuth]=useState(null);const[pendingStripe,setPendingStripe]=useState(null);
   const[wh,setWh]=useState({discord:"",telegram:"",on:false,type:"discord"});
   const[faqO,setFaqO]=useState(null);const[baSlider,setBaSlider]=useState(50);
   const[hcFiles,setHcFiles]=useState([null,null]);const[hcResult,setHcResult]=useState(null);const[hcLoading,setHcLoading]=useState(false);
@@ -187,6 +187,7 @@ export default function App(){
   const hcLoad=async(idx,e)=>{const file=e.target.files?.[0];if(!file)return;const nf=[...hcFiles];nf[idx]=file;setHcFiles(nf);
     if(nf[0]&&nf[1]){setHcLoading(true);try{const[h1,h2]=await Promise.all([pH(nf[0]),pH(nf[1])]);
       const match=h1===h2;setHcResult({h1:h1.slice(0,32),h2:h2.slice(0,32),match,s1:fb(nf[0].size),s2:fb(nf[1].size)})}catch(e){setHcResult(null)}setHcLoading(false)}};
+  const goStripe=(url)=>{if(user){window.open(url,"_blank")}else{setPendingStripe(url);setAuth("register")}};
 
   const FEATURES=[
     {t:"Photos & Vidéos",d:"Traitement batch de JPG, PNG, WEBP, MP4, MOV. Génère autant de versions uniques que nécessaire.",ic:"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"},
@@ -277,7 +278,7 @@ export default function App(){
     <div style={{minHeight:"100vh",background:"#050809",color:"#94a3b8",overflowX:"hidden"}}><style>{S}</style>
       <div style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none",background:"radial-gradient(ellipse 80% 50% at 50% -20%,rgba(13,148,136,.08),transparent 70%)"}}/>
       {pricing&&<PricingModal close={()=>setPricing(false)}/>}
-      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onSuccess={()=>setAuth(null)}/>}
+      {auth&&<AuthModal mode={auth} onClose={()=>{setAuth(null);setPendingStripe(null)}} onSuccess={()=>{setAuth(null);if(pendingStripe){window.open(pendingStripe,"_blank");setPendingStripe(null)}}}/>}
 
       <nav className="nav-bar" style={{padding:"16px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:2,maxWidth:1200,margin:"0 auto"}}>
         <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setPg("landing")}>
@@ -324,7 +325,7 @@ export default function App(){
             <p className="hero-sub" style={{fontSize:16,color:"#475569",maxWidth:520,margin:"0 auto 32px",lineHeight:1.7}}>Veilora modifie les métadonnées, le GPS, le bruit visuel, le zoom et bien plus — pour que chaque export soit unique.</p>
             <div className="hero-btns" style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"15px 32px",fontSize:15,borderRadius:14}}>→ Commencer — 7.99€/mois</button>
-              <button className="btn" onClick={()=>window.open(STRIPE.lifetime,"_blank")} style={{padding:"15px 28px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button>
+              <button className="btn" onClick={()=>goStripe(STRIPE.lifetime)} style={{padding:"15px 28px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button>
               <button className="btn btn-s" onClick={()=>setAuth("login")} style={{padding:"15px 22px",fontSize:14,borderRadius:14}}>→ Se connecter</button></div>
             <div style={{marginTop:14,fontSize:12,color:"#334155"}}>3 fichiers/jour gratuits • Aucune carte requise</div></section>
 
@@ -402,10 +403,10 @@ export default function App(){
                 <button className="btn btn-s" style={{width:"100%",marginTop:18,padding:12}} onClick={()=>setAuth("register")}>Commencer</button></div>
               <div className="prc ft"><div style={{fontSize:17,fontWeight:700,color:"#2dd4bf",marginBottom:4}}>Pro</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>7.99€<span style={{fontSize:13,color:"#64748b",fontWeight:500}}>/mois</span></div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Sans engagement</div>
                 {["Fichiers illimités","100 versions","13 transformations","GPS + Fake Device","Webhooks Discord/TG"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
-                <button className="btn btn-p" style={{width:"100%",marginTop:18,padding:12}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner</button></div>
+                <button className="btn btn-p" style={{width:"100%",marginTop:18,padding:12}} onClick={()=>goStripe(STRIPE.monthly)}>S'abonner</button></div>
               <div className="prc lt"><div style={{fontSize:17,fontWeight:700,color:"#06b6d4",marginBottom:4}}>À Vie</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>44.99€</div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Paiement unique</div>
                 {["Tout le Pro","Pour toujours","Mises à jour incluses","Support prioritaire"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#06b6d4"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
-                <button className="btn" style={{width:"100%",marginTop:18,padding:12,borderRadius:12,background:"rgba(6,182,212,.1)",color:"#22d3ee",fontWeight:700,fontSize:13,border:"1px solid rgba(6,182,212,.2)",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter à vie</button></div></div>
+                <button className="btn" style={{width:"100%",marginTop:18,padding:12,borderRadius:12,background:"rgba(6,182,212,.1)",color:"#22d3ee",fontWeight:700,fontSize:13,border:"1px solid rgba(6,182,212,.2)",cursor:"pointer"}} onClick={()=>goStripe(STRIPE.lifetime)}>Acheter à vie</button></div></div>
             <div style={{textAlign:"center",marginTop:14,fontSize:12,color:"#334155"}}>🔒 Paiement sécurisé par Stripe</div></section>
 
           {/* TESTIMONIALS */}
@@ -425,7 +426,7 @@ export default function App(){
             <p style={{fontSize:14,color:"#475569",marginBottom:24}}>Créez votre compte et accédez à Veilora en quelques secondes.</p>
             <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"14px 28px",fontSize:15,borderRadius:14}}>→ Commencer gratuitement</button>
-              <button className="btn" onClick={()=>window.open(STRIPE.lifetime,"_blank")} style={{padding:"14px 24px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button></div></section>
+              <button className="btn" onClick={()=>goStripe(STRIPE.lifetime)} style={{padding:"14px 24px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button></div></section>
         </main>)}
       <footer style={{padding:"20px 28px",borderTop:"1px solid rgba(255,255,255,.04)",textAlign:"center",position:"relative",zIndex:1}}>
         <div style={{fontSize:11,color:"#1e293b"}}>Veilora © 2026 — Par Alkyma Agency</div></footer></div>);
@@ -436,9 +437,9 @@ export default function App(){
       <div className="prc"><div style={{fontSize:16,fontWeight:700,color:"#e2e8f0"}}>Free</div><div style={{fontSize:32,fontWeight:800,color:"#fff"}}>0€</div>
         <button className="btn btn-s" style={{width:"100%",marginTop:14,padding:12}} onClick={close}>Continuer Free</button></div>
       <div className="prc ft"><div style={{fontSize:16,fontWeight:700,color:"#2dd4bf"}}>Pro</div><div style={{fontSize:32,fontWeight:800,color:"#fff"}}>7.99€<span style={{fontSize:12,color:"#64748b"}}>/mois</span></div>
-        <button className="btn btn-p" style={{width:"100%",marginTop:14,padding:12}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner</button></div>
+        <button className="btn btn-p" style={{width:"100%",marginTop:14,padding:12}} onClick={()=>goStripe(STRIPE.monthly)}>S'abonner</button></div>
       <div className="prc lt"><div style={{fontSize:16,fontWeight:700,color:"#06b6d4"}}>À Vie</div><div style={{fontSize:32,fontWeight:800,color:"#fff"}}>44.99€</div>
-        <button className="btn" style={{width:"100%",marginTop:14,padding:12,borderRadius:12,background:"rgba(6,182,212,.1)",color:"#22d3ee",fontWeight:700,fontSize:13,border:"1px solid rgba(6,182,212,.2)",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter</button></div></div>
+        <button className="btn" style={{width:"100%",marginTop:14,padding:12,borderRadius:12,background:"rgba(6,182,212,.1)",color:"#22d3ee",fontWeight:700,fontSize:13,border:"1px solid rgba(6,182,212,.2)",cursor:"pointer"}} onClick={()=>goStripe(STRIPE.lifetime)}>Acheter</button></div></div>
     <button className="btn btn-s" onClick={close} style={{width:"100%",marginTop:14}}>Fermer</button></div></div>}
 
   /* ===== APP ===== */
@@ -446,7 +447,7 @@ export default function App(){
     <div style={{minHeight:"100vh",height:"100vh",display:"flex",flexDirection:"column",background:"#050809",color:"#94a3b8",overflowX:"hidden"}}><style>{S}</style>
       <div style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none",background:"radial-gradient(ellipse 60% 40% at 50% 0%,rgba(13,148,136,.04),transparent)"}}/>
       {pricing&&<PricingModal close={()=>setPricing(false)}/>}
-      {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onSuccess={()=>setAuth(null)}/>}
+      {auth&&<AuthModal mode={auth} onClose={()=>{setAuth(null);setPendingStripe(null)}} onSuccess={()=>{setAuth(null);if(pendingStripe){window.open(pendingStripe,"_blank");setPendingStripe(null)}}}/>}
       {preview&&(<div className="ov" onClick={()=>setPreview(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:700,width:"100%"}}>
         <div style={{display:"flex",gap:6,marginBottom:12,justifyContent:"center"}}>{["split","blink","overlay"].map(m=><button key={m} className="btn btn-s" onClick={()=>setDm(m)} style={{padding:"6px 14px",fontSize:11,background:dm===m?"rgba(13,148,136,.1)":"rgba(255,255,255,.03)",color:dm===m?"#2dd4bf":"#64748b"}}>{m}</button>)}</div>
         {dm==="split"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}><div>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",borderRadius:12}}/>}</div><div>{preview.thumb&&<img src={preview.thumb} style={{width:"100%",borderRadius:12}}/>}</div></div>}
