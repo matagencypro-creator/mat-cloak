@@ -1,8 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-/* VEILORA v3.1 — Mobile Fix + Auth Fix */
-
 const supabase = createClient(
   "https://lutwwnjizgkdnmvkfoth.supabase.co",
   "sb_publishable_X5Q91rqekOhd6uiniPE2rg_LiW5cKyI"
@@ -27,6 +25,7 @@ const MTPL=[
   {id:"ig",name:"Export IG"},{id:"strip",name:"Strip tout"},
 ];
 const LUTS=[{r:3,g:1,b:-3,t:3,c:2},{r:-2,g:1,b:2,t:-3,c:1},{r:2,g:0,b:-1,t:1,c:-3},{r:5,g:2,b:-3,t:5,c:1},{r:1,g:-1,b:1,t:0,c:-4}];
+
 const PRESETS=[
   {id:"ig",name:"Instagram",icon:"📸",ver:12,int:.5},{id:"reddit",name:"Reddit",icon:"🟠",ver:8,int:.5},
   {id:"tiktok",name:"TikTok",icon:"🎵",ver:5,int:.4},
@@ -42,28 +41,33 @@ const TF={
 const TFD=Object.fromEntries(Object.keys(TF).map(k=>[k,true]));
 
 const TESTI=[
-  {n:"Lucas M.",r:"Agency Owner",a:"🧑‍💼",t:"On poste sur 40 comptes IG sans ban. Veilora a tout changé."},
-  {n:"Sarah K.",r:"Content Manager",a:"👩‍💻",t:"Le Humanizer c'est génial. Le workflow est parfait."},
-  {n:"Marc D.",r:"Growth Hacker",a:"🧔",t:"J'ai testé tous les outils. Veilora a plus de transformations."},
+  {n:"Lucas M.",r:"Agency Owner",a:"🧑‍💼",t:"On poste sur 40 comptes IG sans ban. Avant on perdait 2-3 comptes par semaine."},
+  {n:"Sarah K.",r:"Content Manager",a:"👩‍💻",t:"Le Humanizer c'est génial. Le workflow est parfait pour notre équipe."},
+  {n:"Marc D.",r:"Growth Hacker",a:"🧔",t:"J'ai testé tous les outils du marché. Veilora est de loin le plus complet."},
   {n:"Emma R.",r:"Social Media",a:"👩",t:"GPS spoofing + fake device = zéro détection depuis 3 mois."},
-  {n:"Thomas B.",r:"Freelance",a:"👨‍🎨",t:"Le plan à vie à 44.99€ c'est un no-brainer."},
-  {n:"Julie P.",r:"Agency Co-founder",a:"👩‍🦰",t:"La preview before/after m'a convaincue. Visuellement identique."},
+  {n:"Thomas B.",r:"Freelance",a:"👨‍🎨",t:"Le plan à vie c'est un no-brainer. L'envoi auto Discord me fait gagner 1h/jour."},
+  {n:"Julie P.",r:"Agency Co-founder",a:"👩‍🦰",t:"Visuellement identique, techniquement différent. Exactement ce qu'il nous fallait."},
+];
+
+const GUIDE=[
+  {title:"1. Crée ton compte",desc:"Inscris-toi en 10 secondes avec ton email. Aucune carte bancaire requise pour le plan gratuit. Tu as immédiatement accès à 3 fichiers par jour.",icon:"M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"},
+  {title:"2. Choisis ton preset",desc:"Sélectionne Instagram, TikTok, Reddit, Twitter ou Custom. Chaque preset optimise automatiquement les transformations pour la plateforme cible.",icon:"M4 6h16M4 10h16M4 14h16M4 18h16"},
+  {title:"3. Upload tes fichiers",desc:"Drag & drop tes photos ou vidéos. Formats supportés : JPG, PNG, WEBP, MP4, MOV, WEBM. Tout est traité localement dans ton navigateur — rien n'est uploadé.",icon:"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"},
+  {title:"4. Règle le Humanizer",desc:"Le curseur contrôle l'intensité de toutes les transformations. Ultra léger = qualité maximale. Agressif = sécurité maximale pour poster sur beaucoup de comptes.",icon:"M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"},
+  {title:"5. Lance le traitement",desc:"Clique sur Traiter. Veilora génère jusqu'à 100 versions uniques par fichier. Chaque version a des pixels, métadonnées et hash différents.",icon:"M13 10V3L4 14h7v7l9-11h-7z"},
+  {title:"6. Vérifie avec Visual Diff",desc:"Compare l'original et les versions en mode Split, Blink ou Overlay. Le Similarity Score te prouve que chaque version est techniquement unique.",icon:"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"},
+  {title:"7. Télécharge & partage",desc:"Download toutes les versions en un clic ou envoie-les automatiquement sur Discord/Telegram via webhook. Tes fichiers sont prêts à poster.",icon:"M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"},
 ];
 
 const FAQ=[
-  {q:"C'est quoi Veilora ?",a:"Veilora randomise tes photos et vidéos pour que les plateformes ne les détectent pas comme doublons."},
-  {q:"Comment les algorithmes détectent les doublons ?",a:"3 méthodes : hash SHA-256, hash perceptuel pHash, métadonnées EXIF. Veilora modifie les 3."},
-  {q:"C'est vraiment indétectable ?",a:"Les micro-modifications sont imperceptibles mais suffisantes pour générer un hash différent."},
-  {q:"Mes fichiers sont uploadés ?",a:"Non. Traitement 100% local dans ton navigateur. Aucun fichier ne quitte ton appareil."},
-  {q:"Le curseur Humanizer ?",a:"Il contrôle l'intensité de toutes les transformations."},
-  {q:"Free vs Pro ?",a:"Free : 3 fichiers/jour, 5 versions. Pro (7.99€/mois ou 44.99€ à vie) : illimité, 100 versions, 13 transformations."},
-];
-
-const CHANGELOG=[
-  {v:"3.1",d:"20 mai 2026",items:["Fix mobile responsive","Fix formulaire inscription","Optimisation performances"]},
-  {v:"3.0",d:"20 mai 2026",items:["Backend Supabase","Vérification Pro serveur","Limite fichiers/jour serveur"]},
-  {v:"2.0",d:"12 mai 2026",items:["Refonte interface","22 GPS","Webhook Telegram","Stripe"]},
-  {v:"1.0",d:"15 avril 2026",items:["Lancement","13 transformations","Visual Diff","Humanizer"]},
+  {q:"C'est quoi Veilora ?",a:"Veilora est un outil qui randomise tes photos et vidéos à chaque export. Il modifie les pixels, les métadonnées EXIF, le hash SHA-256, les coordonnées GPS et les infos device. Résultat : chaque version est techniquement unique et indétectable comme doublon par les algorithmes des réseaux sociaux."},
+  {q:"Comment les plateformes détectent les doublons ?",a:"Les réseaux sociaux utilisent 3 méthodes principales : le hash SHA-256 (comparaison bit à bit du fichier), le hash perceptuel pHash (analyse de la structure visuelle), et les métadonnées EXIF (appareil, date, GPS). Veilora modifie les 3 couches simultanément pour rendre chaque fichier unique."},
+  {q:"Mes fichiers sont uploadés sur un serveur ?",a:"Non, jamais. Tout le traitement est 100% local dans ton navigateur grâce à l'API Canvas et les Web Workers. Aucun fichier ne quitte ton appareil. C'est plus rapide ET plus sécurisé qu'un traitement serveur."},
+  {q:"À quoi sert le curseur Humanizer ?",a:"Le Humanizer contrôle l'intensité de toutes les transformations en même temps. À gauche (Ultra léger) : modifications minimales, qualité maximale — idéal pour 2-3 comptes. À droite (Maximum) : modifications agressives pour poster sur des dizaines de comptes sans risque."},
+  {q:"C'est vraiment indétectable ?",a:"Les micro-modifications sont imperceptibles à l'oeil humain mais suffisantes pour générer un hash complètement différent. Le mode Visual Diff te permet de vérifier toi-même : original et version côte à côte, impossible de voir la différence."},
+  {q:"Free vs Pro, quelle différence ?",a:"Free : 3 fichiers/jour, 5 versions max, 4 transformations de base. Pro (7.99€/mois ou 44.99€ à vie) : fichiers illimités, 100 versions par fichier, 13 transformations incluant AI Noise, LUT, Perspective Warp, GPS Spoofing, Fake Device, et webhooks Discord/Telegram."},
+  {q:"Le webhook Discord/Telegram, comment ça marche ?",a:"Dans l'app, clique sur l'icône Webhooks. Colle l'URL de ton webhook Discord ou ton Chat ID Telegram. Active le toggle. Après chaque traitement, toutes les versions sont automatiquement envoyées sur ton channel. Zéro action manuelle."},
+  {q:"Je peux traiter des vidéos ?",a:"Oui. Veilora supporte les formats MP4, MOV et WEBM. Les vidéos sont renommées avec un nom aléatoire et les métadonnées sont modifiées. Le traitement pixel par pixel n'est pas disponible pour les vidéos (limitation navigateur)."},
 ];
 
 function processImg(file,tf,vi,I){return new Promise(res=>{const img=new Image();img.onload=()=>{const s=vi+Math.random();const r=(a,b)=>a+Math.abs(Math.sin(s*(b+1)))*(b-a);
@@ -89,136 +93,76 @@ const STRIPE={monthly:"https://buy.stripe.com/6oU9AT4Zj4gf1XA8tr8Vi00",lifetime:
 const FREE_LIMIT=3;
 async function sendWH(url,blob,name,type){if(!url)return;try{const fd=new FormData();fd.append("file",blob,name);if(type==="discord")fd.append("payload_json",JSON.stringify({content:`🔒 **Veilora** — ${name}`}));await fetch(url,{method:"POST",body:fd})}catch(e){}}
 
-function useCounter(target,duration=1800){const[v,setV]=useState(0);useEffect(()=>{let start=null;const step=ts=>{if(!start)start=ts;const p=Math.min((ts-start)/duration,1);setV(Math.floor(p*target));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)},[target,duration]);return v}
+function useCounter(target,dur=2000){const[v,setV]=useState(0);useEffect(()=>{let s=null;const step=ts=>{if(!s)s=ts;const p=Math.min((ts-s)/dur,1);setV(Math.floor(p*target));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)},[target,dur]);return v}
+
+const IC=({d,size=20,color="currentColor"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d={d}/></svg>;
 
 function AuthModal({mode:initMode,onClose,onSuccess}){
-  const emailRef=useRef(null);
-  const passRef=useRef(null);
-  const nameRef=useRef(null);
-  const[err,setErr]=useState("");
-  const[loading,setLoading]=useState(false);
-  const[mode,setMode]=useState(initMode);
-
+  const emailRef=useRef(null);const passRef=useRef(null);const nameRef=useRef(null);
+  const[err,setErr]=useState("");const[loading,setLoading]=useState(false);const[mode,setMode]=useState(initMode);
   const doRegister=async()=>{
-    const email=emailRef.current?.value||"";
-    const pass=passRef.current?.value||"";
-    const name=nameRef.current?.value||"";
+    const email=emailRef.current?.value||"";const pass=passRef.current?.value||"";const name=nameRef.current?.value||"";
     setErr("");setLoading(true);
     const{data,error}=await supabase.auth.signUp({email,password:pass,options:{data:{name:name||email.split("@")[0]}}});
-    setLoading(false);
-    if(error){setErr(error.message);return}
-    if(data.user&&!data.session){setErr("✅ Vérifie ton email pour confirmer ton compte !");return}
-    onSuccess();
-  };
+    setLoading(false);if(error){setErr(error.message);return}
+    if(data.user&&!data.session){setErr("✅ Vérifie ton email !");return}onSuccess();};
   const doLogin=async()=>{
-    const email=emailRef.current?.value||"";
-    const pass=passRef.current?.value||"";
+    const email=emailRef.current?.value||"";const pass=passRef.current?.value||"";
     setErr("");setLoading(true);
     const{data,error}=await supabase.auth.signInWithPassword({email,password:pass});
-    setLoading(false);
-    if(error){setErr(error.message);return}
-    onSuccess();
-  };
-
-  const IS={width:"100%",padding:"14px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,.12)",background:"rgba(255,255,255,.05)",color:"#e0eaf0",fontSize:"16px",outline:"none",fontFamily:"inherit",WebkitAppearance:"none",boxSizing:"border-box"};
-
+    setLoading(false);if(error){setErr(error.message);return}onSuccess();};
+  const IS={width:"100%",padding:"14px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,.1)",background:"rgba(255,255,255,.04)",color:"#e0eaf0",fontSize:"16px",outline:"none",fontFamily:"inherit",WebkitAppearance:"none",boxSizing:"border-box"};
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",backdropFilter:"blur(16px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16,overflowY:"auto"}} onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
-      <div style={{maxWidth:400,width:"100%",background:"#0c1216",border:"1px solid rgba(255,255,255,.1)",borderRadius:20,padding:"32px 24px",position:"relative"}}>
-        <button onClick={onClose} style={{position:"absolute",top:12,right:12,background:"rgba(255,255,255,.08)",border:"none",color:"#fff",width:32,height:32,borderRadius:"50%",fontSize:16,cursor:"pointer"}}>&#x2715;</button>
-        <div style={{textAlign:"center",marginBottom:20}}>
-          <div style={{width:48,height:48,borderRadius:14,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:12,overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:6}} alt="V"/></div>
-          <div style={{fontSize:20,fontWeight:800,color:"#fff"}}>{mode==="register"?"Créer un compte":"Connexion"}</div>
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          {mode==="register"&&<input key="auth-name" ref={nameRef} style={IS} placeholder="Ton prénom" defaultValue="" autoComplete="given-name" autoCapitalize="words" autoCorrect="off" spellCheck={false} enterKeyHint="next"/>}
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",backdropFilter:"blur(20px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16,overflowY:"auto"}} onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
+      <div style={{maxWidth:420,width:"100%",background:"linear-gradient(180deg,#0a1014,#080c10)",border:"1px solid rgba(255,255,255,.08)",borderRadius:24,padding:"36px 28px",position:"relative"}}>
+        <button onClick={onClose} style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,.06)",border:"none",color:"#667",width:32,height:32,borderRadius:"50%",fontSize:14,cursor:"pointer"}}>✕</button>
+        <div style={{textAlign:"center",marginBottom:24}}>
+          <div style={{width:52,height:52,borderRadius:16,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:14,overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain"}} alt="V"/></div>
+          <div style={{fontSize:22,fontWeight:800,color:"#fff",letterSpacing:"-.5px"}}>{mode==="register"?"Créer un compte":"Connexion"}</div>
+          <div style={{fontSize:13,color:"#4a5568",marginTop:4}}>{mode==="register"?"Commence gratuitement":"Content de te revoir"}</div></div>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {mode==="register"&&<input key="auth-name" ref={nameRef} style={IS} placeholder="Prénom" defaultValue="" autoComplete="given-name" autoCapitalize="words" autoCorrect="off" spellCheck={false} enterKeyHint="next"/>}
           <input key="auth-email" ref={emailRef} style={IS} type="email" inputMode="email" placeholder="Email" defaultValue="" autoComplete="email" autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="next"/>
-          <input key="auth-pass" ref={passRef} style={IS} type="password" placeholder="Mot de passe (min 6)" defaultValue="" autoComplete={mode==="register"?"new-password":"current-password"} autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done" onKeyDown={e=>{if(e.key==="Enter"){mode==="register"?doRegister():doLogin()}}}/>
-          {err&&<div style={{color:err.startsWith("✅")?"#5eead4":"#fb7185",fontSize:13,textAlign:"center",padding:8,borderRadius:8,background:err.startsWith("✅")?"rgba(94,234,212,.06)":"rgba(251,113,133,.06)"}}>{err}</div>}
-          <button onClick={mode==="register"?doRegister:doLogin} disabled={loading} style={{width:"100%",padding:14,borderRadius:12,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontSize:15,fontWeight:700,border:"none",cursor:"pointer",opacity:loading?.5:1}}>
-            {loading?"⏳ Chargement...":mode==="register"?"Créer mon compte":"Se connecter"}</button>
-        </div>
-        <div style={{textAlign:"center",marginTop:16}}>
-          {mode==="login"?<span style={{fontSize:13,color:"#4a6a78"}}>Pas de compte ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>{setMode("register");setErr("")}}>S&#39;inscrire</span></span>:
-          <span style={{fontSize:13,color:"#4a6a78"}}>Déjà inscrit ? <span style={{color:"#5eead4",cursor:"pointer",fontWeight:600}} onClick={()=>{setMode("login");setErr("")}}>Connexion</span></span>}
-        </div>
-      </div>
-    </div>
-  );
+          <input key="auth-pass" ref={passRef} style={IS} type="password" placeholder="Mot de passe (min 6 caractères)" defaultValue="" autoComplete={mode==="register"?"new-password":"current-password"} autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done" onKeyDown={e=>{if(e.key==="Enter"){mode==="register"?doRegister():doLogin()}}}/>
+          {err&&<div style={{color:err.startsWith("✅")?"#5eead4":"#f87171",fontSize:13,textAlign:"center",padding:"10px 12px",borderRadius:10,background:err.startsWith("✅")?"rgba(94,234,212,.06)":"rgba(248,113,113,.06)"}}>{err}</div>}
+          <button onClick={mode==="register"?doRegister:doLogin} disabled={loading} style={{width:"100%",padding:15,borderRadius:12,background:"linear-gradient(135deg,#0d9488,#06b6d4)",color:"#fff",fontSize:15,fontWeight:700,border:"none",cursor:"pointer",opacity:loading?.5:1,letterSpacing:"-.2px",marginTop:4}}>
+            {loading?"⏳":mode==="register"?"Créer mon compte":"Se connecter"}</button></div>
+        <div style={{textAlign:"center",marginTop:18}}>
+          {mode==="login"?<span style={{fontSize:13,color:"#4a5568"}}>Pas de compte ? <span style={{color:"#2dd4bf",cursor:"pointer",fontWeight:600}} onClick={()=>{setMode("register");setErr("")}}>S'inscrire</span></span>:
+          <span style={{fontSize:13,color:"#4a5568"}}>Déjà inscrit ? <span style={{color:"#2dd4bf",cursor:"pointer",fontWeight:600}} onClick={()=>{setMode("login");setErr("")}}>Connexion</span></span>}</div></div></div>);
 }
 
 export default function App(){
   const[pg,setPg]=useState("landing");
-  const[mode,setMode]=useState("photo");
-  const[files,setFiles]=useState([]);
-  const[ver,setVer]=useState(5);
-  const[tf,setTf2]=useState({...TFD});
-  const[loc,setLoc]=useState(LOCS[0]);
-  const[mtpl,setMtpl]=useState(MTPL[0]);
-  const[preset,setPreset]=useState(null);
-  const[inten,setInten]=useState(.5);
-  const[proc,setProc]=useState(false);
-  const[prog,setProg]=useState({c:0,t:0,f:"",v:0});
-  const[res,setRes]=useState([]);
-  const[vw,setVw]=useState("config");
-  const[drag,setDrag]=useState(false);
-  const[thumbs,setThumbs]=useState({});
-  const[preview,setPreview]=useState(null);
-  const[dm,setDm]=useState("split");
-  const[panel,setPanel]=useState(null);
-  const[hist,setHist]=useState([]);
-  const[pricing,setPricing]=useState(false);
-  const[auth,setAuth]=useState(null);
+  const[mode,setMode]=useState("photo");const[files,setFiles]=useState([]);const[ver,setVer]=useState(5);
+  const[tf,setTf2]=useState({...TFD});const[loc,setLoc]=useState(LOCS[0]);const[mtpl,setMtpl]=useState(MTPL[0]);
+  const[preset,setPreset]=useState(null);const[inten,setInten]=useState(.5);const[proc,setProc]=useState(false);
+  const[prog,setProg]=useState({c:0,t:0,f:"",v:0});const[res,setRes]=useState([]);const[vw,setVw]=useState("config");
+  const[drag,setDrag]=useState(false);const[thumbs,setThumbs]=useState({});const[preview,setPreview]=useState(null);
+  const[dm,setDm]=useState("split");const[panel,setPanel]=useState(null);const[hist,setHist]=useState([]);
+  const[pricing,setPricing]=useState(false);const[auth,setAuth]=useState(null);
   const[wh,setWh]=useState({discord:"",telegram:"",on:false,type:"discord"});
-  const[faqO,setFaqO]=useState(null);
-  const[baSlider,setBaSlider]=useState(50);
-  const[hcFiles,setHcFiles]=useState([null,null]);
-  const[hcResult,setHcResult]=useState(null);
-  const[hcLoading,setHcLoading]=useState(false);
-  const[user,setUser]=useState(null);
-  const[profile,setProfile]=useState(null);
-  const[pro,setPro]=useState(false);
-  const[du,setDu]=useState(0);
-  const ir=useRef();
-  const hcRef1=useRef();
-  const hcRef2=useRef();
-
-  const cFiles=useCounter(142847);
-  const cVersions=useCounter(1284920);
-  const cUsers=useCounter(3847);
+  const[faqO,setFaqO]=useState(null);const[baSlider,setBaSlider]=useState(50);
+  const[hcFiles,setHcFiles]=useState([null,null]);const[hcResult,setHcResult]=useState(null);const[hcLoading,setHcLoading]=useState(false);
+  const[user,setUser]=useState(null);const[profile,setProfile]=useState(null);const[pro,setPro]=useState(false);const[du,setDu]=useState(0);
+  const ir=useRef();const hcRef1=useRef();const hcRef2=useRef();
+  const cFiles=useCounter(142847);const cVersions=useCounter(1284920);const cUsers=useCounter(3847);
 
   useEffect(()=>{
-    supabase.auth.getSession().then(({data:{session}})=>{
-      if(session?.user){setUser(session.user);loadProfile(session.user.id)}
-    });
+    supabase.auth.getSession().then(({data:{session}})=>{if(session?.user){setUser(session.user);loadProfile(session.user.id)}});
     const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
       if(session?.user){setUser(session.user);loadProfile(session.user.id)}
-      else{setUser(null);setProfile(null);setPro(false);setDu(0)}
-    });
-    return()=>subscription.unsubscribe();
-  },[]);
+      else{setUser(null);setProfile(null);setPro(false);setDu(0)}});
+    return()=>subscription.unsubscribe();},[]);
 
-  const loadProfile=async(uid)=>{
-    const{data}=await supabase.from("profiles").select("*").eq("id",uid).single();
-    if(data){
-      setProfile(data);setPro(data.is_pro||false);
-      const today=new Date().toISOString().slice(0,10);
+  const loadProfile=async(uid)=>{const{data}=await supabase.from("profiles").select("*").eq("id",uid).single();
+    if(data){setProfile(data);setPro(data.is_pro||false);const today=new Date().toISOString().slice(0,10);
       if(data.last_usage_date!==today){setDu(0);await supabase.from("profiles").update({daily_usage:0,last_usage_date:today}).eq("id",uid)}
-      else{setDu(data.daily_usage||0)}
-    }
-  };
-  const incrementUsage=async(count)=>{
-    if(!user)return;const newDu=du+count;setDu(newDu);
-    const today=new Date().toISOString().slice(0,10);
-    await supabase.from("profiles").update({daily_usage:newDu,last_usage_date:today}).eq("id",user.id);
-  };
+      else{setDu(data.daily_usage||0)}}};
+  const incrementUsage=async(count)=>{if(!user)return;const newDu=du+count;setDu(newDu);const today=new Date().toISOString().slice(0,10);
+    await supabase.from("profiles").update({daily_usage:newDu,last_usage_date:today}).eq("id",user.id);};
   const doLogout=async()=>{await supabase.auth.signOut();setUser(null);setProfile(null);setPro(false);setDu(0)};
-  const ck=()=>{
-    if(!user){setAuth("login");return false}
-    if(pro)return true;
-    if(du>=FREE_LIMIT){setPricing(true);return false}
-    return true;
-  };
+  const ck=()=>{if(!user){setAuth("login");return false}if(pro)return true;if(du>=FREE_LIMIT){setPricing(true);return false}return true;};
   const add=useCallback(nf=>{Array.from(nf).filter(f=>mode==="photo"?f.type.startsWith("image/"):f.type.startsWith("video/")).forEach(f=>{const id=crypto.randomUUID?.() || Math.random().toString(36).slice(2);if(f.type.startsWith("image/"))setThumbs(p=>({...p,[id]:URL.createObjectURL(f)}));setFiles(p=>[...p,{file:f,id,name:f.name,size:f.size,type:f.type}])})},[mode]);
   const applyP=p=>{setPreset(p);if(p.id!=="custom"){setVer(p.ver);setInten(p.int)}};
   const run=async()=>{if(!ck())return;setProc(true);setRes([]);setVw("results");const all=[];const tot=files.length*ver;let done=0;const t0=Date.now();
@@ -238,359 +182,390 @@ export default function App(){
   const activeT=Object.values(tf).filter(Boolean).length;
   const clr=()=>{setFiles([]);setRes([]);setVw("config");setThumbs({})};
   const iL=inten<.25?"Ultra léger":inten<.45?"Léger":inten<.65?"Balanced":inten<.85?"Agressif":"Maximum";
-  const iC=inten<.25?"#6ee7b7":inten<.45?"#67e8f9":inten<.65?"#a78bfa":inten<.85?"#fbbf24":"#fb7185";
-  const hcPick=async(idx)=>{const input=idx===0?hcRef1:hcRef2;input.current?.click()};
+  const iC=inten<.25?"#6ee7b7":inten<.45?"#67e8f9":inten<.65?"#a78bfa":inten<.85?"#fbbf24":"#f87171";
+  const hcPick=async(idx)=>{(idx===0?hcRef1:hcRef2).current?.click()};
   const hcLoad=async(idx,e)=>{const file=e.target.files?.[0];if(!file)return;const nf=[...hcFiles];nf[idx]=file;setHcFiles(nf);
     if(nf[0]&&nf[1]){setHcLoading(true);try{const[h1,h2]=await Promise.all([pH(nf[0]),pH(nf[1])]);
-      const match=h1===h2;setHcResult({h1:h1.slice(0,32),h2:h2.slice(0,32),match,s1:fb(nf[0].size),s2:fb(nf[1].size),n1:nf[0].name,n2:nf[1].name})}catch(e){setHcResult(null)}setHcLoading(false)}};
+      const match=h1===h2;setHcResult({h1:h1.slice(0,32),h2:h2.slice(0,32),match,s1:fb(nf[0].size),s2:fb(nf[1].size)})}catch(e){setHcResult(null)}setHcLoading(false)}};
 
-  const S=`*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+  const FEATURES=[
+    {t:"Photos & Vidéos",d:"Traitement batch de JPG, PNG, WEBP, MP4, MOV. Génère autant de versions uniques que nécessaire.",ic:"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"},
+    {t:"Métadonnées EXIF",d:"Réécriture complète des métadonnées : date, appareil, logiciel — avec des valeurs aléatoires uniques.",ic:"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"},
+    {t:"GPS Aléatoire",d:"Coordonnées GPS générées dans la zone géographique de ton choix — 22 villes ou monde entier.",ic:"M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"},
+    {t:"Zoom & Recadrage",d:"Zoom aléatoire subtil appliqué à chaque version pour varier le cadrage sans altérer le contenu visible.",ic:"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"},
+    {t:"Micro-bruit Visuel",d:"Ajout de bruit gaussien invisible à l'oeil nu pour rendre chaque fichier unique sur le plan technique.",ic:"M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"},
+    {t:"Envoi Automatique",d:"Envoi direct vers Telegram ou Discord via webhook dès que le traitement est terminé. Zéro action manuelle.",ic:"M12 19l9 2-9-18-9 18 9-2zm0 0v-8"},
+  ];
+
+  const S=`@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
     html,body,#root{height:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}
-    input,button,textarea,select{font-size:16px!important;-webkit-appearance:none}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes spin{to{transform:rotate(360deg)}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(20,184,166,.06)}50%{box-shadow:0 0 35px rgba(20,184,166,.15)}}
-    @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
-    .mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 10% 10%,rgba(13,148,136,.04),transparent),radial-gradient(ellipse 60% 70% at 90% 90%,rgba(34,211,238,.03),transparent)}
-    .card{background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.06);border-radius:16px}
-    .btn{font-family:inherit;border:none;border-radius:12px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px}
-    .btn-p{background:linear-gradient(135deg,#0d9488,#14b8a6);color:#021a16;padding:14px 30px;font-size:15px}
-    .btn-s{background:rgba(255,255,255,.04);color:#7a9aaa;padding:10px 18px;font-size:13px;border:1px solid rgba(255,255,255,.06)}
-    .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:100px;font-size:11px;font-weight:600}
-    .bt{background:rgba(20,184,166,.08);color:#5eead4}.bg{background:rgba(52,211,153,.07);color:#6ee7b7}.ba{background:rgba(251,191,36,.08);color:#fde68a}
+    input,button,textarea,select{font-size:16px!important;-webkit-appearance:none;font-family:inherit}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+    @keyframes glow{0%,100%{box-shadow:0 0 30px rgba(13,148,136,.1)}50%{box-shadow:0 0 60px rgba(13,148,136,.2)}}
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    .card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;transition:all .2s}
+    .card:hover{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.03)}
+    .btn{font-family:inherit;border:none;border-radius:12px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+    .btn:active{transform:scale(.97)}
+    .btn-p{background:linear-gradient(135deg,#0d9488,#06b6d4);color:#fff;padding:14px 28px;font-size:15px}
+    .btn-p:hover{box-shadow:0 8px 32px rgba(13,148,136,.3);transform:translateY(-1px)}
+    .btn-s{background:rgba(255,255,255,.04);color:#94a3b8;padding:10px 18px;font-size:13px;border:1px solid rgba(255,255,255,.06)}
+    .btn-s:hover{background:rgba(255,255,255,.07);color:#e2e8f0}
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:600}
+    .bt{background:rgba(13,148,136,.1);color:#2dd4bf}.bg{background:rgba(52,211,153,.07);color:#6ee7b7}.ba{background:rgba(251,191,36,.08);color:#fde68a}
     .thumb{width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
     .row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:12px}
-    .chk{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;user-select:none}.chk.on{background:rgba(20,184,166,.045)}
-    .dot{width:18px;height:18px;border-radius:5px;border:2px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}.dot.on{background:#14b8a6;border-color:#14b8a6;color:#021a16}
-    .cnt{width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#9ab;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-    .pbar{height:4px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden}.pfill{height:100%;background:linear-gradient(90deg,#0d9488,#14b8a6,#67e8f9);border-radius:3px}
-    .vc{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:8px;cursor:pointer;overflow:hidden}
-    .pc{padding:14px 10px;border-radius:12px;cursor:pointer;border:2px solid transparent;background:rgba(255,255,255,.018);text-align:center}.pc.on{border-color:rgba(20,184,166,.35);background:rgba(20,184,166,.05)}
-    .lb{padding:7px 13px;border-radius:8px;cursor:pointer;border:1px solid transparent;font-family:inherit;font-size:12px;font-weight:600;background:rgba(255,255,255,.03);color:#5a7a8a}.lb.on{border-color:rgba(20,184,166,.3);color:#5eead4;background:rgba(20,184,166,.06)}
-    .ov{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(16px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
-    .slider{-webkit-appearance:none;width:100%;height:4px;border-radius:3px;outline:none;background:rgba(255,255,255,.1)}.slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:linear-gradient(135deg,#14b8a6,#2dd4bf);border-radius:50%;cursor:pointer}
-    .mono{font-family:'Courier New',monospace}
-    .prc{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:28px 20px;position:relative}.prc.ft{border-color:rgba(20,184,166,.3);background:rgba(20,184,166,.025)}.prc.ft::before{content:"POPULAIRE";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0d9488,#14b8a6);color:#021a16;padding:4px 16px;border-radius:100px;font-size:11px;font-weight:700}
-    .faq-item{margin-bottom:6px}.faq-q{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:12px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01)}.faq-q.open{background:rgba(20,184,166,.025);border-color:rgba(20,184,166,.1)}.faq-a{padding:10px 16px 16px;font-size:14px;color:#6a8a9a;line-height:1.8}
-    .ba-container{position:relative;overflow:hidden;border-radius:16px;border:1px solid rgba(255,255,255,.06);width:100%;aspect-ratio:4/3;background:#111;touch-action:none}
-    .ba-slider{position:absolute;top:0;bottom:0;width:3px;background:#14b8a6;z-index:3;cursor:ew-resize}.ba-slider::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:#14b8a6;border:3px solid #fff}
+    .chk{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;user-select:none;transition:all .1s}.chk:hover{background:rgba(255,255,255,.02)}.chk.on{background:rgba(13,148,136,.05)}
+    .dot{width:18px;height:18px;border-radius:5px;border:2px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:all .15s}.dot.on{background:linear-gradient(135deg,#0d9488,#06b6d4);border-color:transparent;color:#fff}
+    .cnt{width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#94a3b8;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s}.cnt:hover{border-color:#0d9488;color:#fff}
+    .pbar{height:3px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden}.pfill{height:100%;background:linear-gradient(90deg,#0d9488,#06b6d4);border-radius:3px}
+    .vc{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:8px;cursor:pointer;overflow:hidden;transition:all .15s}.vc:hover{border-color:rgba(13,148,136,.3)}
+    .pc{padding:14px 10px;border-radius:12px;cursor:pointer;border:2px solid transparent;background:rgba(255,255,255,.02);text-align:center;transition:all .15s}.pc:hover{background:rgba(255,255,255,.04)}.pc.on{border-color:rgba(13,148,136,.4);background:rgba(13,148,136,.06)}
+    .lb{padding:7px 13px;border-radius:8px;cursor:pointer;border:1px solid transparent;font-family:inherit;font-size:12px;font-weight:600;background:rgba(255,255,255,.03);color:#64748b;transition:all .1s}.lb:hover{color:#94a3b8}.lb.on{border-color:rgba(13,148,136,.3);color:#2dd4bf;background:rgba(13,148,136,.06)}
+    .ov{position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(20px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+    .slider{-webkit-appearance:none;width:100%;height:3px;border-radius:3px;outline:none;background:rgba(255,255,255,.08)}.slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:linear-gradient(135deg,#0d9488,#06b6d4);border-radius:50%;cursor:pointer;box-shadow:0 0 16px rgba(13,148,136,.4)}
+    .mono{font-family:'SF Mono',SFMono-Regular,Menlo,monospace}
+    .faq-item{margin-bottom:4px}.faq-q{padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;border-radius:14px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01);transition:all .15s}.faq-q:hover{background:rgba(255,255,255,.025)}.faq-q.open{background:rgba(13,148,136,.03);border-color:rgba(13,148,136,.12)}.faq-a{padding:12px 18px 18px;font-size:14px;color:#64748b;line-height:1.8}
+    .ba-container{position:relative;overflow:hidden;border-radius:20px;border:1px solid rgba(255,255,255,.06);width:100%;aspect-ratio:16/9;background:#0a0e12;touch-action:none}
+    .ba-slider{position:absolute;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#0d9488,#06b6d4);z-index:3;cursor:ew-resize}.ba-slider::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#06b6d4);border:3px solid rgba(255,255,255,.9);box-shadow:0 0 20px rgba(13,148,136,.5)}
+    .feat-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:28px 24px;transition:all .25s;position:relative;overflow:hidden}
+    .feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(13,148,136,.3),transparent);opacity:0;transition:opacity .25s}.feat-card:hover::before{opacity:1}
+    .feat-card:hover{border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.03);transform:translateY(-2px)}
+    .feat-icon{width:44px;height:44px;border-radius:12px;background:rgba(13,148,136,.08);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+    .prc{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:32px 24px;position:relative;transition:all .2s}
+    .prc.ft{border-color:rgba(13,148,136,.25);background:linear-gradient(180deg,rgba(13,148,136,.04),transparent)}
+    .prc.ft::before{content:"POPULAIRE";position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0d9488,#06b6d4);color:#fff;padding:5px 18px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.5px}
+    .prc.lt{border-color:rgba(13,148,136,.15);background:linear-gradient(180deg,rgba(6,182,212,.03),transparent)}
     @media(max-width:768px){
       html,body{overflow-x:hidden!important;width:100%!important}
-      .hero-title{font-size:28px!important;letter-spacing:-1px!important}
-      .hero-sub{font-size:13px!important}
-      .hero-btns{flex-direction:column!important}
+      .hero-t{font-size:32px!important;letter-spacing:-1px!important}
+      .hero-sub{font-size:14px!important}
+      .hero-btns{flex-direction:column!important;width:100%!important}
       .hero-btns .btn{width:100%!important}
+      .nav-bar{padding:12px 16px!important}
       .nav-links{display:none!important}
-      .nav-bar{padding:10px 12px!important}
-      .live-stats{grid-template-columns:repeat(3,1fr)!important;gap:6px!important}
-      .stat-num{font-size:18px!important}
+      .live-stats{grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
       .feat-grid{grid-template-columns:1fr!important}
       .price-grid{grid-template-columns:1fr!important}
       .testi-grid{grid-template-columns:1fr!important}
       .nums-grid{grid-template-columns:repeat(2,1fr)!important}
-      .section{padding:0 12px!important}
-      .section-title{font-size:20px!important}
+      .guide-grid{grid-template-columns:1fr!important}
+      .section{padding:0 16px!important}
+      .section-t{font-size:24px!important}
       .hc-grid{grid-template-columns:1fr!important}
       .app-layout{grid-template-columns:1fr!important}
       .app-side{order:2}
-      .app-header{padding:8px 10px!important}
+      .app-header{padding:8px 12px!important}
       .app-header-btns{flex-wrap:wrap;gap:3px!important}
       .app-header-btns .btn{padding:4px 7px!important;font-size:9px!important}
       .stat-grid{grid-template-columns:repeat(2,1fr)!important}
       .ver-grid{grid-template-columns:repeat(2,1fr)!important}
       .preset-grid{grid-template-columns:repeat(3,1fr)!important;gap:4px!important}
       .preset-grid .pc{padding:8px 4px!important}
-      .prc{padding:20px 14px!important}
+      .prc{padding:24px 18px!important}
       .ov{padding:10px!important}
     }
   `;
 
-  if(pg==="landing"||pg==="docs"||pg==="changelog")return(
-    <div style={{minHeight:"100vh",background:"#060a0c",color:"#b8c8d0",overflowX:"hidden"}}><style>{S}</style><div className="mesh"/>
+  /* ===== LANDING PAGE ===== */
+  if(pg==="landing"||pg==="guide")return(
+    <div style={{minHeight:"100vh",background:"#050809",color:"#94a3b8",overflowX:"hidden"}}><style>{S}</style>
+      <div style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none",background:"radial-gradient(ellipse 80% 50% at 50% -20%,rgba(13,148,136,.08),transparent 70%)"}}/>
       {pricing&&<PricingModal close={()=>setPricing(false)}/>}
       {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onSuccess={()=>setAuth(null)}/>}
 
-      <nav className="nav-bar" style={{padding:"18px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:2,maxWidth:1200,margin:"0 auto"}}>
+      <nav className="nav-bar" style={{padding:"16px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:2,maxWidth:1200,margin:"0 auto"}}>
         <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setPg("landing")}>
-          <div style={{width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",animation:"glow 4s infinite",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:6}} alt="V"/></div>
-          <span style={{fontWeight:800,fontSize:18,color:"#f0fdfa",letterSpacing:"-1px"}}>Veilora</span></div>
-        <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
-          <div className="nav-links" style={{display:"flex",gap:6}}>
-            <button className="btn btn-s" style={{fontSize:12,padding:"7px 12px"}} onClick={()=>setPg(pg==="docs"?"landing":"docs")}>{pg==="docs"?"← Retour":"Guide"}</button>
-            <button className="btn btn-s" style={{fontSize:12,padding:"7px 12px"}} onClick={()=>setPg("changelog")}>Changelog</button>
-            <button className="btn btn-s" style={{fontSize:12,padding:"7px 12px"}} onClick={()=>setPricing(true)}>Pricing</button></div>
-          {user?<><span style={{fontSize:11,color:"#5eead4",maxWidth:100,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{profile?.name||user.email?.split("@")[0]}</span>{pro&&<span className="badge bt" style={{fontSize:9}}>PRO</span>}<button className="btn btn-s" style={{padding:"6px 10px",fontSize:11}} onClick={doLogout}>Déco</button></>:
-            <button className="btn btn-s" style={{fontSize:12,padding:"7px 12px"}} onClick={()=>setAuth("login")}>Connexion</button>}
-          <button className="btn btn-p" style={{fontSize:12,padding:"9px 18px"}} onClick={()=>setPg("app")}>Ouvrir l'app</button></div></nav>
+          <div style={{width:34,height:34,borderRadius:10,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain"}} alt="V"/></div>
+          <span style={{fontWeight:800,fontSize:18,color:"#f1f5f9",letterSpacing:"-1px"}}>Veilora</span></div>
+        <div style={{display:"flex",gap:6,alignItems:"center"}}>
+          <div className="nav-links" style={{display:"flex",gap:4}}>
+            <button className="btn btn-s" style={{fontSize:12,padding:"8px 14px"}} onClick={()=>setPg(pg==="guide"?"landing":"guide")}>{pg==="guide"?"← Retour":"Guide"}</button>
+            <button className="btn btn-s" style={{fontSize:12,padding:"8px 14px"}} onClick={()=>setPricing(true)}>Pricing</button></div>
+          {user?<><span style={{fontSize:11,color:"#2dd4bf",maxWidth:100,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{profile?.name||user.email?.split("@")[0]}</span>{pro&&<span className="badge bt" style={{fontSize:9}}>PRO</span>}<button className="btn btn-s" style={{padding:"6px 12px",fontSize:11}} onClick={doLogout}>Déconnexion</button></>:
+            <button className="btn btn-s" style={{fontSize:12,padding:"8px 14px"}} onClick={()=>setAuth("login")}>Connexion</button>}
+          {user&&<button className="btn btn-p" style={{fontSize:12,padding:"10px 20px"}} onClick={()=>setPg("app")}>Ouvrir l'app</button>}
+        </div></nav>
 
-      {pg==="changelog"?(<main className="section" style={{maxWidth:700,margin:"0 auto",padding:"40px 24px",position:"relative",zIndex:1}}>
-        <div style={{textAlign:"center",marginBottom:32}}>
-          <h1 className="section-title" style={{fontSize:28,fontWeight:800,color:"#f0fdfa",marginBottom:8}}>Changelog</h1></div>
-        {CHANGELOG.map((c,ci)=><div key={ci} className="card" style={{padding:"20px 22px",marginBottom:12}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-            <span style={{padding:"4px 12px",borderRadius:100,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontSize:12,fontWeight:800}}>v{c.v}</span>
-            <span style={{fontSize:12,color:"#3d5a6a"}}>{c.d}</span></div>
-          {c.items.map((it,ii)=><div key={ii} style={{display:"flex",gap:8,marginBottom:6,alignItems:"flex-start"}}>
-            <span style={{color:"#5eead4",fontSize:11,marginTop:2}}>◆</span>
-            <span style={{fontSize:13,color:"#9ab",lineHeight:1.6}}>{it}</span></div>)}</div>)}
-        <div style={{textAlign:"center",marginTop:20}}><button className="btn btn-p" onClick={()=>setPg("app")}>Lancer Veilora</button></div>
-      </main>):pg==="docs"?(<main className="section" style={{maxWidth:700,margin:"0 auto",padding:"40px 24px",position:"relative",zIndex:1}}>
-        <div style={{textAlign:"center",marginBottom:32}}>
-          <h1 className="section-title" style={{fontSize:28,fontWeight:800,color:"#f0fdfa",marginBottom:8}}>Guide & FAQ</h1></div>
-        {FAQ.map((g,i)=><div key={i} className="faq-item">
-          <div className={`faq-q ${faqO===i?"open":""}`} onClick={()=>setFaqO(faqO===i?null:i)}>
-            <span style={{flex:1,fontSize:14,fontWeight:600,color:faqO===i?"#5eead4":"#d0e0e8"}}>{g.q}</span>
-            <span style={{fontSize:11,color:"#3d5a6a",transition:"transform .2s",transform:faqO===i?"rotate(180deg)":""}}>&#x25bc;</span>
-          </div>{faqO===i&&<div className="faq-a">{g.a}</div>}</div>)}
-        <div style={{textAlign:"center",marginTop:24}}><button className="btn btn-p" onClick={()=>setPg("app")}>🔒 Lancer Veilora</button></div>
+      {pg==="guide"?(<main className="section" style={{maxWidth:800,margin:"0 auto",padding:"40px 28px",position:"relative",zIndex:1}}>
+        <div style={{textAlign:"center",marginBottom:40}}>
+          <div className="badge bt" style={{marginBottom:12}}>Guide complet</div>
+          <h1 className="section-t" style={{fontSize:32,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px",marginBottom:8}}>Comment utiliser Veilora</h1>
+          <p style={{fontSize:15,color:"#475569",maxWidth:500,margin:"0 auto"}}>De l'inscription au téléchargement, tout est expliqué en détail.</p></div>
+        <div style={{display:"flex",flexDirection:"column",gap:16,marginBottom:50}}>
+          {GUIDE.map((g,i)=><div key={i} style={{display:"flex",gap:20,alignItems:"flex-start",padding:"24px 28px",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.05)",borderRadius:18,animation:`fadeUp .4s ease ${i*.08}s both`}}>
+            <div style={{width:48,height:48,borderRadius:14,background:"rgba(13,148,136,.08)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <IC d={g.icon} size={22} color="#2dd4bf"/></div>
+            <div><div style={{fontSize:16,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>{g.title}</div>
+              <div style={{fontSize:14,color:"#64748b",lineHeight:1.8}}>{g.desc}</div></div></div>)}
+        </div>
+        <div style={{textAlign:"center",marginBottom:50}}>
+          <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:28}}>Questions fréquentes</h2>
+          {FAQ.map((g,i)=><div key={i} className="faq-item">
+            <div className={`faq-q ${faqO===i?"open":""}`} onClick={()=>setFaqO(faqO===i?null:i)}>
+              <span style={{flex:1,fontSize:14,fontWeight:600,color:faqO===i?"#2dd4bf":"#cbd5e1"}}>{g.q}</span>
+              <span style={{fontSize:11,color:"#475569",transition:"transform .2s",transform:faqO===i?"rotate(180deg)":"",flexShrink:0}}>▼</span>
+            </div>{faqO===i&&<div className="faq-a">{g.a}</div>}</div>)}</div>
+        <div style={{textAlign:"center"}}><button className="btn btn-p" onClick={()=>{user?setPg("app"):setAuth("register")}} style={{borderRadius:14}}>{user?"Ouvrir l'app":"Créer un compte"}</button></div>
       </main>):(
-        <main style={{position:"relative",zIndex:1,overflowX:"hidden"}}>
-          <section style={{padding:"60px 20px 50px",textAlign:"center",maxWidth:860,margin:"0 auto"}}>
-            <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"6px 14px",borderRadius:100,border:"1px solid rgba(20,184,166,.12)",background:"rgba(20,184,166,.03)",fontSize:11,color:"#5eead4",fontWeight:600,marginBottom:24}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:"#34d399",animation:"pulse 2s infinite"}}/>100% local</div>
-            <h1 className="hero-title" style={{fontSize:44,fontWeight:900,color:"#f0fdfa",lineHeight:1.1,letterSpacing:"-2px",marginBottom:18}}>
-              Un fichier. <span style={{background:"linear-gradient(135deg,#14b8a6,#67e8f9)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>100 versions uniques.</span><br/>Zéro trace.</h1>
-            <p className="hero-sub" style={{fontSize:15,color:"#4a6a78",maxWidth:500,margin:"0 auto 28px",lineHeight:1.7}}>Chaque pixel, chaque metadata, chaque hash — randomisé.</p>
-            <div className="hero-btns" style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-              <button className="btn btn-p" onClick={()=>setPg("app")} style={{padding:"14px 30px",fontSize:15,borderRadius:14}}>Essayer gratuitement</button>
-              <button className="btn" onClick={()=>window.open(STRIPE.lifetime,"_blank")} style={{padding:"14px 24px",fontSize:14,borderRadius:14,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,border:"none"}}>À vie — 44.99€</button></div>
-            <div style={{marginTop:12,fontSize:11,color:"#2a4a58"}}>3 fichiers/jour gratuits • Pro dès 7.99€/mois</div></section>
 
-          <section className="live-stats section" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,maxWidth:700,margin:"0 auto 50px",padding:"0 20px"}}>
-            {[{n:cFiles.toLocaleString(),l:"Fichiers traités",ic:"◎"},{n:cVersions.toLocaleString(),l:"Versions générées",ic:"⬡"},{n:cUsers.toLocaleString(),l:"Utilisateurs actifs",ic:"◇"}].map((s,i)=>(
-              <div key={i} className="card" style={{padding:"18px 14px",textAlign:"center"}}>
-                <div style={{fontSize:16,color:"#14b8a6",marginBottom:4}}>{s.ic}</div>
-                <div className="mono stat-num" style={{fontSize:24,fontWeight:800,color:"#f0fdfa"}}>{s.n}</div>
-                <div style={{fontSize:10,color:"#3d5a6a",marginTop:3}}>{s.l}</div></div>))}</section>
+        <main style={{position:"relative",zIndex:1}}>
+          {/* HERO */}
+          <section style={{padding:"80px 20px 60px",textAlign:"center",maxWidth:900,margin:"0 auto"}}>
+            <div style={{display:"inline-flex",alignItems:"center",gap:8,padding:"6px 16px",borderRadius:100,border:"1px solid rgba(13,148,136,.15)",background:"rgba(13,148,136,.04)",fontSize:12,color:"#2dd4bf",fontWeight:600,marginBottom:28}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#2dd4bf",animation:"pulse 2s infinite"}}/>100% local — aucun fichier uploadé</div>
+            <h1 className="hero-t" style={{fontSize:52,fontWeight:800,color:"#f1f5f9",lineHeight:1.08,letterSpacing:"-2.5px",marginBottom:20}}>
+              Modifiez vos médias.<br/><span style={{background:"linear-gradient(135deg,#0d9488,#06b6d4,#22d3ee)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Invisiblement.</span></h1>
+            <p className="hero-sub" style={{fontSize:16,color:"#475569",maxWidth:520,margin:"0 auto 32px",lineHeight:1.7}}>Veilora modifie les métadonnées, le GPS, le bruit visuel, le zoom et bien plus — pour que chaque export soit unique.</p>
+            <div className="hero-btns" style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+              <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"15px 32px",fontSize:15,borderRadius:14}}>→ Commencer — 7.99€/mois</button>
+              <button className="btn" onClick={()=>window.open(STRIPE.lifetime,"_blank")} style={{padding:"15px 28px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button>
+              <button className="btn btn-s" onClick={()=>setAuth("login")} style={{padding:"15px 22px",fontSize:14,borderRadius:14}}>→ Se connecter</button></div>
+            <div style={{marginTop:14,fontSize:12,color:"#334155"}}>3 fichiers/jour gratuits • Aucune carte requise</div></section>
 
-          <section className="section" style={{maxWidth:600,margin:"0 auto 50px",padding:"0 20px"}}>
-            <div style={{textAlign:"center",marginBottom:20}}>
-              <h2 className="section-title" style={{fontSize:24,fontWeight:800,color:"#f0fdfa",marginBottom:6}}>Vois la différence. Ou pas.</h2></div>
+          {/* STATS */}
+          <section className="live-stats section" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
+            {[{n:cFiles.toLocaleString(),l:"Fichiers traités"},{n:cVersions.toLocaleString(),l:"Versions générées"},{n:cUsers.toLocaleString(),l:"Utilisateurs actifs"}].map((s,i)=>(
+              <div key={i} className="card" style={{padding:"20px 16px",textAlign:"center"}}>
+                <div className="mono" style={{fontSize:22,fontWeight:800,color:"#f1f5f9"}}>{s.n}</div>
+                <div style={{fontSize:11,color:"#475569",marginTop:4}}>{s.l}</div></div>))}</section>
+
+          {/* BEFORE/AFTER */}
+          <section className="section" style={{maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
+            <div style={{textAlign:"center",marginBottom:24}}>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Vois la différence. Ou pas.</h2>
+              <p style={{fontSize:14,color:"#475569"}}>Glisse le curseur — même image, hash complètement différent.</p></div>
             <div className="ba-container" onMouseMove={e=>{const r=e.currentTarget.getBoundingClientRect();setBaSlider(Math.max(5,Math.min(95,((e.clientX-r.left)/r.width)*100)))}} onTouchMove={e=>{e.preventDefault();const r=e.currentTarget.getBoundingClientRect();const t=e.touches[0];setBaSlider(Math.max(5,Math.min(95,((t.clientX-r.left)/r.width)*100)))}}>
               <div style={{position:"absolute",inset:0}}>
                 <img src="/demo.png" alt="V" style={{width:"100%",height:"100%",objectFit:"cover",filter:"brightness(1.03) saturate(1.08) hue-rotate(4deg)"}}/>
-                <div style={{position:"absolute",top:8,right:8,zIndex:4,padding:"3px 8px",borderRadius:6,background:"rgba(20,184,166,.15)",border:"1px solid rgba(94,234,212,.2)"}}><div className="mono" style={{fontSize:9,color:"#5eead4"}}>SHA: e91b...f8a4</div></div></div>
+                <div style={{position:"absolute",top:12,right:12,zIndex:4,padding:"4px 10px",borderRadius:8,background:"rgba(13,148,136,.12)",border:"1px solid rgba(45,212,191,.2)",backdropFilter:"blur(8px)"}}><div className="mono" style={{fontSize:10,color:"#2dd4bf"}}>SHA-256: e91b...f8a4</div></div></div>
               <div style={{position:"absolute",top:0,bottom:0,left:0,width:`${baSlider}%`,overflow:"hidden",zIndex:2}}>
                 <div style={{position:"absolute",inset:0,width:`${10000/Math.max(baSlider,1)}%`}}>
                   <img src="/demo.png" alt="O" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-                  <div style={{position:"absolute",top:8,left:8,zIndex:4,padding:"3px 8px",borderRadius:6,background:"rgba(0,0,0,.4)"}}><div className="mono" style={{fontSize:9,color:"#7a9aaa"}}>SHA: 7f3a...c2d1</div></div></div></div>
+                  <div style={{position:"absolute",top:12,left:12,zIndex:4,padding:"4px 10px",borderRadius:8,background:"rgba(0,0,0,.5)",backdropFilter:"blur(8px)"}}><div className="mono" style={{fontSize:10,color:"#94a3b8"}}>SHA-256: 7f3a...c2d1</div></div></div></div>
               <div className="ba-slider" style={{left:`${baSlider}%`,transform:"translateX(-50%)"}}/>
-              <div style={{position:"absolute",bottom:8,left:10,zIndex:4,fontSize:10,fontWeight:700,color:"#fff",background:"rgba(0,0,0,.6)",padding:"4px 10px",borderRadius:6}}>ORIGINAL</div>
-              <div style={{position:"absolute",bottom:8,right:10,zIndex:4,fontSize:10,fontWeight:700,color:"#5eead4",background:"rgba(0,0,0,.6)",padding:"4px 10px",borderRadius:6}}>VERSION</div></div></section>
+              <div style={{position:"absolute",bottom:12,left:14,zIndex:4,fontSize:11,fontWeight:700,color:"#fff",background:"rgba(0,0,0,.6)",padding:"5px 12px",borderRadius:8,backdropFilter:"blur(8px)"}}>ORIGINAL</div>
+              <div style={{position:"absolute",bottom:12,right:14,zIndex:4,fontSize:11,fontWeight:700,color:"#2dd4bf",background:"rgba(0,0,0,.6)",padding:"5px 12px",borderRadius:8,backdropFilter:"blur(8px)"}}>VERSION</div></div></section>
 
-          <section className="nums-grid section" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,maxWidth:700,margin:"0 auto 50px",padding:"0 20px"}}>
-            {[{n:"100",l:"Versions"},{n:"13",l:"Transformations"},{n:"22",l:"GPS"},{n:"8",l:"Devices"}].map((s,i)=>(
-              <div key={i} style={{textAlign:"center"}}><div style={{fontSize:32,fontWeight:900,color:"#f0fdfa"}}>{s.n}</div><div style={{fontSize:11,color:"#3d5a6a",marginTop:2}}>{s.l}</div></div>))}</section>
+          {/* NUMBERS */}
+          <section className="nums-grid section" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
+            {[{n:"100",l:"Versions max"},{n:"13",l:"Transformations"},{n:"22",l:"Localisations GPS"},{n:"8",l:"Fake Devices"}].map((s,i)=>(
+              <div key={i} style={{textAlign:"center"}}><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>{s.n}</div><div style={{fontSize:11,color:"#475569",marginTop:2}}>{s.l}</div></div>))}</section>
 
-          <section className="section" style={{maxWidth:600,margin:"0 auto 50px",padding:"0 20px"}}>
-            <div style={{textAlign:"center",marginBottom:20}}>
-              <span className="badge bt" style={{marginBottom:8}}>Outil gratuit</span>
-              <h2 className="section-title" style={{fontSize:24,fontWeight:800,color:"#f0fdfa",marginBottom:6}}>Hash Checker</h2></div>
-            <div className="card" style={{padding:"24px 20px"}}>
-              <div className="hc-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-                {[0,1].map(idx=><div key={idx} onClick={()=>hcPick(idx)} style={{padding:"24px 12px",borderRadius:14,border:"2px dashed rgba(255,255,255,.08)",textAlign:"center",cursor:"pointer",background:hcFiles[idx]?"rgba(20,184,166,.03)":"transparent",borderColor:hcFiles[idx]?"rgba(20,184,166,.2)":"rgba(255,255,255,.08)"}}>
-                  <div style={{fontSize:24,marginBottom:4}}>{hcFiles[idx]?"✅":"📄"}</div>
-                  <div style={{fontSize:12,fontWeight:600,color:hcFiles[idx]?"#5eead4":"#4a6a78",wordBreak:"break-all"}}>{hcFiles[idx]?hcFiles[idx].name:`Fichier ${idx+1}`}</div>
+          {/* FEATURES */}
+          <section className="section" style={{maxWidth:900,margin:"0 auto 60px",padding:"0 20px"}}>
+            <div style={{textAlign:"center",marginBottom:32}}>
+              <div className="badge bt" style={{marginBottom:12}}>Fonctionnalités</div>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Tout ce dont vous avez besoin</h2>
+              <p style={{fontSize:14,color:"#475569",maxWidth:500,margin:"0 auto"}}>Un outil complet pour modifier, anonymiser et diversifier vos médias en quelques clics.</p></div>
+            <div className="feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
+              {FEATURES.map((f,i)=>(<div key={i} className="feat-card">
+                <div className="feat-icon"><IC d={f.ic} size={22} color="#2dd4bf"/></div>
+                <div style={{fontSize:15,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>{f.t}</div>
+                <div style={{fontSize:13,color:"#64748b",lineHeight:1.7}}>{f.d}</div></div>))}</div></section>
+
+          {/* HASH CHECKER */}
+          <section className="section" style={{maxWidth:600,margin:"0 auto 60px",padding:"0 20px"}}>
+            <div style={{textAlign:"center",marginBottom:24}}>
+              <div className="badge bt" style={{marginBottom:12}}>Outil gratuit</div>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Hash Checker</h2>
+              <p style={{fontSize:14,color:"#475569"}}>Drop 2 fichiers — compare leur hash instantanément.</p></div>
+            <div className="card" style={{padding:"28px 24px"}}>
+              <div className="hc-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+                {[0,1].map(idx=><div key={idx} onClick={()=>hcPick(idx)} style={{padding:"28px 16px",borderRadius:16,border:"2px dashed rgba(255,255,255,.06)",textAlign:"center",cursor:"pointer",background:hcFiles[idx]?"rgba(13,148,136,.03)":"transparent",borderColor:hcFiles[idx]?"rgba(13,148,136,.2)":"rgba(255,255,255,.06)",transition:"all .15s"}}>
+                  <div style={{marginBottom:6}}><IC d={hcFiles[idx]?"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z":"M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"} size={24} color={hcFiles[idx]?"#2dd4bf":"#475569"}/></div>
+                  <div style={{fontSize:12,fontWeight:600,color:hcFiles[idx]?"#2dd4bf":"#475569",wordBreak:"break-all"}}>{hcFiles[idx]?hcFiles[idx].name:`Fichier ${idx+1}`}</div>
                   <input ref={idx===0?hcRef1:hcRef2} type="file" accept="image/*" style={{display:"none"}} onChange={e=>hcLoad(idx,e)}/></div>)}</div>
               {hcResult&&<div>
-                <div className="hc-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
-                  {[{h:hcResult.h1,s:hcResult.s1,l:"Hash 1"},{h:hcResult.h2,s:hcResult.s2,l:"Hash 2"}].map((x,i)=><div key={i} style={{padding:"10px 12px",borderRadius:10,background:"rgba(255,255,255,.02)"}}>
-                    <div style={{fontSize:9,color:"#3d5a6a",textTransform:"uppercase",marginBottom:3}}>{x.l}</div>
-                    <div className="mono" style={{fontSize:10,color:"#7a9aaa",wordBreak:"break-all"}}>{x.h}...</div>
-                    <div style={{fontSize:10,color:"#3d5a6a",marginTop:3}}>{x.s}</div></div>)}</div>
-                <div style={{textAlign:"center",padding:"14px 16px",borderRadius:12,background:hcResult.match?"rgba(251,113,133,.06)":"rgba(94,234,212,.06)"}}>
-                  <div style={{fontSize:24,marginBottom:4}}>{hcResult.match?"⚠️":"✅"}</div>
-                  <div style={{fontSize:15,fontWeight:700,color:hcResult.match?"#fb7185":"#5eead4"}}>{hcResult.match?"Doublon":"Fichiers uniques"}</div></div>
-                <button className="btn btn-s" onClick={()=>{setHcFiles([null,null]);setHcResult(null)}} style={{width:"100%",marginTop:10}}>Réinitialiser</button></div>}</div></section>
+                <div className="hc-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+                  {[{h:hcResult.h1,s:hcResult.s1,l:"Hash fichier 1"},{h:hcResult.h2,s:hcResult.s2,l:"Hash fichier 2"}].map((x,i)=><div key={i} style={{padding:"12px 14px",borderRadius:12,background:"rgba(255,255,255,.02)"}}>
+                    <div style={{fontSize:10,color:"#475569",textTransform:"uppercase",marginBottom:4,letterSpacing:".5px"}}>{x.l}</div>
+                    <div className="mono" style={{fontSize:11,color:"#94a3b8",wordBreak:"break-all"}}>{x.h}...</div>
+                    <div style={{fontSize:11,color:"#475569",marginTop:4}}>{x.s}</div></div>)}</div>
+                <div style={{textAlign:"center",padding:"16px 18px",borderRadius:14,background:hcResult.match?"rgba(248,113,113,.05)":"rgba(45,212,191,.05)",border:`1px solid ${hcResult.match?"rgba(248,113,113,.12)":"rgba(45,212,191,.12)"}`}}>
+                  <div style={{fontSize:16,fontWeight:700,color:hcResult.match?"#f87171":"#2dd4bf"}}>{hcResult.match?"⚠ Doublon détectable":"✓ Fichiers uniques"}</div></div>
+                <button className="btn btn-s" onClick={()=>{setHcFiles([null,null]);setHcResult(null)}} style={{width:"100%",marginTop:12}}>Réinitialiser</button></div>}</div></section>
 
-          <section className="section" style={{maxWidth:900,margin:"0 auto 50px",padding:"0 20px"}}>
-            <h2 className="section-title" style={{fontSize:24,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:24}}>13 couches de randomisation</h2>
-            <div className="feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
-              {[{ic:"⬡",t:"AI Noise",d:"Bruit gaussien"},{ic:"◇",t:"Perspective",d:"Micro-déformation"},{ic:"◈",t:"LUT",d:"Courbes couleur"},
-                {ic:"⎔",t:"Fake Device",d:"8 appareils"},{ic:"⊕",t:"22 GPS",d:"Spoof villes"},{ic:"◉",t:"Visual Diff",d:"Split/blink/overlay"},
-                {ic:"≡",t:"Humanizer",d:"Curseur intensité"},{ic:"⤳",t:"Webhooks",d:"Discord & Telegram"},{ic:"◎",t:"Privacy Audit",d:"Score protection"},
-              ].map((f,i)=>(<div key={i} className="card" style={{padding:"18px 16px"}}>
-                <div style={{fontSize:20,marginBottom:6,color:"#14b8a6"}}>{f.ic}</div>
-                <div style={{fontSize:13,fontWeight:700,color:"#e0f0f8",marginBottom:3}}>{f.t}</div>
-                <div style={{fontSize:11,color:"#4a6a78",lineHeight:1.5}}>{f.d}</div></div>))}</div></section>
+          {/* PRICING */}
+          <section className="section" style={{maxWidth:860,margin:"0 auto 60px",padding:"0 20px"}}>
+            <div style={{textAlign:"center",marginBottom:32}}>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Prêt à commencer ?</h2>
+              <p style={{fontSize:14,color:"#475569"}}>Choisissez l'offre qui vous convient.</p></div>
+            <div className="price-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
+              <div className="prc"><div style={{fontSize:17,fontWeight:700,color:"#e2e8f0",marginBottom:4}}>Free</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>0€</div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Pour tester</div>
+                {["3 fichiers/jour","5 versions max","4 transformations"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#94a3b8"}}>{f}</span></div>)}
+                <button className="btn btn-s" style={{width:"100%",marginTop:18,padding:12}} onClick={()=>setAuth("register")}>Commencer</button></div>
+              <div className="prc ft"><div style={{fontSize:17,fontWeight:700,color:"#2dd4bf",marginBottom:4}}>Pro</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>7.99€<span style={{fontSize:13,color:"#64748b",fontWeight:500}}>/mois</span></div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Sans engagement</div>
+                {["Fichiers illimités","100 versions","13 transformations","GPS + Fake Device","Webhooks Discord/TG"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
+                <button className="btn btn-p" style={{width:"100%",marginTop:18,padding:12}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner</button></div>
+              <div className="prc lt"><div style={{fontSize:17,fontWeight:700,color:"#06b6d4",marginBottom:4}}>À Vie</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>44.99€</div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Paiement unique</div>
+                {["Tout le Pro","Pour toujours","Mises à jour incluses","Support prioritaire"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#06b6d4"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
+                <button className="btn" style={{width:"100%",marginTop:18,padding:12,borderRadius:12,background:"rgba(6,182,212,.1)",color:"#22d3ee",fontWeight:700,fontSize:13,border:"1px solid rgba(6,182,212,.2)",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter à vie</button></div></div>
+            <div style={{textAlign:"center",marginTop:14,fontSize:12,color:"#334155"}}>🔒 Paiement sécurisé par Stripe</div></section>
 
-          <section className="section" style={{maxWidth:800,margin:"0 auto 50px",padding:"0 20px"}}>
-            <h2 className="section-title" style={{fontSize:24,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:24}}>Pricing</h2>
-            <div className="price-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
-              <div className="prc"><div style={{fontSize:16,fontWeight:700,color:"#e0f0f8",marginBottom:4}}>Free</div><div style={{fontSize:30,fontWeight:800,color:"#fff"}}>0€</div><div style={{fontSize:11,color:"#3d5a6a",marginBottom:14}}>Pour tester</div>
-                {["3 fichiers/jour","5 versions","4 transformations"].map((f,i)=><div key={i} style={{display:"flex",gap:6,marginBottom:6}}><span style={{color:"#5eead4",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#8aa"}}>{f}</span></div>)}
-                <button className="btn btn-s" style={{width:"100%",marginTop:14,padding:10}} onClick={()=>setPg("app")}>Commencer</button></div>
-              <div className="prc ft"><div style={{fontSize:16,fontWeight:700,color:"#5eead4",marginBottom:4}}>Pro</div><div style={{fontSize:30,fontWeight:800,color:"#fff"}}>7.99€<span style={{fontSize:12,color:"#5a7a8a"}}>/mois</span></div><div style={{fontSize:11,color:"#3d5a6a",marginBottom:14}}>Sans engagement</div>
-                {["Illimité","100 versions","13 transformations","GPS + Device","Webhooks"].map((f,i)=><div key={i} style={{display:"flex",gap:6,marginBottom:6}}><span style={{color:"#5eead4",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#ccc"}}>{f}</span></div>)}
-                <button className="btn btn-p" style={{width:"100%",marginTop:14,padding:10}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner</button></div>
-              <div className="prc" style={{borderColor:"rgba(251,191,36,.2)"}}>
-                <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",padding:"4px 14px",borderRadius:100,fontSize:10,fontWeight:700}}>BEST DEAL</div>
-                <div style={{fontSize:16,fontWeight:700,color:"#fbbf24",marginBottom:4}}>À Vie</div><div style={{fontSize:30,fontWeight:800,color:"#fff"}}>44.99€</div><div style={{fontSize:11,color:"#3d5a6a",marginBottom:14}}>Paiement unique</div>
-                {["Tout le Pro","Pour toujours","Updates","VIP"].map((f,i)=><div key={i} style={{display:"flex",gap:6,marginBottom:6}}><span style={{color:"#fbbf24",fontSize:11}}>✓</span><span style={{fontSize:12,color:"#ccc"}}>{f}</span></div>)}
-                <button className="btn" style={{width:"100%",marginTop:14,padding:10,borderRadius:12,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,fontSize:13,border:"none",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter</button></div></div></section>
+          {/* TESTIMONIALS */}
+          <section className="section" style={{maxWidth:900,margin:"0 auto 60px",padding:"0 20px"}}>
+            <div style={{textAlign:"center",marginBottom:28}}>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px"}}>Ils utilisent Veilora</h2></div>
+            <div className="testi-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+              {TESTI.map((t,i)=>(<div key={i} className="card" style={{padding:"22px 20px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+                  <div style={{width:40,height:40,borderRadius:12,background:"rgba(13,148,136,.06)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{t.a}</div>
+                  <div><div style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>{t.n}</div><div style={{fontSize:11,color:"#475569"}}>{t.r}</div></div></div>
+                <div style={{fontSize:13,color:"#94a3b8",lineHeight:1.7}}>"{t.t}"</div></div>))}</div></section>
 
-          <section className="section" style={{maxWidth:900,margin:"0 auto 50px",padding:"0 20px"}}>
-            <h2 className="section-title" style={{fontSize:24,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:24}}>Témoignages</h2>
-            <div className="testi-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-              {TESTI.map((t,i)=>(<div key={i} className="card" style={{padding:"18px 16px"}}>
-                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                  <div style={{width:36,height:36,borderRadius:10,background:"rgba(20,184,166,.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>{t.a}</div>
-                  <div><div style={{fontSize:12,fontWeight:700,color:"#e0f0f8"}}>{t.n}</div><div style={{fontSize:10,color:"#3d5a6a"}}>{t.r}</div></div></div>
-                <div style={{fontSize:12,color:"#6a8a9a",lineHeight:1.6,marginBottom:8}}>"{t.t}"</div>
-                <div style={{color:"#fbbf24",fontSize:12,letterSpacing:3}}>★★★★★</div></div>))}</div></section>
-
-          <section className="section" style={{maxWidth:660,margin:"0 auto 50px",padding:"0 20px"}}>
-            <h2 className="section-title" style={{fontSize:24,fontWeight:800,color:"#f0fdfa",textAlign:"center",marginBottom:20}}>FAQ</h2>
-            {FAQ.slice(0,5).map((g,i)=><div key={i} className="faq-item">
-              <div className={`faq-q ${faqO===i?"open":""}`} onClick={()=>setFaqO(faqO===i?null:i)}>
-                <span style={{flex:1,fontSize:13,fontWeight:600,color:faqO===i?"#5eead4":"#c0d6e0"}}>{g.q}</span>
-                <span style={{fontSize:10,color:"#3d5a6a",transition:"transform .2s",transform:faqO===i?"rotate(180deg)":""}}>&#x25bc;</span>
-              </div>{faqO===i&&<div className="faq-a">{g.a}</div>}</div>)}</section>
-
-          <section style={{textAlign:"center",padding:"20px 20px 50px"}}><button className="btn btn-p" onClick={()=>setPg("app")} style={{padding:"14px 30px",fontSize:15,borderRadius:14,width:"100%",maxWidth:320}}>🔒 Lancer Veilora</button></section>
+          {/* CTA FINAL */}
+          <section style={{textAlign:"center",padding:"40px 20px 70px",maxWidth:600,margin:"0 auto"}}>
+            <h2 style={{fontSize:24,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:10}}>Prêt à commencer ?</h2>
+            <p style={{fontSize:14,color:"#475569",marginBottom:24}}>Créez votre compte et accédez à Veilora en quelques secondes.</p>
+            <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+              <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"14px 28px",fontSize:15,borderRadius:14}}>→ Commencer gratuitement</button>
+              <button className="btn" onClick={()=>window.open(STRIPE.lifetime,"_blank")} style={{padding:"14px 24px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button></div></section>
         </main>)}
-      <footer style={{padding:"16px 20px",borderTop:"1px solid rgba(255,255,255,.04)",textAlign:"center",position:"relative",zIndex:1}}><div style={{fontSize:10,color:"#1a2a33"}}>Veilora © 2026</div></footer></div>);
+      <footer style={{padding:"20px 28px",borderTop:"1px solid rgba(255,255,255,.04)",textAlign:"center",position:"relative",zIndex:1}}>
+        <div style={{fontSize:11,color:"#1e293b"}}>Veilora © 2026 — Par Alkyma Agency</div></footer></div>);
 
-  function PricingModal({close}){return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",backdropFilter:"blur(16px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={close}><div onClick={e=>e.stopPropagation()} style={{maxWidth:800,width:"100%",maxHeight:"90vh",overflowY:"auto"}}>
-    <div style={{textAlign:"center",marginBottom:20}}><div style={{fontSize:22,fontWeight:800,color:"#fff"}}>Choisis ton plan</div></div>
-    <div className="price-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
-      <div className="prc"><div style={{fontSize:15,fontWeight:700,color:"#e0f0f8",marginBottom:4}}>Free</div><div style={{fontSize:28,fontWeight:800,color:"#fff"}}>0€</div>
-        <button className="btn btn-s" style={{width:"100%",marginTop:12,padding:10}} onClick={close}>Continuer Free</button></div>
-      <div className="prc ft"><div style={{fontSize:15,fontWeight:700,color:"#5eead4",marginBottom:4}}>Pro</div><div style={{fontSize:28,fontWeight:800,color:"#fff"}}>7.99€<span style={{fontSize:12,color:"#5a7a8a"}}>/mois</span></div>
-        <button className="btn btn-p" style={{width:"100%",marginTop:12,padding:10}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner</button></div>
-      <div className="prc" style={{borderColor:"rgba(251,191,36,.2)"}}>
-        <div style={{fontSize:15,fontWeight:700,color:"#fbbf24",marginBottom:4}}>À Vie</div><div style={{fontSize:28,fontWeight:800,color:"#fff"}}>44.99€</div>
-        <button className="btn" style={{width:"100%",marginTop:12,padding:10,borderRadius:12,background:"linear-gradient(135deg,#d97706,#f59e0b)",color:"#000",fontWeight:700,fontSize:13,border:"none",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter</button></div></div>
-    <button className="btn btn-s" onClick={close} style={{width:"100%",marginTop:12}}>Fermer</button></div></div>}
+  function PricingModal({close}){return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.9)",backdropFilter:"blur(20px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={close}><div onClick={e=>e.stopPropagation()} style={{maxWidth:860,width:"100%",maxHeight:"90vh",overflowY:"auto"}}>
+    <div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:24,fontWeight:800,color:"#fff",letterSpacing:"-.5px"}}>Choisis ton plan</div></div>
+    <div className="price-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
+      <div className="prc"><div style={{fontSize:16,fontWeight:700,color:"#e2e8f0"}}>Free</div><div style={{fontSize:32,fontWeight:800,color:"#fff"}}>0€</div>
+        <button className="btn btn-s" style={{width:"100%",marginTop:14,padding:12}} onClick={close}>Continuer Free</button></div>
+      <div className="prc ft"><div style={{fontSize:16,fontWeight:700,color:"#2dd4bf"}}>Pro</div><div style={{fontSize:32,fontWeight:800,color:"#fff"}}>7.99€<span style={{fontSize:12,color:"#64748b"}}>/mois</span></div>
+        <button className="btn btn-p" style={{width:"100%",marginTop:14,padding:12}} onClick={()=>window.open(STRIPE.monthly,"_blank")}>S'abonner</button></div>
+      <div className="prc lt"><div style={{fontSize:16,fontWeight:700,color:"#06b6d4"}}>À Vie</div><div style={{fontSize:32,fontWeight:800,color:"#fff"}}>44.99€</div>
+        <button className="btn" style={{width:"100%",marginTop:14,padding:12,borderRadius:12,background:"rgba(6,182,212,.1)",color:"#22d3ee",fontWeight:700,fontSize:13,border:"1px solid rgba(6,182,212,.2)",cursor:"pointer"}} onClick={()=>window.open(STRIPE.lifetime,"_blank")}>Acheter</button></div></div>
+    <button className="btn btn-s" onClick={close} style={{width:"100%",marginTop:14}}>Fermer</button></div></div>}
 
+  /* ===== APP ===== */
   return(
-    <div style={{minHeight:"100vh",height:"100vh",display:"flex",flexDirection:"column",background:"#060a0c",color:"#b0c0c8",overflowX:"hidden"}}><style>{S}</style><div className="mesh"/>
+    <div style={{minHeight:"100vh",height:"100vh",display:"flex",flexDirection:"column",background:"#050809",color:"#94a3b8",overflowX:"hidden"}}><style>{S}</style>
+      <div style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none",background:"radial-gradient(ellipse 60% 40% at 50% 0%,rgba(13,148,136,.04),transparent)"}}/>
       {pricing&&<PricingModal close={()=>setPricing(false)}/>}
       {auth&&<AuthModal mode={auth} onClose={()=>setAuth(null)} onSuccess={()=>setAuth(null)}/>}
       {preview&&(<div className="ov" onClick={()=>setPreview(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:700,width:"100%"}}>
-        <div style={{display:"flex",gap:6,marginBottom:12,justifyContent:"center"}}>{["split","blink","overlay"].map(m=><button key={m} className="btn btn-s" onClick={()=>setDm(m)} style={{padding:"6px 12px",fontSize:11,background:dm===m?"rgba(20,184,166,.12)":"rgba(255,255,255,.03)",color:dm===m?"#5eead4":"#666"}}>{m}</button>)}</div>
+        <div style={{display:"flex",gap:6,marginBottom:12,justifyContent:"center"}}>{["split","blink","overlay"].map(m=><button key={m} className="btn btn-s" onClick={()=>setDm(m)} style={{padding:"6px 14px",fontSize:11,background:dm===m?"rgba(13,148,136,.1)":"rgba(255,255,255,.03)",color:dm===m?"#2dd4bf":"#64748b"}}>{m}</button>)}</div>
         {dm==="split"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}><div>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",borderRadius:12}}/>}</div><div>{preview.thumb&&<img src={preview.thumb} style={{width:"100%",borderRadius:12}}/>}</div></div>}
         {dm==="blink"&&<div style={{marginBottom:10,textAlign:"center",position:"relative"}}>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{maxWidth:"100%",maxHeight:350,borderRadius:12}}/>}{preview.thumb&&<img src={preview.thumb} style={{position:"absolute",left:0,top:0,maxWidth:"100%",maxHeight:350,borderRadius:12,animation:"blink 1.2s infinite"}}/>}</div>}
         {dm==="overlay"&&<div style={{marginBottom:10,position:"relative"}}>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",maxHeight:350,objectFit:"contain",borderRadius:12}}/>}{preview.thumb&&<img src={preview.thumb} style={{position:"absolute",inset:0,width:"100%",maxHeight:350,objectFit:"contain",borderRadius:12,opacity:.5,mixBlendMode:"difference"}}/>}</div>}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>{[{l:"Hash Orig",v:preview.origHash,c:"#7a9aaa"},{l:"Hash New",v:preview.hash,c:"#5eead4"},{l:"Size",v:`${preview.w}×${preview.h}`,c:"#67e8f9"},{l:"Diff",v:preview.similarity+"%",c:preview.similarity>50?"#fb7185":"#5eead4"}].map((s,i)=><div key={i} style={{background:"rgba(255,255,255,.025)",padding:"8px",borderRadius:8}}><div style={{fontSize:8,color:"#3d5a6a",textTransform:"uppercase"}}>{s.l}</div><div className="mono" style={{fontSize:12,fontWeight:700,color:s.c,marginTop:1}}>{s.v}</div></div>)}</div>
-        <div style={{display:"flex",gap:8,justifyContent:"center"}}><button className="btn btn-p" style={{padding:"10px 20px"}} onClick={()=>{dl(preview);setPreview(null)}}>📥 Download</button><button className="btn btn-s" onClick={()=>setPreview(null)}>Fermer</button></div></div></div>)}
-      {panel&&(<div className="ov" onClick={()=>setPanel(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:460,width:"100%",maxHeight:"80vh",overflowY:"auto",background:"#0c1216",border:"1px solid rgba(255,255,255,.08)",borderRadius:20,padding:"24px 20px"}}>
-        {panel==="audit"&&<><h3 style={{fontSize:17,fontWeight:700,color:"#fff",marginBottom:12}}>🛡️ Privacy Audit</h3>{[{l:"EXIF",s:tf.metadata},{l:"GPS",s:tf.location},{l:"Device",s:tf.metaTemplate},{l:"Timeline",s:tf.fakeTimeline},{l:"Filename",s:tf.randomName},{l:"Pixels",s:tf.crop||tf.colors||tf.noise},{l:"Couleurs",s:tf.colors||tf.lut}].map((a,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 12px",borderRadius:8,background:"rgba(255,255,255,.02)",marginBottom:3}}><span style={{fontSize:12,color:"#9ab"}}>{a.l}</span><span style={{fontSize:11,fontWeight:600,color:a.s?"#5eead4":"#fbbf24"}}>{a.s?"✅":"⚠️"}</span></div>)}
-          <div style={{marginTop:10,padding:12,borderRadius:8,background:activeT>=10?"rgba(94,234,212,.04)":"rgba(251,191,36,.04)"}}><div style={{fontSize:13,fontWeight:700,color:activeT>=10?"#5eead4":"#fbbf24"}}>Protection: {Math.round(activeT/Object.keys(TF).length*100)}%</div></div></>}
-        {panel==="webhook"&&<><h3 style={{fontSize:17,fontWeight:700,color:"#fff",marginBottom:12}}>🔗 Webhooks</h3>
-          <div style={{display:"flex",gap:6,marginBottom:10}}>{["discord","telegram"].map(t=><button key={t} className="btn btn-s" onClick={()=>setWh(w=>({...w,type:t}))} style={{flex:1,padding:9,fontSize:12,background:wh.type===t?"rgba(20,184,166,.1)":"rgba(255,255,255,.02)",color:wh.type===t?"#5eead4":"#5a7a8a"}}>{t}</button>)}</div>
-          <input style={{width:"100%",padding:"14px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.03)",color:"#e0eaf0",fontSize:"16px",outline:"none",fontFamily:"inherit",WebkitAppearance:"none",marginBottom:10}} placeholder={wh.type==="discord"?"URL webhook Discord":"Chat ID Telegram"} value={wh.type==="discord"?wh.discord:wh.telegram} onChange={e=>setWh(w=>({...w,[w.type]:e.target.value}))} autoCapitalize="off" autoCorrect="off" spellCheck="false"/>
-          <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:10}}>
-            <div onClick={()=>setWh(w=>({...w,on:!w.on}))} style={{width:46,height:26,borderRadius:13,background:wh.on?"#14b8a6":"rgba(255,255,255,.1)",cursor:"pointer",position:"relative"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>{[{l:"Hash Orig",v:preview.origHash,c:"#94a3b8"},{l:"Hash New",v:preview.hash,c:"#2dd4bf"},{l:"Size",v:`${preview.w}×${preview.h}`,c:"#22d3ee"},{l:"Diff",v:preview.similarity+"%",c:preview.similarity>50?"#f87171":"#2dd4bf"}].map((s,i)=><div key={i} style={{background:"rgba(255,255,255,.02)",padding:10,borderRadius:10}}><div style={{fontSize:9,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</div><div className="mono" style={{fontSize:13,fontWeight:700,color:s.c,marginTop:2}}>{s.v}</div></div>)}</div>
+        <div style={{display:"flex",gap:8,justifyContent:"center"}}><button className="btn btn-p" style={{padding:"10px 22px"}} onClick={()=>{dl(preview);setPreview(null)}}>📥 Download</button><button className="btn btn-s" onClick={()=>setPreview(null)}>Fermer</button></div></div></div>)}
+      {panel&&(<div className="ov" onClick={()=>setPanel(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:460,width:"100%",maxHeight:"80vh",overflowY:"auto",background:"linear-gradient(180deg,#0a1014,#080c10)",border:"1px solid rgba(255,255,255,.08)",borderRadius:22,padding:"28px 24px"}}>
+        {panel==="audit"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>🛡️ Privacy Audit</h3>{[{l:"EXIF",s:tf.metadata},{l:"GPS",s:tf.location},{l:"Device",s:tf.metaTemplate},{l:"Timeline",s:tf.fakeTimeline},{l:"Filename",s:tf.randomName},{l:"Pixels",s:tf.crop||tf.colors||tf.noise},{l:"Couleurs",s:tf.colors||tf.lut}].map((a,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:4}}><span style={{fontSize:13,color:"#94a3b8"}}>{a.l}</span><span style={{fontSize:12,fontWeight:600,color:a.s?"#2dd4bf":"#fbbf24"}}>{a.s?"✓":"⚠"}</span></div>)}
+          <div style={{marginTop:12,padding:14,borderRadius:10,background:activeT>=10?"rgba(45,212,191,.04)":"rgba(251,191,36,.04)"}}><div style={{fontSize:14,fontWeight:700,color:activeT>=10?"#2dd4bf":"#fbbf24"}}>Protection: {Math.round(activeT/Object.keys(TF).length*100)}%</div></div></>}
+        {panel==="webhook"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>🔗 Webhooks</h3>
+          <div style={{display:"flex",gap:6,marginBottom:12}}>{["discord","telegram"].map(t=><button key={t} className="btn btn-s" onClick={()=>setWh(w=>({...w,type:t}))} style={{flex:1,padding:10,fontSize:12,background:wh.type===t?"rgba(13,148,136,.08)":"rgba(255,255,255,.02)",color:wh.type===t?"#2dd4bf":"#64748b"}}>{t}</button>)}</div>
+          <input style={{width:"100%",padding:"14px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.03)",color:"#e2e8f0",fontSize:"16px",outline:"none",fontFamily:"inherit",WebkitAppearance:"none",marginBottom:12}} placeholder={wh.type==="discord"?"URL webhook Discord":"Chat ID Telegram"} value={wh.type==="discord"?wh.discord:wh.telegram} onChange={e=>setWh(w=>({...w,[w.type]:e.target.value}))}/>
+          <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
+            <div onClick={()=>setWh(w=>({...w,on:!w.on}))} style={{width:46,height:26,borderRadius:13,background:wh.on?"linear-gradient(135deg,#0d9488,#06b6d4)":"rgba(255,255,255,.1)",cursor:"pointer",position:"relative"}}>
               <div style={{width:22,height:22,borderRadius:11,background:"#fff",position:"absolute",top:2,left:wh.on?22:2,transition:"left .15s"}}/></div>
-            <span style={{fontSize:12,color:wh.on?"#5eead4":"#5a7a8a"}}>{wh.on?"Activé":"Désactivé"}</span></div>
-          <button className="btn btn-p" style={{width:"100%",padding:12}} onClick={()=>{try{localStorage.setItem("v_wh",JSON.stringify(wh))}catch(e){}}}>Sauvegarder</button></>}
-        {panel==="history"&&<><h3 style={{fontSize:17,fontWeight:700,color:"#fff",marginBottom:12}}>📋 Historique</h3>{!hist.length&&<div style={{color:"#3d5a6a",fontSize:12}}>Aucun traitement</div>}{hist.map((h,i)=><div key={i} style={{padding:"8px 12px",borderRadius:8,background:"rgba(255,255,255,.02)",marginBottom:4}}><div style={{fontSize:12,fontWeight:600,color:"#ddd"}}>{h.files} fichiers → {h.versions}v • {h.time}</div><div style={{fontSize:10,color:"#3d5a6a"}}>{h.date}</div></div>)}</>}
-        <button className="btn btn-s" onClick={()=>setPanel(null)} style={{marginTop:10,width:"100%"}}>Fermer</button></div></div>)}
+            <span style={{fontSize:13,color:wh.on?"#2dd4bf":"#64748b"}}>{wh.on?"Activé":"Désactivé"}</span></div>
+          <button className="btn btn-p" style={{width:"100%",padding:12}}>Sauvegarder</button></>}
+        {panel==="history"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>📋 Historique</h3>{!hist.length&&<div style={{color:"#475569",fontSize:13}}>Aucun traitement</div>}{hist.map((h,i)=><div key={i} style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:4}}><div style={{fontSize:13,fontWeight:600,color:"#e2e8f0"}}>{h.files} fichiers → {h.versions}v • {h.time}</div><div style={{fontSize:11,color:"#475569"}}>{h.date}</div></div>)}</>}
+        <button className="btn btn-s" onClick={()=>setPanel(null)} style={{marginTop:12,width:"100%"}}>Fermer</button></div></div>)}
 
-      <header className="app-header" style={{padding:"10px 16px",borderBottom:"1px solid rgba(255,255,255,.05)",flexShrink:0,position:"relative",zIndex:2}}>
+      <header className="app-header" style={{padding:"12px 18px",borderBottom:"1px solid rgba(255,255,255,.05)",flexShrink:0,position:"relative",zIndex:2}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",minWidth:0}} onClick={()=>setPg("landing")}>
-            <div style={{width:28,height:28,borderRadius:7,background:"linear-gradient(135deg,#0d9488,#14b8a6)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:5}} alt="V"/></div>
-            <span style={{fontWeight:800,fontSize:15,color:"#f0fdfa",letterSpacing:"-.8px"}}>Veilora</span>
-            {user&&(pro?<span className="badge bt" style={{fontSize:9}}>PRO</span>:<span className="badge ba" style={{fontSize:9}}>FREE {du}/{FREE_LIMIT}</span>)}
-            {!user&&<span className="badge" style={{fontSize:9,background:"rgba(251,113,133,.08)",color:"#fb7185"}}>Non connecté</span>}</div>
+            <div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain"}} alt="V"/></div>
+            <span style={{fontWeight:800,fontSize:15,color:"#f1f5f9",letterSpacing:"-.8px"}}>Veilora</span>
+            {user&&(pro?<span className="badge bt" style={{fontSize:9}}>PRO</span>:<span className="badge ba" style={{fontSize:9}}>FREE {du}/{FREE_LIMIT}</span>)}</div>
           <div className="app-header-btns" style={{display:"flex",gap:4,alignItems:"center"}}>
             <button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={()=>setPanel("audit")}>🛡️</button>
             <button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={()=>setPanel("webhook")}>🔗</button>
             <button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={()=>setPanel("history")}>📋</button>
-            {!pro&&user&&<button className="btn" style={{padding:"5px 10px",fontSize:10,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontWeight:700,border:"none"}} onClick={()=>setPricing(true)}>⚡ Pro</button>}
-            {!user&&<button className="btn" style={{padding:"5px 10px",fontSize:10,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#14b8a6)",color:"#021a16",fontWeight:700,border:"none"}} onClick={()=>setAuth("login")}>Connexion</button>}
+            {!pro&&user&&<button className="btn" style={{padding:"5px 10px",fontSize:10,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#06b6d4)",color:"#fff",fontWeight:700,border:"none"}} onClick={()=>setPricing(true)}>⚡ Pro</button>}
             {user&&<button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={doLogout}>Déco</button>}
-            {files.length>0&&<button className="btn btn-s" style={{padding:"5px 8px",fontSize:10,color:"#fb7185"}} onClick={clr}>✕</button>}</div></div></header>
+            {files.length>0&&<button className="btn btn-s" style={{padding:"5px 8px",fontSize:10,color:"#f87171"}} onClick={clr}>✕</button>}</div></div></header>
 
-      <main style={{flex:1,overflow:"auto",padding:"14px 16px",position:"relative",zIndex:1}}>
-        <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:3,borderRadius:10,maxWidth:240,margin:"0 auto 12px",border:"1px solid rgba(255,255,255,.05)"}}>
-          {[["photo","📸 Photos"],["video","🎬 Vidéos"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"8px 0",fontSize:12,fontWeight:700,borderRadius:8,background:mode===m?"linear-gradient(135deg,#0d9488,#14b8a6)":"transparent",color:mode===m?"#021a16":"#4a6a78"}}>{l}</button>)}</div>
+      <main style={{flex:1,overflow:"auto",padding:"16px 18px",position:"relative",zIndex:1}}>
+        <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:3,borderRadius:10,maxWidth:240,margin:"0 auto 14px",border:"1px solid rgba(255,255,255,.05)"}}>
+          {[["photo","📸 Photos"],["video","🎬 Vidéos"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"8px 0",fontSize:12,fontWeight:700,borderRadius:8,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b"}}>{l}</button>)}</div>
         <div className="preset-grid" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:5,maxWidth:500,margin:"0 auto 14px"}}>
           {PRESETS.map(p=><div key={p.id} className={`pc ${preset?.id===p.id?"on":""}`} onClick={()=>applyP(p)}>
             <div style={{fontSize:18,marginBottom:1}}>{p.icon}</div>
-            <div style={{fontSize:10,fontWeight:700,color:preset?.id===p.id?"#5eead4":"#6a8a9a"}}>{p.name}</div></div>)}</div>
+            <div style={{fontSize:10,fontWeight:700,color:preset?.id===p.id?"#2dd4bf":"#64748b"}}>{p.name}</div></div>)}</div>
 
         {res.length>0&&<div style={{display:"flex",gap:6,marginBottom:12,justifyContent:"center"}}>
           <button className={`btn ${vw==="config"?"btn-p":"btn-s"}`} style={{padding:"7px 16px",fontSize:11}} onClick={()=>setVw("config")}>⚙️ Config</button>
-          <button className={`btn ${vw==="results"?"btn-p":"btn-s"}`} style={{padding:"7px 16px",fontSize:11}} onClick={()=>setVw("results")}>✅ Résultats ({totV})</button></div>}
+          <button className={`btn ${vw==="results"?"btn-p":"btn-s"}`} style={{padding:"7px 16px",fontSize:11}} onClick={()=>setVw("results")}>✓ Résultats ({totV})</button></div>}
 
         {vw==="config"&&(<div className="app-layout" style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:14}}>
           <aside className="app-side" style={{display:"flex",flexDirection:"column",gap:8}}>
             <div className="card" style={{padding:"14px 16px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span style={{fontSize:13,fontWeight:700,color:"#e8f4f8"}}>🎚️ Humanizer</span><span style={{fontSize:12,fontWeight:700,color:iC}}>{iL}</span></div>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>🎚️ Humanizer</span><span style={{fontSize:12,fontWeight:700,color:iC}}>{iL}</span></div>
               <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)}/></div>
             <div className="card" style={{padding:"12px 16px"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
-                <span style={{fontSize:13,fontWeight:700,color:"#e0e8f0"}}>Versions</span>
+                <span style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>Versions</span>
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <button className="cnt" style={{width:34,height:34,fontSize:16}} onClick={()=>setVer(v=>Math.max(1,v-1))}>−</button>
-                  <div className="mono" style={{fontSize:24,fontWeight:700,color:"#5eead4",width:40,textAlign:"center"}}>{ver}</div>
-                  <button className="cnt" style={{width:34,height:34,fontSize:16}} onClick={()=>setVer(v=>Math.min(pro?100:5,v+1))}>+</button></div></div>
-              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,20,50,100].map(n=><button key={n} className="btn btn-s" onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"4px 8px",fontSize:10,fontWeight:700,background:ver===n?"rgba(20,184,166,.12)":"rgba(255,255,255,.02)",color:ver===n?"#5eead4":"#4a6a78",opacity:!pro&&n>5?.35:1}}>{n}</button>)}</div></div>
+                  <button className="cnt" onClick={()=>setVer(v=>Math.max(1,v-1))}>−</button>
+                  <div className="mono" style={{fontSize:22,fontWeight:700,color:"#2dd4bf",width:36,textAlign:"center"}}>{ver}</div>
+                  <button className="cnt" onClick={()=>setVer(v=>Math.min(pro?100:5,v+1))}>+</button></div></div>
+              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,20,50,100].map(n=><button key={n} className="btn btn-s" onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"4px 8px",fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:ver===n?"#2dd4bf":"#64748b",opacity:!pro&&n>5?.3:1}}>{n}</button>)}</div></div>
             {tf.location&&<div className="card" style={{padding:"12px 14px"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"#e0e8f0",marginBottom:6}}>📍 GPS Spoofing</div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:3}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"5px 10px",fontSize:10,opacity:!pro&&i>3?.35:1}}>{l.city}</button>)}</div></div>}
+              <div style={{fontSize:12,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>📍 GPS Spoofing</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:3}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"5px 10px",fontSize:10,opacity:!pro&&i>3?.3:1}}>{l.city}</button>)}</div></div>}
             {tf.metaTemplate&&<div className="card" style={{padding:"12px 14px"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"#e0e8f0",marginBottom:6}}>🧹 Fake Device</div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:3}}>{MTPL.map((m,i)=><button key={m.id} className={`lb ${mtpl.id===m.id?"on":""}`} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"5px 10px",fontSize:10,opacity:!pro&&i>2?.35:1}}>{m.name}</button>)}</div></div>}
+              <div style={{fontSize:12,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>🧹 Fake Device</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:3}}>{MTPL.map((m,i)=><button key={m.id} className={`lb ${mtpl.id===m.id?"on":""}`} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"5px 10px",fontSize:10,opacity:!pro&&i>2?.3:1}}>{m.name}</button>)}</div></div>}
             <div className="card" style={{padding:"10px 10px",flex:1}}>
               <div style={{display:"flex",justifyContent:"space-between",padding:"0 6px",marginBottom:4}}>
-                <span style={{fontSize:12,fontWeight:700,color:"#e0e8f0"}}>Transformations</span>
+                <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>Transformations</span>
                 <span className="badge bt" style={{fontSize:10}}>{activeT}</span></div>
               <div style={{maxHeight:250,overflowY:"auto"}}>{Object.entries(TF).map(([k,m])=>{const on=tf[k];const lk=!pro&&m.p;return(
-                <div key={k} className={`chk ${on&&!lk?"on":""}`} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{opacity:lk?.3:1,padding:"7px 10px"}}>
+                <div key={k} className={`chk ${on&&!lk?"on":""}`} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{opacity:lk?.25:1,padding:"7px 10px"}}>
                   <div className={`dot ${on&&!lk?"on":""}`} style={{width:16,height:16,fontSize:9}}>{on&&!lk?"✓":lk?"🔒":""}</div>
-                  <div style={{fontSize:12,fontWeight:600,color:on&&!lk?"#5eead4":"#4a6a78"}}>{m.i} {m.l}</div></div>)})}</div></div>
+                  <div style={{fontSize:12,fontWeight:600,color:on&&!lk?"#2dd4bf":"#64748b"}}>{m.i} {m.l}</div></div>)})}</div></div>
           </aside>
 
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}
               onClick={()=>{if(!ck())return;ir.current?.click()}} className="card"
-              style={{padding:files.length?"28px 16px":"48px 16px",textAlign:"center",cursor:"pointer",borderColor:drag?"rgba(20,184,166,.3)":undefined}}>
-              <div style={{fontSize:files.length?24:38,marginBottom:6,animation:"float 3.5s ease infinite"}}>{drag?"📥":mode==="photo"?"📸":"🎬"}</div>
-              <div style={{fontSize:15,fontWeight:700,color:"#f0fdfa",marginBottom:3}}>{drag?"Lâche ici":!user?"Connecte-toi pour commencer":`Drop tes ${mode==="photo"?"photos":"vidéos"}`}</div>
-              <div className="mono" style={{fontSize:12,color:"#2a4a58"}}>{mode==="photo"?"JPG • PNG • WEBP":"MP4 • MOV • WEBM"}</div>
+              style={{padding:files.length?"28px 16px":"52px 16px",textAlign:"center",cursor:"pointer",borderColor:drag?"rgba(13,148,136,.3)":undefined}}>
+              <div style={{fontSize:files.length?24:42,marginBottom:8,animation:"float 3.5s ease infinite"}}>{drag?"📥":mode==="photo"?"📸":"🎬"}</div>
+              <div style={{fontSize:15,fontWeight:700,color:"#f1f5f9",marginBottom:4}}>{drag?"Lâche ici":`Drop tes ${mode==="photo"?"photos":"vidéos"}`}</div>
+              <div className="mono" style={{fontSize:12,color:"#334155"}}>{mode==="photo"?"JPG • PNG • WEBP":"MP4 • MOV • WEBM"}</div>
               <input ref={ir} type="file" multiple accept={mode==="photo"?"image/*":"video/*"} style={{display:"none"}} onChange={e=>{if(!ck())return;add(e.target.files)}}/></div>
 
             {files.length>0&&<div className="stat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>
-              {[{l:"Fichiers",v:files.length,c:"#5eead4"},{l:"Versions",v:files.length*ver,c:"#a78bfa"},{l:"Taille",v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24"},{l:"Intensité",v:iL,c:iC}].map((s,i)=>(
-                <div key={i} className="card" style={{padding:"8px 10px"}}><div style={{fontSize:9,color:"#2a4a58",textTransform:"uppercase",letterSpacing:.6}}>{s.l}</div><div className="mono" style={{fontSize:17,fontWeight:700,color:s.c,marginTop:1}}>{s.v}</div></div>))}</div>}
+              {[{l:"Fichiers",v:files.length,c:"#2dd4bf"},{l:"Versions",v:files.length*ver,c:"#a78bfa"},{l:"Taille",v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24"},{l:"Intensité",v:iL,c:iC}].map((s,i)=>(
+                <div key={i} className="card" style={{padding:"10px 12px"}}><div style={{fontSize:9,color:"#334155",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</div><div className="mono" style={{fontSize:16,fontWeight:700,color:s.c,marginTop:2}}>{s.v}</div></div>))}</div>}
 
             {files.length>0&&<div style={{flex:1,overflow:"auto"}}>{files.map(f=>(
               <div key={f.id} className="row" style={{padding:"10px 12px",gap:10}}>
                 {thumbs[f.id]?<img src={thumbs[f.id]} className="thumb" style={{width:44,height:44}}/>:<div className="thumb" style={{width:44,height:44,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🎬</div>}
-                <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#e0e8f0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{f.name}</div>
-                  <div className="mono" style={{fontSize:11,color:"#3d5a6a"}}>{fb(f.size)} <span style={{color:"#5eead4"}}>→ ×{ver}</span></div></div>
-                <button className="btn btn-s" style={{padding:"3px 8px",fontSize:10,color:"#fb7185"}} onClick={()=>setFiles(p=>p.filter(x=>x.id!==f.id))}>✕</button></div>))}</div>}
+                <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#e2e8f0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{f.name}</div>
+                  <div className="mono" style={{fontSize:11,color:"#475569"}}>{fb(f.size)} <span style={{color:"#2dd4bf"}}>→ ×{ver}</span></div></div>
+                <button className="btn btn-s" style={{padding:"3px 8px",fontSize:10,color:"#f87171"}} onClick={()=>setFiles(p=>p.filter(x=>x.id!==f.id))}>✕</button></div>))}</div>}
 
             <button className="btn btn-p" onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:14,fontSize:14,borderRadius:12}}>
               {proc?"⏳ Traitement...":`🔒 Traiter ${files.length||0} fichier${files.length>1?"s":""} → ${(files.length||0)*ver} versions`}</button>
           </div></div>)}
 
         {vw==="results"&&(<div>
-          {proc&&<div className="card" style={{padding:"40px 20px",textAlign:"center",marginBottom:14}}>
+          {proc&&<div className="card" style={{padding:"44px 20px",textAlign:"center",marginBottom:14}}>
             <div style={{fontSize:28,marginBottom:10}}><span style={{display:"inline-block",animation:"spin 1s linear infinite"}}>⚙️</span></div>
-            <div style={{fontSize:15,fontWeight:700,color:"#fff",marginBottom:4}}>Randomisation...</div>
-            <div className="mono" style={{fontSize:12,color:"#3d5a6a",marginBottom:14}}>{prog.f} — v{prog.v}/{ver}</div>
-            <div className="pbar" style={{maxWidth:400,margin:"0 auto"}}><div className="pfill" style={{width:`${prog.t?(prog.c/prog.t)*100:0}%`}}/></div>
-            <div className="mono" style={{fontSize:11,color:"#3d5a6a",marginTop:6}}>{prog.c}/{prog.t}</div></div>}
+            <div style={{fontSize:15,fontWeight:700,color:"#fff",marginBottom:4}}>Randomisation en cours...</div>
+            <div className="mono" style={{fontSize:12,color:"#475569",marginBottom:14}}>{prog.f} — v{prog.v}/{ver}</div>
+            <div className="pbar" style={{maxWidth:400,margin:"0 auto"}}><div className="pfill" style={{width:`${prog.t?(prog.c/prog.t)*100:0}%`}}/></div></div>}
           {!proc&&totV>0&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:6}}>
-            <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
-              <span style={{fontSize:14,fontWeight:700,color:"#fff"}}>✅ {totV} versions</span>
-              <span className="badge bg" style={{fontSize:9}}>Uniques</span></div>
-            <button className="btn btn-p" style={{padding:"8px 18px",fontSize:12}} onClick={dlAll}>📥 Tout ({totV})</button></div>}
+            <span style={{fontSize:14,fontWeight:700,color:"#fff"}}>✓ {totV} versions uniques</span>
+            <button className="btn btn-p" style={{padding:"8px 20px",fontSize:12}} onClick={dlAll}>📥 Tout télécharger</button></div>}
           {res.map((g,gi)=><div key={gi} className="card" style={{marginBottom:8}}>
-            <div style={{padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",gap:10}}>
+            <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",gap:10}}>
               {thumbs[g.orig.id]?<img src={thumbs[g.orig.id]} style={{width:38,height:38,borderRadius:8,objectFit:"cover"}}/>:null}
-              <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#eee",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{g.orig.name}</div><div className="mono" style={{fontSize:10,color:"#3d5a6a"}}>{fb(g.orig.size)} • {g.vers.length}v</div></div></div>
+              <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#e2e8f0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{g.orig.name}</div><div className="mono" style={{fontSize:10,color:"#475569"}}>{fb(g.orig.size)} • {g.vers.length}v</div></div></div>
             <div className="ver-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:5,padding:"10px 12px"}}>{g.vers.map((v,vi)=>(
-              <div key={vi} className="vc" onClick={()=>v.thumb?setPreview({...v,vi:vi+1,origId:g.orig.id,origName:g.orig.name,origSize:g.orig.size}):dl(v)}>
+              <div key={vi} className="vc" onClick={()=>v.thumb?setPreview({...v,vi:vi+1,origId:g.orig.id}):dl(v)}>
                 {v.thumb&&<img src={v.thumb} style={{width:"100%",height:60,objectFit:"cover",borderRadius:8,marginBottom:4,display:"block"}}/>}
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <span className="badge bt" style={{fontSize:8}}>v{vi+1}</span>
-                  {v.similarity!=null&&<span className="mono" style={{fontSize:8,color:v.similarity>50?"#fb7185":"#5eead4"}}>{v.similarity}%</span>}</div></div>))}</div></div>)}
+                  {v.similarity!=null&&<span className="mono" style={{fontSize:8,color:v.similarity>50?"#f87171":"#2dd4bf"}}>{v.similarity}%</span>}</div></div>))}</div></div>)}
           {!proc&&totV>0&&<button className="btn btn-s" onClick={dlAll} style={{width:"100%",padding:12,fontSize:13,marginTop:6}}>📥 Télécharger les {totV} fichiers</button>}
         </div>)}
       </main></div>);
