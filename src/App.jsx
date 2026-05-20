@@ -57,7 +57,7 @@ const GUIDE=[
   {title:"5. Lance le traitement",desc:"Clique sur Traiter. Veilora génère jusqu'à 100 versions uniques par fichier. Chaque version a des pixels, métadonnées et hash différents.",icon:"M13 10V3L4 14h7v7l9-11h-7z"},
   {title:"6. Vérifie avec Visual Diff",desc:"Compare l'original et les versions en mode Split, Blink ou Overlay. Le Similarity Score te prouve que chaque version est techniquement unique.",icon:"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"},
   {title:"7. Télécharge & partage",desc:"Download toutes les versions en un clic ou envoie-les automatiquement sur Discord/Telegram via webhook. Tes fichiers sont prêts à poster.",icon:"M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"},
-  {title:"8. Content Studio IA",desc:"Ouvre l'onglet Content Studio dans l'app. Décris ta vidéo en une phrase (ex: "je montre ma routine skincare"). L'IA génère automatiquement le titre, la caption, les textes à afficher sur la vidéo et 30 hashtags. Copie chaque section en 1 clic et colle directement dans ton post.",icon:"M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"},
+  {title:"8. Content Studio IA",desc:"Ouvre l'onglet Content Studio dans l'app. Décris ta vidéo en une phrase (ex: 'je montre ma routine skincare'). L'IA génère automatiquement le titre, la caption, les textes à afficher sur la vidéo et 30 hashtags. Copie chaque section en 1 clic et colle directement dans ton post.",icon:"M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"},
 ];
 
 const FAQ=[
