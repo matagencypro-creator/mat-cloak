@@ -57,7 +57,7 @@ const GUIDE=[
   {title:"5. Lance le traitement",desc:"Clique sur Traiter. Veilora génère jusqu'à 100 versions uniques par fichier. Chaque version a des pixels, métadonnées et hash différents.",icon:"M13 10V3L4 14h7v7l9-11h-7z"},
   {title:"6. Vérifie avec Visual Diff",desc:"Compare l'original et les versions en mode Split, Blink ou Overlay. Le Similarity Score te prouve que chaque version est techniquement unique.",icon:"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"},
   {title:"7. Télécharge & partage",desc:"Download toutes les versions en un clic ou envoie-les automatiquement sur Discord/Telegram via webhook. Tes fichiers sont prêts à poster.",icon:"M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"},
-  {title:"8. Content Studio IA",desc:"Passe sur l'onglet Content Studio dans l'app. Choisis le type (captions, titres, hashtags, script, bio), entre ta niche, sélectionne la plateforme et le ton — l'IA génère tout en 1 clic. Copie et colle directement sur tes posts.",icon:"M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"},
+  {title:"8. Content Studio IA",desc:"Ouvre l'onglet Content Studio dans l'app. Décris ta vidéo en une phrase (ex: "je montre ma routine skincare"). L'IA génère automatiquement le titre, la caption, les textes à afficher sur la vidéo et 30 hashtags. Copie chaque section en 1 clic et colle directement dans ton post.",icon:"M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"},
 ];
 
 const FAQ=[
@@ -69,7 +69,7 @@ const FAQ=[
   {q:"Free vs Pro, quelle différence ?",a:"Free : 3 fichiers/jour, 5 versions max, 4 transformations de base. Pro (7.99€/mois ou 44.99€ à vie) : fichiers illimités, 100 versions par fichier, 13 transformations incluant AI Noise, LUT, Perspective Warp, GPS Spoofing, Fake Device, et webhooks Discord/Telegram."},
   {q:"Le webhook Discord/Telegram, comment ça marche ?",a:"Dans l'app, clique sur l'icône Webhooks. Colle l'URL de ton webhook Discord ou ton Chat ID Telegram. Active le toggle. Après chaque traitement, toutes les versions sont automatiquement envoyées sur ton channel. Zéro action manuelle."},
   {q:"Je peux traiter des vidéos ?",a:"Oui. Veilora supporte les formats MP4, MOV et WEBM. Les vidéos sont renommées avec un nom aléatoire et les métadonnées sont modifiées. Le traitement pixel par pixel n'est pas disponible pour les vidéos (limitation navigateur)."},
-  {q:"C'est quoi le Content Studio ?",a:"Le Content Studio est un outil IA intégré directement dans Veilora (onglet dédié dans l'app). Il te permet de générer en 1 clic des captions Instagram/TikTok, des titres et hooks accrocheurs, des packs de 30 hashtags optimisés, des scripts de Reels complets avec indications de montage, et des bios percutantes. Tu choisis ta niche, ta plateforme, la langue (FR/EN) et le ton (Pro, Fun, Storytelling, Viral, Edgy). Réservé aux utilisateurs Pro."},
+  {q:"C'est quoi le Content Studio ?",a:"Le Content Studio est un outil IA intégré dans Veilora (onglet dédié). Tu décris ta vidéo en une phrase et l'IA génère tout : titre accrocheur + 3 alternatives, caption complète avec hook et CTA, textes à afficher sur la vidéo, et 30 hashtags. Chaque section copiable en 1 clic. Choix plateforme, langue et ton. Réservé Pro."},
 ];
 
 function processImg(file,tf,vi,I){return new Promise(res=>{const img=new Image();img.onload=()=>{const s=vi+Math.random();const r=(a,b)=>a+Math.abs(Math.sin(s*(b+1)))*(b-a);
@@ -146,7 +146,7 @@ export default function App(){
   const[wh,setWh]=useState({discord:"",telegram:"",on:false,type:"discord"});
   const[faqO,setFaqO]=useState(null);const[baSlider,setBaSlider]=useState(50);
   const[hcFiles,setHcFiles]=useState([null,null]);const[hcResult,setHcResult]=useState(null);const[hcLoading,setHcLoading]=useState(false);
-  const[cs,setCs]=useState({niche:"",tone:"pro",platform:"instagram",type:"caption",lang:"fr",result:"",loading:false,copied:false});
+  const[cs,setCs]=useState({desc:"",tone:"pro",platform:"instagram",lang:"fr",loading:false,sections:null,copiedIdx:null});
   const[user,setUser]=useState(null);const[profile,setProfile]=useState(null);const[pro,setPro]=useState(false);const[du,setDu]=useState(0);
   const ir=useRef();const hcRef1=useRef();const hcRef2=useRef();
   const cFiles=useCounter(142847);const cVersions=useCounter(1284920);const cUsers=useCounter(3847);
@@ -191,16 +191,23 @@ export default function App(){
     if(nf[0]&&nf[1]){setHcLoading(true);try{const[h1,h2]=await Promise.all([pH(nf[0]),pH(nf[1])]);
       const match=h1===h2;setHcResult({h1:h1.slice(0,32),h2:h2.slice(0,32),match,s1:fb(nf[0].size),s2:fb(nf[1].size)})}catch(e){setHcResult(null)}setHcLoading(false)}};
   const goStripe=(url)=>{if(user){window.open(url,"_blank")}else{setPendingStripe(url);setAuth("register")}};
-  const generateContent=async()=>{if(!cs.niche.trim())return;setCs(p=>({...p,loading:true,result:"",copied:false}));
-    const prompts={caption:`Tu es un expert en social media marketing. G\u00e9n\u00e8re 3 captions ${cs.lang==="fr"?"en fran\u00e7ais":"in English"} pour un Reel ${cs.platform} dans la niche "${cs.niche}". Ton: ${cs.tone==="pro"?"professionnel et autoritaire":cs.tone==="fun"?"fun et d\u00e9contract\u00e9":cs.tone==="storytelling"?"storytelling \u00e9motionnel":cs.tone==="viral"?"viral et accrocheur":"provocateur et polarisant"}. Chaque caption doit avoir un hook percutant en premi\u00e8re ligne, du contenu engageant, un CTA, et 5-8 hashtags pertinents. S\u00e9pare chaque caption par ---`,
-      title:`Tu es un expert en social media. G\u00e9n\u00e8re 10 titres/hooks ${cs.lang==="fr"?"en fran\u00e7ais":"in English"} ultra accrocheurs pour des Reels ${cs.platform} dans la niche "${cs.niche}". Ton: ${cs.tone==="pro"?"professionnel":cs.tone==="fun"?"fun":cs.tone==="storytelling"?"storytelling":cs.tone==="viral"?"viral":"provocateur"}. Format: un titre par ligne, num\u00e9rot\u00e9. Chaque titre doit donner envie de regarder le Reel.`,
-      hashtag:`G\u00e9n\u00e8re 30 hashtags ${cs.lang==="fr"?"en fran\u00e7ais et anglais mix\u00e9s":"in English"} ultra pertinents pour des Reels ${cs.platform} dans la niche "${cs.niche}". M\u00e9lange : 10 gros hashtags (>1M posts), 10 moyens (100K-1M), 10 petits (<100K) pour maximiser la port\u00e9e. Format: tous sur une ligne s\u00e9par\u00e9s par des espaces.`,
-      script:`Tu es un expert en cr\u00e9ation de contenu vid\u00e9o. \u00c9cris un script complet ${cs.lang==="fr"?"en fran\u00e7ais":"in English"} pour un Reel ${cs.platform} de 30-60 secondes dans la niche "${cs.niche}". Ton: ${cs.tone==="pro"?"professionnel":cs.tone==="fun"?"fun":cs.tone==="storytelling"?"storytelling":cs.tone==="viral"?"viral":"provocateur"}. Inclus: [HOOK] les 3 premi\u00e8res secondes, [CONTENU] le d\u00e9veloppement, [CTA] l'appel \u00e0 l'action. Ajoute des indications de montage entre crochets.`,
-      bio:`G\u00e9n\u00e8re 5 bios ${cs.lang==="fr"?"en fran\u00e7ais":"in English"} pour un profil ${cs.platform} dans la niche "${cs.niche}". Chaque bio doit \u00eatre courte (150 caract\u00e8res max), percutante, avec des emojis pertinents et un CTA. S\u00e9pare chaque bio par ---`};
+  const generateContent=async()=>{if(!cs.desc.trim())return;setCs(p=>({...p,loading:true,sections:null,copiedIdx:null}));
+    const toneMap={pro:"professionnel et autoritaire",fun:"fun, d\u00e9contract\u00e9 et avec des emojis",storytelling:"storytelling \u00e9motionnel",viral:"viral, accrocheur et punchy",edgy:"provocateur, polarisant et audacieux"};
+    const lng=cs.lang==="fr"?"en fran\u00e7ais":"in English";
+    const prompt=`Tu es un expert en social media et cr\u00e9ation de contenu vid\u00e9o pour ${cs.platform}.
+Un cr\u00e9ateur te d\u00e9crit sa vid\u00e9o/Reel : "${cs.desc}"
+
+G\u00e9n\u00e8re TOUT le contenu n\u00e9cessaire pour poster cette vid\u00e9o ${lng}. Ton: ${toneMap[cs.tone]||toneMap.pro}.
+
+R\u00e9ponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks) avec cette structure exacte:
+{"titre":"Un titre/hook ultra accrocheur pour la vid\u00e9o (courte phrase punch)","caption":"Une caption compl\u00e8te avec hook en 1\u00e8re ligne, contenu engageant et CTA. Pas de hashtags ici.","hashtags":"30 hashtags pertinents s\u00e9par\u00e9s par des espaces (mix gros et petits)","textes_video":["Texte 1 \u00e0 afficher au d\u00e9but de la vid\u00e9o (hook visuel)","Texte 2 pour le milieu","Texte 3 pour la fin / CTA"],"alt_titres":["Titre alternatif 1","Titre alternatif 2","Titre alternatif 3"]}`;
     try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompts[cs.type]||prompts.caption}]})});
-      const d=await r.json();const txt=d.content?.map(b=>b.text||"").join("\n")||"Erreur de g\u00e9n\u00e9ration";
-      setCs(p=>({...p,result:txt,loading:false}))}catch(e){setCs(p=>({...p,result:"Erreur: "+e.message,loading:false}))}};
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
+      const d=await r.json();const raw=d.content?.map(b=>b.text||"").join("")||"";
+      try{const clean=raw.replace(/```json|```/g,"").trim();const parsed=JSON.parse(clean);
+        setCs(p=>({...p,sections:parsed,loading:false}))}
+      catch(e){setCs(p=>({...p,sections:{error:raw},loading:false}))}}
+    catch(e){setCs(p=>({...p,sections:{error:"Erreur: "+e.message},loading:false}))}};
 
   const FEATURES=[
     {t:"Photos & Vidéos",d:"Traitement batch de JPG, PNG, WEBP, MP4, MOV. Génère autant de versions uniques que nécessaire.",ic:"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"},
@@ -387,11 +394,11 @@ export default function App(){
           {/* CONTENT STUDIO SHOWCASE */}
           <section className="section" style={{maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:28}}>
-              <div className="badge bt" style={{marginBottom:12}}>Nouveau — IA int&eacute;gr&eacute;e</div>
+              <div className="badge bt" style={{marginBottom:12}}>Nouveau &mdash; IA int&eacute;gr&eacute;e</div>
               <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Content Studio</h2>
-              <p style={{fontSize:14,color:"#475569",maxWidth:500,margin:"0 auto"}}>G&eacute;n&egrave;re tout le contenu dont tu as besoin pour tes Reels, directement dans l'app.</p></div>
+              <p style={{fontSize:14,color:"#475569",maxWidth:500,margin:"0 auto"}}>D&eacute;cris ta vid&eacute;o en une phrase &mdash; l'IA g&eacute;n&egrave;re tout le contenu pour la poster.</p></div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,marginBottom:20}}>
-              {[{ic:"\ud83d\udcdd",t:"Captions",d:"3 captions avec hook, CTA et hashtags"},{ic:"\ud83c\udfaf",t:"Titres & Hooks",d:"10 titres accrocheurs pour tes Reels"},{ic:"#\ufe0f\u20e3",t:"Hashtags",d:"30 hashtags mix gros/moyens/petits"},{ic:"\ud83c\udfac",t:"Scripts",d:"Script Reel 30-60s avec montage"},{ic:"\ud83d\udc64",t:"Bios",d:"5 bios optimis\u00e9es avec emojis"}].map((c,i)=>
+              {[{ic:"\ud83c\udfaf",t:"Titre & Hook",d:"Un hook accrocheur + 3 alternatives"},{ic:"\ud83d\udcdd",t:"Caption",d:"Caption compl\u00e8te avec CTA"},{ic:"\ud83c\udfac",t:"Textes vid\u00e9o",d:"Textes \u00e0 afficher sur ta vid\u00e9o"},{ic:"#\ufe0f\u20e3",t:"Hashtags",d:"30 hashtags optimis\u00e9s"},{ic:"\ud83c\udf10",t:"Multi-langue",d:"Fran\u00e7ais ou Anglais"}].map((c,i)=>
                 <div key={i} className="feat-card" style={{padding:"18px 14px",textAlign:"center"}}>
                   <div style={{fontSize:24,marginBottom:8}}>{c.ic}</div>
                   <div style={{fontSize:12,fontWeight:700,color:"#e2e8f0",marginBottom:4}}>{c.t}</div>
@@ -400,7 +407,7 @@ export default function App(){
               <div style={{display:"flex",gap:12,alignItems:"flex-start",marginBottom:16}}>
                 <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{"\u270d\ufe0f"}</div>
                 <div><div style={{fontSize:15,fontWeight:700,color:"#e2e8f0",marginBottom:4}}>Comment &ccedil;a marche ?</div>
-                  <div style={{fontSize:13,color:"#64748b",lineHeight:1.8}}>Dans l'app, clique sur l'onglet <span style={{color:"#2dd4bf",fontWeight:600}}>Content Studio</span>. Choisis le type de contenu, entre ta niche (fitness, crypto, mode...), s&eacute;lectionne ta plateforme et ton style. L'IA g&eacute;n&egrave;re ton contenu en quelques secondes. Copie en 1 clic et colle directement dans ton post.</div></div></div>
+                  <div style={{fontSize:13,color:"#64748b",lineHeight:1.8}}>Dans l'app, ouvre l'onglet <span style={{color:"#2dd4bf",fontWeight:600}}>Content Studio</span>. D&eacute;cris ta vid&eacute;o en quelques mots (ex: &laquo; je montre ma routine skincare du matin &raquo;). Choisis ta plateforme, ton style et la langue. En 1 clic, l'IA g&eacute;n&egrave;re : le titre, la caption, les textes &agrave; afficher sur la vid&eacute;o, et 30 hashtags. Copie chaque section individuellement et colle directement.</div></div></div>
               <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
                 {["Instagram","TikTok","YouTube Shorts","X/Twitter"].map((p,i)=><span key={i} className="badge bt" style={{fontSize:10}}>{p}</span>)}
                 {["Pro","Fun","Story","Viral","Edgy"].map((t,i)=><span key={i} className="badge" style={{background:"rgba(255,255,255,.04)",color:"#94a3b8",fontSize:10}}>{t}</span>)}</div></div></section>
@@ -522,57 +529,55 @@ export default function App(){
         <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:3,borderRadius:10,maxWidth:420,margin:"0 auto 14px",border:"1px solid rgba(255,255,255,.05)"}}>
           {[["photo","\ud83d\udcf8 Photos"],["video","\ud83c\udfac Vid\u00e9os"],["studio","\u270d\ufe0f Content Studio"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{if(m==="studio"){if(!pro){setPricing(true);return}setMode(m)}else{setMode(m);clr()}}} style={{flex:1,padding:"8px 0",fontSize:11,fontWeight:700,borderRadius:8,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b",opacity:m==="studio"&&!pro?.5:1}}>{l}{m==="studio"&&!pro&&" \ud83d\udd12"}</button>)}</div>
 
-        {mode==="studio"&&pro&&(<div style={{maxWidth:600,margin:"0 auto"}}>
+        {mode==="studio"&&pro&&(<div style={{maxWidth:620,margin:"0 auto"}}>
           <div style={{textAlign:"center",marginBottom:20}}>
             <div style={{width:52,height:52,borderRadius:16,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:24,marginBottom:10}}>{"\u270d\ufe0f"}</div>
             <h2 style={{fontSize:22,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:4}}>Content Studio</h2>
-            <p style={{fontSize:13,color:"#475569"}}>G\u00e9n\u00e8re des captions, titres, hashtags, scripts et bios avec l'IA</p></div>
+            <p style={{fontSize:13,color:"#475569"}}>D\u00e9cris ta vid\u00e9o \u2014 l'IA g\u00e9n\u00e8re tout le contenu pour poster</p></div>
 
-          <div className="card" style={{padding:"24px 20px",marginBottom:14}}>
-            <div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:8}}>Type de contenu</div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:5}}>
-              {[{id:"caption",l:"\ud83d\udcdd Captions",d:"3 captions compl\u00e8tes"},{id:"title",l:"\ud83c\udfaf Titres",d:"10 hooks accrocheurs"},{id:"hashtag",l:"# Hashtags",d:"30 hashtags optimis\u00e9s"},{id:"script",l:"\ud83c\udfac Script",d:"Script Reel 30-60s"},{id:"bio",l:"\ud83d\udc64 Bio",d:"5 bios percutantes"}].map(t=>
-                <div key={t.id} onClick={()=>setCs(p=>({...p,type:t.id,result:"",copied:false}))} className="pc" style={{padding:"14px 8px",borderColor:cs.type===t.id?"rgba(13,148,136,.4)":"transparent",background:cs.type===t.id?"rgba(13,148,136,.06)":"rgba(255,255,255,.02)"}}>
-                  <div style={{fontSize:16,marginBottom:2}}>{t.l.split(" ")[0]}</div>
-                  <div style={{fontSize:10,fontWeight:700,color:cs.type===t.id?"#2dd4bf":"#94a3b8"}}>{t.l.split(" ").slice(1).join(" ")}</div>
-                  <div style={{fontSize:9,color:"#475569",marginTop:2}}>{t.d}</div></div>)}</div></div>
-
-          <div className="card" style={{padding:"20px 20px",marginBottom:14}}>
-            <div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:8}}>Ta niche / sujet</div>
-            <input style={{width:"100%",padding:"14px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.03)",color:"#e2e8f0",fontSize:"16px",outline:"none",fontFamily:"inherit",WebkitAppearance:"none",boxSizing:"border-box"}} placeholder="Ex: fitness, crypto, cuisine, mode, voyage, immobilier..." value={cs.niche} onChange={e=>setCs(p=>({...p,niche:e.target.value}))}/>
-          </div>
+          <div className="card" style={{padding:"22px 20px",marginBottom:14}}>
+            <div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:8}}>De quoi parle ta vid\u00e9o ?</div>
+            <textarea style={{width:"100%",padding:"14px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.03)",color:"#e2e8f0",fontSize:"16px",outline:"none",fontFamily:"inherit",WebkitAppearance:"none",boxSizing:"border-box",resize:"vertical",minHeight:80,lineHeight:1.6}} placeholder={"Ex: Je montre ma routine skincare du matin avec 3 produits\nOu: Tuto pour gagner ses premiers 1000\u20ac en freelance\nOu: Avant/apr\u00e8s transformation salon de coiffure"} value={cs.desc} onChange={e=>setCs(p=>({...p,desc:e.target.value}))}/></div>
 
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
-            <div className="card" style={{padding:"16px 14px"}}>
-              <div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:8}}>Plateforme</div>
+            <div className="card" style={{padding:"14px 12px"}}>
+              <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px",marginBottom:6}}>Plateforme</div>
               <div style={{display:"flex",flexDirection:"column",gap:3}}>
-                {[{id:"instagram",l:"\ud83d\udcf8 Instagram"},{id:"tiktok",l:"\ud83c\udfb5 TikTok"},{id:"youtube",l:"\u25b6 YT Shorts"},{id:"twitter",l:"\ud83d\udc26 X/Twitter"}].map(p=>
-                  <button key={p.id} className={`lb ${cs.platform===p.id?"on":""}`} onClick={()=>setCs(pr=>({...pr,platform:p.id}))} style={{padding:"6px 10px",fontSize:11,textAlign:"left"}}>{p.l}</button>)}</div></div>
-
-            <div className="card" style={{padding:"16px 14px"}}>
-              <div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:8}}>Ton / Style</div>
+                {[{id:"instagram",l:"\ud83d\udcf8 Instagram"},{id:"tiktok",l:"\ud83c\udfb5 TikTok"},{id:"youtube",l:"\u25b6 YT Shorts"},{id:"twitter",l:"\ud83d\udc26 X"}].map(p=>
+                  <button key={p.id} className={`lb ${cs.platform===p.id?"on":""}`} onClick={()=>setCs(pr=>({...pr,platform:p.id}))} style={{padding:"5px 9px",fontSize:11,textAlign:"left"}}>{p.l}</button>)}</div></div>
+            <div className="card" style={{padding:"14px 12px"}}>
+              <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px",marginBottom:6}}>Ton</div>
               <div style={{display:"flex",flexDirection:"column",gap:3}}>
                 {[{id:"pro",l:"\ud83d\udcbc Pro"},{id:"fun",l:"\ud83d\ude04 Fun"},{id:"storytelling",l:"\ud83d\udcd6 Story"},{id:"viral",l:"\ud83d\udd25 Viral"},{id:"edgy",l:"\u26a1 Edgy"}].map(t=>
-                  <button key={t.id} className={`lb ${cs.tone===t.id?"on":""}`} onClick={()=>setCs(p=>({...p,tone:t.id}))} style={{padding:"6px 10px",fontSize:11,textAlign:"left"}}>{t.l}</button>)}</div></div>
-
-            <div className="card" style={{padding:"16px 14px"}}>
-              <div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:8}}>Langue</div>
+                  <button key={t.id} className={`lb ${cs.tone===t.id?"on":""}`} onClick={()=>setCs(p=>({...p,tone:t.id}))} style={{padding:"5px 9px",fontSize:11,textAlign:"left"}}>{t.l}</button>)}</div></div>
+            <div className="card" style={{padding:"14px 12px"}}>
+              <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px",marginBottom:6}}>Langue</div>
               <div style={{display:"flex",flexDirection:"column",gap:3}}>
                 {[{id:"fr",l:"\ud83c\uddeb\ud83c\uddf7 Fran\u00e7ais"},{id:"en",l:"\ud83c\uddec\ud83c\udde7 English"}].map(l=>
-                  <button key={l.id} className={`lb ${cs.lang===l.id?"on":""}`} onClick={()=>setCs(p=>({...p,lang:l.id}))} style={{padding:"6px 10px",fontSize:11,textAlign:"left"}}>{l.l}</button>)}</div></div></div>
+                  <button key={l.id} className={`lb ${cs.lang===l.id?"on":""}`} onClick={()=>setCs(p=>({...p,lang:l.id}))} style={{padding:"5px 9px",fontSize:11,textAlign:"left"}}>{l.l}</button>)}</div></div></div>
 
-          <button className="btn btn-p" onClick={generateContent} disabled={cs.loading||!cs.niche.trim()} style={{width:"100%",padding:16,fontSize:15,borderRadius:14,opacity:cs.loading||!cs.niche.trim()?.5:1}}>
-            {cs.loading?"\u23f3 G\u00e9n\u00e9ration en cours...":"\u2728 G\u00e9n\u00e9rer"}</button>
+          <button className="btn btn-p" onClick={generateContent} disabled={cs.loading||!cs.desc.trim()} style={{width:"100%",padding:16,fontSize:15,borderRadius:14,opacity:cs.loading||!cs.desc.trim()?.5:1}}>
+            {cs.loading?"\u23f3 G\u00e9n\u00e9ration en cours...":"\u2728 G\u00e9n\u00e9rer tout le contenu"}</button>
 
-          {cs.result&&<div className="card" style={{padding:"20px 20px",marginTop:14}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:15,fontWeight:700,color:"#e2e8f0"}}>{"\u2728"} R\u00e9sultat</span>
-                <span className="badge bt">{cs.type==="caption"?"Captions":cs.type==="title"?"Titres":cs.type==="hashtag"?"Hashtags":cs.type==="script"?"Script":"Bios"}</span></div>
-              <div style={{display:"flex",gap:4}}>
-                <button className="btn btn-s" style={{padding:"6px 14px",fontSize:11}} onClick={()=>{navigator.clipboard.writeText(cs.result);setCs(p=>({...p,copied:true}))}}>{cs.copied?"\u2713 Copi\u00e9":"\ud83d\udccb Copier"}</button>
-                <button className="btn btn-s" style={{padding:"6px 14px",fontSize:11}} onClick={()=>setCs(p=>({...p,result:"",copied:false}))}>{"\ud83d\udd04"}</button></div></div>
-            <div style={{padding:"18px 20px",borderRadius:14,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)",fontSize:13,color:"#cbd5e1",lineHeight:1.9,whiteSpace:"pre-wrap",maxHeight:400,overflowY:"auto"}}>{cs.result}</div></div>}
+          {cs.sections&&!cs.sections.error&&<div style={{marginTop:16,display:"flex",flexDirection:"column",gap:10}}>
+            {[
+              {key:"titre",icon:"\ud83c\udfaf",label:"Titre / Hook",render:s=>s.titre},
+              {key:"alt_titres",icon:"\ud83d\udca1",label:"Titres alternatifs",render:s=>(s.alt_titres||[]).map((t,i)=>`${i+1}. ${t}`).join("\n")},
+              {key:"caption",icon:"\ud83d\udcdd",label:"Caption",render:s=>s.caption},
+              {key:"textes_video",icon:"\ud83c\udfac",label:"Textes \u00e0 afficher sur la vid\u00e9o",render:s=>(s.textes_video||[]).map((t,i)=>`[${i===0?"D\u00c9BUT":i===((s.textes_video||[]).length-1)?"FIN":"MILIEU"}] ${t}`).join("\n\n")},
+              {key:"hashtags",icon:"#\ufe0f\u20e3",label:"Hashtags",render:s=>s.hashtags},
+            ].map((sec,idx)=>{const txt=sec.render(cs.sections);if(!txt)return null;return(
+              <div key={sec.key} className="card" style={{padding:"18px 18px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:16}}>{sec.icon}</span>
+                    <span style={{fontSize:14,fontWeight:700,color:"#e2e8f0"}}>{sec.label}</span></div>
+                  <button className="btn btn-s" style={{padding:"5px 12px",fontSize:10}} onClick={()=>{navigator.clipboard.writeText(txt);setCs(p=>({...p,copiedIdx:idx}))}}>{cs.copiedIdx===idx?"\u2713 Copi\u00e9":"\ud83d\udccb Copier"}</button></div>
+                <div style={{padding:"14px 16px",borderRadius:12,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)",fontSize:13,color:"#cbd5e1",lineHeight:1.8,whiteSpace:"pre-wrap"}}>{txt}</div></div>)})}
+            <button className="btn btn-s" onClick={()=>setCs(p=>({...p,sections:null,copiedIdx:null}))} style={{width:"100%",padding:12,fontSize:12}}>{"\ud83d\udd04"} Reg\u00e9n\u00e9rer avec une autre description</button></div>}
+
+          {cs.sections?.error&&<div className="card" style={{padding:"18px",marginTop:14}}>
+            <div style={{fontSize:13,color:"#f87171",lineHeight:1.7,whiteSpace:"pre-wrap"}}>{cs.sections.error}</div></div>}
         </div>)}
 
         {mode!=="studio"&&<><div className="preset-grid" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:5,maxWidth:500,margin:"0 auto 14px"}}>
