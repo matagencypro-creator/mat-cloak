@@ -144,6 +144,7 @@ export default function App(){
   const[wh,setWh]=useState({discord:"",telegram:"",on:false,type:"discord"});
   const[faqO,setFaqO]=useState(null);const[baSlider,setBaSlider]=useState(50);
   const[hcFiles,setHcFiles]=useState([null,null]);const[hcResult,setHcResult]=useState(null);const[hcLoading,setHcLoading]=useState(false);
+  const[cs,setCs]=useState({niche:"",tone:"pro",platform:"instagram",type:"caption",lang:"fr",result:"",loading:false,copied:false});
   const[user,setUser]=useState(null);const[profile,setProfile]=useState(null);const[pro,setPro]=useState(false);const[du,setDu]=useState(0);
   const ir=useRef();const hcRef1=useRef();const hcRef2=useRef();
   const cFiles=useCounter(142847);const cVersions=useCounter(1284920);const cUsers=useCounter(3847);
@@ -188,6 +189,16 @@ export default function App(){
     if(nf[0]&&nf[1]){setHcLoading(true);try{const[h1,h2]=await Promise.all([pH(nf[0]),pH(nf[1])]);
       const match=h1===h2;setHcResult({h1:h1.slice(0,32),h2:h2.slice(0,32),match,s1:fb(nf[0].size),s2:fb(nf[1].size)})}catch(e){setHcResult(null)}setHcLoading(false)}};
   const goStripe=(url)=>{if(user){window.open(url,"_blank")}else{setPendingStripe(url);setAuth("register")}};
+  const generateContent=async()=>{if(!cs.niche.trim())return;setCs(p=>({...p,loading:true,result:"",copied:false}));
+    const prompts={caption:`Tu es un expert en social media marketing. G\u00e9n\u00e8re 3 captions ${cs.lang==="fr"?"en fran\u00e7ais":"in English"} pour un Reel ${cs.platform} dans la niche "${cs.niche}". Ton: ${cs.tone==="pro"?"professionnel et autoritaire":cs.tone==="fun"?"fun et d\u00e9contract\u00e9":cs.tone==="storytelling"?"storytelling \u00e9motionnel":cs.tone==="viral"?"viral et accrocheur":"provocateur et polarisant"}. Chaque caption doit avoir un hook percutant en premi\u00e8re ligne, du contenu engageant, un CTA, et 5-8 hashtags pertinents. S\u00e9pare chaque caption par ---`,
+      title:`Tu es un expert en social media. G\u00e9n\u00e8re 10 titres/hooks ${cs.lang==="fr"?"en fran\u00e7ais":"in English"} ultra accrocheurs pour des Reels ${cs.platform} dans la niche "${cs.niche}". Ton: ${cs.tone==="pro"?"professionnel":cs.tone==="fun"?"fun":cs.tone==="storytelling"?"storytelling":cs.tone==="viral"?"viral":"provocateur"}. Format: un titre par ligne, num\u00e9rot\u00e9. Chaque titre doit donner envie de regarder le Reel.`,
+      hashtag:`G\u00e9n\u00e8re 30 hashtags ${cs.lang==="fr"?"en fran\u00e7ais et anglais mix\u00e9s":"in English"} ultra pertinents pour des Reels ${cs.platform} dans la niche "${cs.niche}". M\u00e9lange : 10 gros hashtags (>1M posts), 10 moyens (100K-1M), 10 petits (<100K) pour maximiser la port\u00e9e. Format: tous sur une ligne s\u00e9par\u00e9s par des espaces.`,
+      script:`Tu es un expert en cr\u00e9ation de contenu vid\u00e9o. \u00c9cris un script complet ${cs.lang==="fr"?"en fran\u00e7ais":"in English"} pour un Reel ${cs.platform} de 30-60 secondes dans la niche "${cs.niche}". Ton: ${cs.tone==="pro"?"professionnel":cs.tone==="fun"?"fun":cs.tone==="storytelling"?"storytelling":cs.tone==="viral"?"viral":"provocateur"}. Inclus: [HOOK] les 3 premi\u00e8res secondes, [CONTENU] le d\u00e9veloppement, [CTA] l'appel \u00e0 l'action. Ajoute des indications de montage entre crochets.`,
+      bio:`G\u00e9n\u00e8re 5 bios ${cs.lang==="fr"?"en fran\u00e7ais":"in English"} pour un profil ${cs.platform} dans la niche "${cs.niche}". Chaque bio doit \u00eatre courte (150 caract\u00e8res max), percutante, avec des emojis pertinents et un CTA. S\u00e9pare chaque bio par ---`};
+    try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompts[cs.type]||prompts.caption}]})});
+      const d=await r.json();const txt=d.content?.map(b=>b.text||"").join("\n")||"Erreur de g\u00e9n\u00e9ration";
+      setCs(p=>({...p,result:txt,loading:false}))}catch(e){setCs(p=>({...p,result:"Erreur: "+e.message,loading:false}))}};
 
   const FEATURES=[
     {t:"Photos & Vidéos",d:"Traitement batch de JPG, PNG, WEBP, MP4, MOV. Génère autant de versions uniques que nécessaire.",ic:"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"},
@@ -455,7 +466,7 @@ export default function App(){
         {dm==="overlay"&&<div style={{marginBottom:10,position:"relative"}}>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",maxHeight:350,objectFit:"contain",borderRadius:12}}/>}{preview.thumb&&<img src={preview.thumb} style={{position:"absolute",inset:0,width:"100%",maxHeight:350,objectFit:"contain",borderRadius:12,opacity:.5,mixBlendMode:"difference"}}/>}</div>}
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>{[{l:"Hash Orig",v:preview.origHash,c:"#94a3b8"},{l:"Hash New",v:preview.hash,c:"#2dd4bf"},{l:"Size",v:`${preview.w}×${preview.h}`,c:"#22d3ee"},{l:"Diff",v:preview.similarity+"%",c:preview.similarity>50?"#f87171":"#2dd4bf"}].map((s,i)=><div key={i} style={{background:"rgba(255,255,255,.02)",padding:10,borderRadius:10}}><div style={{fontSize:9,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</div><div className="mono" style={{fontSize:13,fontWeight:700,color:s.c,marginTop:2}}>{s.v}</div></div>)}</div>
         <div style={{display:"flex",gap:8,justifyContent:"center"}}><button className="btn btn-p" style={{padding:"10px 22px"}} onClick={()=>{dl(preview);setPreview(null)}}>📥 Download</button><button className="btn btn-s" onClick={()=>setPreview(null)}>Fermer</button></div></div></div>)}
-      {panel&&(<div className="ov" onClick={()=>setPanel(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:460,width:"100%",maxHeight:"80vh",overflowY:"auto",background:"linear-gradient(180deg,#0a1014,#080c10)",border:"1px solid rgba(255,255,255,.08)",borderRadius:22,padding:"28px 24px"}}>
+      {panel&&(<div className="ov" onClick={()=>setPanel(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:panel==="studio"?560:460,width:"100%",maxHeight:"85vh",overflowY:"auto",background:"linear-gradient(180deg,#0a1014,#080c10)",border:"1px solid rgba(255,255,255,.08)",borderRadius:22,padding:"28px 24px"}}>
         {panel==="audit"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>🛡️ Privacy Audit</h3>{[{l:"EXIF",s:tf.metadata},{l:"GPS",s:tf.location},{l:"Device",s:tf.metaTemplate},{l:"Timeline",s:tf.fakeTimeline},{l:"Filename",s:tf.randomName},{l:"Pixels",s:tf.crop||tf.colors||tf.noise},{l:"Couleurs",s:tf.colors||tf.lut}].map((a,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:4}}><span style={{fontSize:13,color:"#94a3b8"}}>{a.l}</span><span style={{fontSize:12,fontWeight:600,color:a.s?"#2dd4bf":"#fbbf24"}}>{a.s?"✓":"⚠"}</span></div>)}
           <div style={{marginTop:12,padding:14,borderRadius:10,background:activeT>=10?"rgba(45,212,191,.04)":"rgba(251,191,36,.04)"}}><div style={{fontSize:14,fontWeight:700,color:activeT>=10?"#2dd4bf":"#fbbf24"}}>Protection: {Math.round(activeT/Object.keys(TF).length*100)}%</div></div></>}
         {panel==="webhook"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>🔗 Webhooks</h3>
@@ -467,6 +478,35 @@ export default function App(){
             <span style={{fontSize:13,color:wh.on?"#2dd4bf":"#64748b"}}>{wh.on?"Activé":"Désactivé"}</span></div>
           <button className="btn btn-p" style={{width:"100%",padding:12}}>Sauvegarder</button></>}
         {panel==="history"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>📋 Historique</h3>{!hist.length&&<div style={{color:"#475569",fontSize:13}}>Aucun traitement</div>}{hist.map((h,i)=><div key={i} style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:4}}><div style={{fontSize:13,fontWeight:600,color:"#e2e8f0"}}>{h.files} fichiers → {h.versions}v • {h.time}</div><div style={{fontSize:11,color:"#475569"}}>{h.date}</div></div>)}</>}
+        {panel==="studio"&&<><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+          <div style={{width:40,height:40,borderRadius:12,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>✍️</div>
+          <div><h3 style={{fontSize:18,fontWeight:700,color:"#fff",margin:0}}>Content Studio</h3><div style={{fontSize:11,color:"#475569"}}>Génère des captions, titres, hashtags et scripts IA</div></div></div>
+          <div style={{marginBottom:14}}>
+            <div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:6}}>Type de contenu</div>
+            <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{[{id:"caption",l:"📝 Captions"},{id:"title",l:"🎯 Titres/Hooks"},{id:"hashtag",l:"# Hashtags"},{id:"script",l:"🎬 Script Reel"},{id:"bio",l:"👤 Bio"}].map(t=>
+              <button key={t.id} className="btn btn-s" onClick={()=>setCs(p=>({...p,type:t.id,result:"",copied:false}))} style={{padding:"7px 12px",fontSize:11,background:cs.type===t.id?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:cs.type===t.id?"#2dd4bf":"#64748b",borderColor:cs.type===t.id?"rgba(13,148,136,.2)":"rgba(255,255,255,.06)"}}>{t.l}</button>)}</div></div>
+          <div style={{marginBottom:14}}>
+            <div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:6}}>Ta niche / sujet</div>
+            <input style={{width:"100%",padding:"14px 16px",borderRadius:12,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.03)",color:"#e2e8f0",fontSize:"16px",outline:"none",fontFamily:"inherit",WebkitAppearance:"none",boxSizing:"border-box"}} placeholder="Ex: fitness, crypto, cuisine, mode, voyage..." value={cs.niche} onChange={e=>setCs(p=>({...p,niche:e.target.value}))}/></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+            <div><div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:6}}>Plateforme</div>
+              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[{id:"instagram",l:"IG"},{id:"tiktok",l:"TikTok"},{id:"youtube",l:"YT Shorts"},{id:"twitter",l:"X/Twitter"}].map(p=>
+                <button key={p.id} className="btn btn-s" onClick={()=>setCs(pr=>({...pr,platform:p.id}))} style={{padding:"5px 10px",fontSize:10,background:cs.platform===p.id?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:cs.platform===p.id?"#2dd4bf":"#64748b",borderColor:cs.platform===p.id?"rgba(13,148,136,.2)":"rgba(255,255,255,.06)"}}>{p.l}</button>)}</div></div>
+            <div><div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:6}}>Langue</div>
+              <div style={{display:"flex",gap:3}}>{[{id:"fr",l:"🇫🇷 FR"},{id:"en",l:"🇬🇧 EN"}].map(l=>
+                <button key={l.id} className="btn btn-s" onClick={()=>setCs(p=>({...p,lang:l.id}))} style={{padding:"5px 10px",fontSize:10,background:cs.lang===l.id?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:cs.lang===l.id?"#2dd4bf":"#64748b",borderColor:cs.lang===l.id?"rgba(13,148,136,.2)":"rgba(255,255,255,.06)"}}>{l.l}</button>)}</div></div></div>
+          <div style={{marginBottom:14}}>
+            <div style={{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginBottom:6}}>Ton / Style</div>
+            <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{[{id:"pro",l:"💼 Pro"},{id:"fun",l:"😄 Fun"},{id:"storytelling",l:"📖 Story"},{id:"viral",l:"🔥 Viral"},{id:"edgy",l:"⚡ Edgy"}].map(t=>
+              <button key={t.id} className="btn btn-s" onClick={()=>setCs(p=>({...p,tone:t.id}))} style={{padding:"7px 12px",fontSize:11,background:cs.tone===t.id?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:cs.tone===t.id?"#2dd4bf":"#64748b",borderColor:cs.tone===t.id?"rgba(13,148,136,.2)":"rgba(255,255,255,.06)"}}>{t.l}</button>)}</div></div>
+          <button className="btn btn-p" onClick={generateContent} disabled={cs.loading||!cs.niche.trim()} style={{width:"100%",padding:14,fontSize:14,borderRadius:12,opacity:cs.loading||!cs.niche.trim()?.5:1}}>
+            {cs.loading?"⏳ Génération en cours...":"✨ Générer"}</button>
+          {cs.result&&<div style={{marginTop:16}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <span style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>✨ Résultat</span>
+              <button className="btn btn-s" style={{padding:"5px 12px",fontSize:10}} onClick={()=>{navigator.clipboard.writeText(cs.result);setCs(p=>({...p,copied:true}))}}>{cs.copied?"✓ Copié":"📋 Copier"}</button></div>
+            <div style={{padding:"16px 18px",borderRadius:14,background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.05)",fontSize:13,color:"#94a3b8",lineHeight:1.8,whiteSpace:"pre-wrap",maxHeight:300,overflowY:"auto"}}>{cs.result}</div>
+            <button className="btn btn-s" onClick={()=>setCs(p=>({...p,result:"",copied:false}))} style={{width:"100%",marginTop:8,fontSize:11}}>🔄 Regénérer</button></div>}</>}
         <button className="btn btn-s" onClick={()=>setPanel(null)} style={{marginTop:12,width:"100%"}}>Fermer</button></div></div>)}
 
       <header className="app-header" style={{padding:"12px 18px",borderBottom:"1px solid rgba(255,255,255,.05)",flexShrink:0,position:"relative",zIndex:2}}>
@@ -479,6 +519,7 @@ export default function App(){
             <button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={()=>setPanel("audit")}>🛡️</button>
             <button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={()=>setPanel("webhook")}>🔗</button>
             <button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={()=>setPanel("history")}>📋</button>
+            <button className="btn" style={{padding:"5px 10px",fontSize:10,borderRadius:8,background:"rgba(13,148,136,.06)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.15)"}} onClick={()=>{if(!pro){setPricing(true);return}setPanel("studio")}}>✍️ Studio</button>
             {!pro&&user&&<button className="btn" style={{padding:"5px 10px",fontSize:10,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#06b6d4)",color:"#fff",fontWeight:700,border:"none"}} onClick={()=>setPricing(true)}>⚡ Pro</button>}
             {user&&<button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={doLogout}>Déco</button>}
             {files.length>0&&<button className="btn btn-s" style={{padding:"5px 8px",fontSize:10,color:"#f87171"}} onClick={clr}>✕</button>}</div></div></header>
