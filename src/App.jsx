@@ -288,13 +288,15 @@ export default function App(){
       
       
       
-      .app-header{padding:8px 12px!important}
-      .app-header-btns{flex-wrap:wrap;gap:3px!important}
-      .app-header-btns .btn{padding:4px 7px!important;font-size:9px!important}
+      .app-head{padding:10px 14px!important}
+      .app-head-r{display:none!important}
+      .app-toolbar{flex-direction:column!important;gap:6px!important}
+      .app-toolbar>div{width:100%!important}
+      .app-presets{overflow-x:auto!important;flex-wrap:nowrap!important}
+      .app-grid{grid-template-columns:1fr!important}
+      .app-side-panels{grid-template-columns:1fr!important}
       .stat-grid{grid-template-columns:repeat(2,1fr)!important}
       .ver-grid{grid-template-columns:repeat(2,1fr)!important}
-      .preset-grid{flex-wrap:wrap!important}
-      .preset-grid .pc{padding:4px 8px!important}
       .prc{padding:24px 18px!important}
       .ov{padding:10px!important}
     }
@@ -485,107 +487,143 @@ export default function App(){
         {panel==="history"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>📋 Historique</h3>{!hist.length&&<div style={{color:"#475569",fontSize:13}}>Aucun traitement</div>}{hist.map((h,i)=><div key={i} style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:4}}><div style={{fontSize:13,fontWeight:600,color:"#e2e8f0"}}>{h.files} fichiers → {h.versions}v • {h.time}</div><div style={{fontSize:11,color:"#475569"}}>{h.date}</div></div>)}</>}
         <button className="btn btn-s" onClick={()=>setPanel(null)} style={{marginTop:12,width:"100%"}}>Fermer</button></div></div>)}
 
-      <header className="app-header" style={{padding:"12px 18px",borderBottom:"1px solid rgba(255,255,255,.05)",flexShrink:0,position:"relative",zIndex:2}}>
+      {/* ===== APP HEADER ===== */}
+      <header className="app-head" style={{padding:"14px 24px",borderBottom:"1px solid rgba(255,255,255,.04)",flexShrink:0,position:"relative",zIndex:2,background:"rgba(5,8,9,.8)",backdropFilter:"blur(12px)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",minWidth:0}} onClick={()=>setPg("landing")}>
-            <div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain"}} alt="V"/></div>
-            <span style={{fontWeight:800,fontSize:15,color:"#f1f5f9",letterSpacing:"-.8px"}}>Veilora</span>
-            {user&&(pro?<span className="badge bt" style={{fontSize:9}}>PRO</span>:<span className="badge ba" style={{fontSize:9}}>FREE {du}/{FREE_LIMIT}</span>)}</div>
-          <div className="app-header-btns" style={{display:"flex",gap:4,alignItems:"center"}}>
-            <button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={()=>setPanel("audit")}>🛡️</button>
-            <button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={()=>setPanel("webhook")}>🔗</button>
-            <button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={()=>setPanel("history")}>📋</button>
-            {!pro&&user&&<button className="btn" style={{padding:"5px 10px",fontSize:10,borderRadius:8,background:"linear-gradient(135deg,#0d9488,#06b6d4)",color:"#fff",fontWeight:700,border:"none"}} onClick={()=>setPricing(true)}>⚡ Pro</button>}
-            {user&&<button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={doLogout}>Déco</button>}
-            {files.length>0&&<button className="btn btn-s" style={{padding:"5px 8px",fontSize:10,color:"#f87171"}} onClick={clr}>✕</button>}</div></div></header>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}} onClick={()=>setPg("landing")}>
+              <div style={{width:30,height:30,borderRadius:9,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain"}} alt="V"/></div>
+              <span style={{fontWeight:800,fontSize:16,color:"#f1f5f9",letterSpacing:"-.8px"}}>Veilora</span></div>
+            <div style={{width:1,height:20,background:"rgba(255,255,255,.06)"}}/>
+            {user&&(pro?<span style={{padding:"4px 10px",borderRadius:6,background:"linear-gradient(135deg,rgba(13,148,136,.12),rgba(6,182,212,.08))",border:"1px solid rgba(13,148,136,.15)",fontSize:10,fontWeight:700,color:"#2dd4bf",letterSpacing:".3px"}}>PRO</span>
+              :<span style={{padding:"4px 10px",borderRadius:6,background:"rgba(251,191,36,.06)",border:"1px solid rgba(251,191,36,.1)",fontSize:10,fontWeight:700,color:"#fde68a"}}>{du}/{FREE_LIMIT} today</span>)}</div>
+          <div className="app-head-r" style={{display:"flex",gap:6,alignItems:"center"}}>
+            {[{p:"audit",ic:"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",l:"Audit"},
+              {p:"webhook",ic:"M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1",l:"Webhooks"},
+              {p:"history",ic:"M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",l:"Historique"}].map(b=>
+              <button key={b.p} onClick={()=>setPanel(b.p)} style={{display:"flex",alignItems:"center",gap:5,padding:"6px 12px",borderRadius:8,background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.05)",color:"#64748b",fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s",fontFamily:"inherit"}}>
+                <IC d={b.ic} size={14} color="#64748b"/>{b.l}</button>)}
+            {!pro&&user&&<button onClick={()=>setPricing(true)} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 14px",borderRadius:8,background:"linear-gradient(135deg,#0d9488,#06b6d4)",border:"none",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+              <IC d="M13 10V3L4 14h7v7l9-11h-7z" size={13} color="#fff"/>Upgrade</button>}
+            {user&&<div style={{display:"flex",alignItems:"center",gap:6}}>
+              <div style={{width:28,height:28,borderRadius:8,background:"rgba(13,148,136,.08)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <IC d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" size={14} color="#2dd4bf"/></div>
+              <button onClick={doLogout} style={{fontSize:11,color:"#475569",cursor:"pointer",background:"none",border:"none",fontFamily:"inherit",fontWeight:600}}>Déco</button></div>}
+            {files.length>0&&<button onClick={clr} style={{padding:"6px 10px",borderRadius:8,background:"rgba(248,113,113,.06)",border:"1px solid rgba(248,113,113,.1)",color:"#f87171",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>Reset</button>}</div></div></header>
 
-      <main style={{flex:1,overflow:"auto",padding:"0",position:"relative",zIndex:1}}>
-        {/* TOP BAR */}
-        <div style={{padding:"12px 20px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-          <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:3,borderRadius:10,border:"1px solid rgba(255,255,255,.05)"}}>
-            {[["photo","\ud83d\udcf8 Photos"],["video","\ud83c\udfac Vid\u00e9os"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{setMode(m);clr()}} style={{padding:"7px 18px",fontSize:12,fontWeight:700,borderRadius:8,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b"}}>{l}</button>)}</div>
-          <div className="preset-grid" style={{display:"flex",gap:4}}>
-            {PRESETS.map(p=><div key={p.id} className={`pc ${preset?.id===p.id?"on":""}`} onClick={()=>applyP(p)} style={{padding:"6px 14px",borderRadius:10,display:"flex",alignItems:"center",gap:5,cursor:"pointer",border:preset?.id===p.id?"1px solid rgba(13,148,136,.3)":"1px solid transparent",background:preset?.id===p.id?"rgba(13,148,136,.06)":"rgba(255,255,255,.02)"}}>
-              <span style={{fontSize:14}}>{p.icon}</span>
-              <span style={{fontSize:11,fontWeight:700,color:preset?.id===p.id?"#2dd4bf":"#64748b"}}>{p.name}</span></div>)}</div></div>
+      <main style={{flex:1,overflow:"auto",position:"relative",zIndex:1}}>
+        {/* TOOLBAR */}
+        <div className="app-toolbar" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 24px",borderBottom:"1px solid rgba(255,255,255,.03)",gap:12}}>
+          <div style={{display:"flex",gap:3,background:"rgba(255,255,255,.02)",padding:3,borderRadius:10,border:"1px solid rgba(255,255,255,.05)"}}>
+            {[["photo","Photos"],["video","Vidéos"]].map(([m,l])=><button key={m} onClick={()=>{setMode(m);clr()}} style={{padding:"7px 20px",fontSize:12,fontWeight:700,borderRadius:8,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b",border:"none",cursor:"pointer",fontFamily:"inherit",transition:"all .12s"}}>{l}</button>)}</div>
+          <div className="app-presets" style={{display:"flex",gap:4}}>
+            {PRESETS.map(p=><button key={p.id} onClick={()=>applyP(p)} style={{padding:"6px 16px",borderRadius:8,display:"flex",alignItems:"center",gap:5,cursor:"pointer",border:preset?.id===p.id?"1px solid rgba(13,148,136,.3)":"1px solid rgba(255,255,255,.05)",background:preset?.id===p.id?"rgba(13,148,136,.06)":"rgba(255,255,255,.015)",fontFamily:"inherit",transition:"all .12s"}}>
+              <span style={{fontSize:13}}>{p.icon}</span>
+              <span style={{fontSize:11,fontWeight:700,color:preset?.id===p.id?"#2dd4bf":"#64748b"}}>{p.name}</span></button>)}</div></div>
 
-        {res.length>0&&<div style={{display:"flex",gap:6,marginBottom:12,justifyContent:"center"}}>
-          <button className={`btn ${vw==="config"?"btn-p":"btn-s"}`} style={{padding:"7px 16px",fontSize:11}} onClick={()=>setVw("config")}>{"\u2699\ufe0f"} Config</button>
-          <button className={`btn ${vw==="results"?"btn-p":"btn-s"}`} style={{padding:"7px 16px",fontSize:11}} onClick={()=>setVw("results")}>{"\u2713"} R\u00e9sultats ({totV})</button></div>}
+        {res.length>0&&<div style={{display:"flex",gap:6,padding:"10px 24px",borderBottom:"1px solid rgba(255,255,255,.03)"}}>
+          {[["config","Config"],["results","Résultats"]].map(([v,l])=>
+            <button key={v} onClick={()=>setVw(v)} style={{padding:"6px 18px",borderRadius:8,fontSize:12,fontWeight:700,background:vw===v?"linear-gradient(135deg,#0d9488,#06b6d4)":"rgba(255,255,255,.02)",color:vw===v?"#fff":"#64748b",border:vw===v?"none":"1px solid rgba(255,255,255,.05)",cursor:"pointer",fontFamily:"inherit"}}>{l}{v==="results"?` (${totV})`:""}</button>)}</div>}
 
-        {vw==="config"&&(<div className="app-layout" style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:14}}>
-          <aside className="app-side" style={{display:"flex",flexDirection:"column",gap:8}}>
-            <div className="card" style={{padding:"14px 16px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>🎚️ Humanizer</span><span style={{fontSize:12,fontWeight:700,color:iC}}>{iL}</span></div>
+        {vw==="config"&&(<div style={{padding:"20px 24px"}}>
+          {/* CONTROLS ROW */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+            <div style={{padding:"16px 18px",borderRadius:14,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.05)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <IC d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" size={16} color="#2dd4bf"/>
+                  <span style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>Humanizer</span></div>
+                <span className="mono" style={{fontSize:12,fontWeight:700,color:iC,padding:"3px 10px",borderRadius:6,background:`${iC}10`}}>{iL}</span></div>
               <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)}/></div>
-            <div className="card" style={{padding:"12px 16px"}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
-                <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>Versions</span>
+            <div style={{padding:"16px 18px",borderRadius:14,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.05)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <IC d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" size={16} color="#a78bfa"/>
+                  <span style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>Versions</span></div>
                 <div style={{display:"flex",alignItems:"center",gap:4}}>
-                  <button className="cnt" style={{width:30,height:30,fontSize:14}} onClick={()=>setVer(v=>Math.max(1,v-1))}>−</button>
-                  <div className="mono" style={{fontSize:20,fontWeight:700,color:"#2dd4bf",width:32,textAlign:"center"}}>{ver}</div>
-                  <button className="cnt" style={{width:30,height:30,fontSize:14}} onClick={()=>setVer(v=>Math.min(pro?100:5,v+1))}>+</button></div></div>
-              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,25,50,100].map(n=><button key={n} className="btn btn-s" onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"3px 7px",fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:ver===n?"#2dd4bf":"#64748b",opacity:!pro&&n>5?.3:1}}>{n}</button>)}</div></div>
-            {tf.location&&<div className="card" style={{padding:"12px 14px"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>📍 GPS Spoofing</div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:3}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"5px 10px",fontSize:10,opacity:!pro&&i>3?.3:1}}>{l.city}</button>)}</div></div>}
-            {tf.metaTemplate&&<div className="card" style={{padding:"12px 14px"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>🧹 Fake Device</div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:3}}>{MTPL.map((m,i)=><button key={m.id} className={`lb ${mtpl.id===m.id?"on":""}`} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"5px 10px",fontSize:10,opacity:!pro&&i>2?.3:1}}>{m.name}</button>)}</div></div>}
-            <div className="card" style={{padding:"10px 10px",flex:1}}>
-              <div style={{display:"flex",justifyContent:"space-between",padding:"0 6px",marginBottom:4}}>
-                <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>Transformations</span>
-                <span className="badge bt" style={{fontSize:9}}>{activeT}/13</span></div>
-              <div style={{maxHeight:250,overflowY:"auto"}}>{Object.entries(TF).map(([k,m])=>{const on=tf[k];const lk=!pro&&m.p;return(
-                <div key={k} className={`chk ${on&&!lk?"on":""}`} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{opacity:lk?.25:1,padding:"7px 10px"}}>
-                  <div className={`dot ${on&&!lk?"on":""}`} style={{width:16,height:16,fontSize:9}}>{on&&!lk?"✓":lk?"🔒":""}</div>
-                  <div style={{fontSize:12,fontWeight:600,color:on&&!lk?"#2dd4bf":"#64748b"}}>{m.i} {m.l}</div></div>)})}</div></div>
-          </aside>
+                  <button onClick={()=>setVer(v=>Math.max(1,v-1))} style={{width:28,height:28,borderRadius:7,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.02)",color:"#94a3b8",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>−</button>
+                  <div className="mono" style={{fontSize:20,fontWeight:800,color:"#2dd4bf",width:36,textAlign:"center"}}>{ver}</div>
+                  <button onClick={()=>setVer(v=>Math.min(pro?100:5,v+1))} style={{width:28,height:28,borderRadius:7,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.02)",color:"#94a3b8",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>+</button></div></div>
+              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,25,50,100].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"4px 9px",borderRadius:6,fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:ver===n?"#2dd4bf":"#475569",border:ver===n?"1px solid rgba(13,148,136,.2)":"1px solid rgba(255,255,255,.04)",cursor:"pointer",opacity:!pro&&n>5?.3:1,fontFamily:"inherit"}}>{n}</button>)}</div></div></div>
 
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}
-              onClick={()=>{if(!ck())return;ir.current?.click()}} className="card"
-              style={{padding:files.length?"28px 16px":"52px 16px",textAlign:"center",cursor:"pointer",borderColor:drag?"rgba(13,148,136,.3)":undefined}}>
-              <div style={{fontSize:files.length?24:42,marginBottom:8,animation:"float 3.5s ease infinite"}}>{drag?"📥":mode==="photo"?"📸":"🎬"}</div>
-              <div style={{fontSize:15,fontWeight:700,color:"#f1f5f9",marginBottom:4}}>{drag?"Lâche ici":`Drop tes ${mode==="photo"?"photos":"vidéos"}`}</div>
-              <div className="mono" style={{fontSize:12,color:"#334155"}}>{mode==="photo"?"JPG • PNG • WEBP":"MP4 • MOV • WEBM"}</div>
+          {/* SIDE PANELS: GPS + DEVICE + TRANSFORMATIONS */}
+          <div className="app-side-panels" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:16}}>
+            {tf.location&&<div style={{padding:"14px 16px",borderRadius:14,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.05)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+                <IC d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" size={15} color="#22d3ee"/>
+                <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>GPS</span>
+                <span style={{marginLeft:"auto",fontSize:10,fontWeight:600,color:"#2dd4bf"}}>{loc.city}</span></div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:3,maxHeight:120,overflowY:"auto"}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"4px 9px",fontSize:10,opacity:!pro&&i>3?.3:1}}>{l.city}</button>)}</div></div>}
+            {tf.metaTemplate&&<div style={{padding:"14px 16px",borderRadius:14,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.05)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+                <IC d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" size={15} color="#a78bfa"/>
+                <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>Device</span>
+                <span style={{marginLeft:"auto",fontSize:10,fontWeight:600,color:"#a78bfa"}}>{mtpl.name}</span></div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:3,maxHeight:120,overflowY:"auto"}}>{MTPL.map((m,i)=><button key={m.id} className={`lb ${mtpl.id===m.id?"on":""}`} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"4px 9px",fontSize:10,opacity:!pro&&i>2?.3:1}}>{m.name}</button>)}</div></div>}
+            <div style={{padding:"14px 16px",borderRadius:14,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.05)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+                <IC d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" size={15} color="#fbbf24"/>
+                <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>Transfo</span>
+                <span style={{marginLeft:"auto",fontSize:10,fontWeight:600,color:"#fbbf24"}}>{activeT}/13</span></div>
+              <div style={{maxHeight:120,overflowY:"auto"}}>{Object.entries(TF).map(([k,m])=>{const on=tf[k];const lk=!pro&&m.p;return(
+                <div key={k} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 6px",borderRadius:6,cursor:"pointer",opacity:lk?.25:1,transition:"background .1s",background:on&&!lk?"rgba(13,148,136,.04)":"transparent"}}>
+                  <div style={{width:14,height:14,borderRadius:4,border:on&&!lk?"none":"1.5px solid rgba(255,255,255,.1)",background:on&&!lk?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:"#fff",flexShrink:0}}>{on&&!lk?"✓":""}</div>
+                  <span style={{fontSize:11,fontWeight:600,color:on&&!lk?"#cbd5e1":"#475569"}}>{m.l}</span></div>)})}</div></div></div>
+
+          {/* DROP ZONE + FILE LIST */}
+          <div className="app-grid" style={{display:"grid",gridTemplateColumns:files.length?"1fr 1fr":"1fr",gap:12}}>
+            <div onClick={()=>{if(!ck())return;ir.current?.click()}} onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}
+              style={{padding:files.length?"28px 20px":"56px 20px",borderRadius:16,border:`2px dashed ${drag?"rgba(13,148,136,.4)":"rgba(255,255,255,.06)"}`,background:drag?"rgba(13,148,136,.03)":"rgba(255,255,255,.01)",textAlign:"center",cursor:"pointer",transition:"all .15s"}}>
+              <div style={{marginBottom:8}}>
+                <IC d={mode==="photo"?"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z":"M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"} size={files.length?28:40} color={drag?"#2dd4bf":"#334155"}/></div>
+              <div style={{fontSize:14,fontWeight:700,color:drag?"#2dd4bf":"#e2e8f0",marginBottom:4}}>{drag?"Lâche ici":`Dépose tes ${mode==="photo"?"images":"vidéos"}`}</div>
+              <div className="mono" style={{fontSize:11,color:"#334155"}}>{mode==="photo"?"JPG • PNG • WEBP":"MP4 • MOV • WEBM"}</div>
               <input ref={ir} type="file" multiple accept={mode==="photo"?"image/*":"video/*"} style={{display:"none"}} onChange={e=>{if(!ck())return;add(e.target.files)}}/></div>
 
-            {files.length>0&&<div className="stat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>
-              {[{l:"Fichiers",v:files.length,c:"#2dd4bf"},{l:"Versions",v:files.length*ver,c:"#a78bfa"},{l:"Taille",v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24"},{l:"Intensité",v:iL,c:iC}].map((s,i)=>(
-                <div key={i} className="card" style={{padding:"10px 12px"}}><div style={{fontSize:9,color:"#334155",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</div><div className="mono" style={{fontSize:16,fontWeight:700,color:s.c,marginTop:2}}>{s.v}</div></div>))}</div>}
+            {files.length>0&&<div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>
+                {[{l:"Fichiers",v:files.length,c:"#2dd4bf",ic:"M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"},
+                  {l:"Versions",v:files.length*ver,c:"#a78bfa",ic:"M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"},
+                  {l:"Taille",v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24",ic:"M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"},
+                  {l:"Intensité",v:iL,c:iC,ic:"M13 10V3L4 14h7v7l9-11h-7z"}].map((s,i)=>
+                  <div key={i} style={{padding:"10px 10px",borderRadius:10,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:4}}><IC d={s.ic} size={11} color={s.c}/><span style={{fontSize:9,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</span></div>
+                    <div className="mono" style={{fontSize:15,fontWeight:800,color:s.c}}>{s.v}</div></div>)}</div>
+              <div style={{maxHeight:180,overflowY:"auto",marginBottom:10}}>
+                {files.map(f=><div key={f.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:10,marginBottom:2,background:"rgba(255,255,255,.01)"}}>
+                  {thumbs[f.id]?<img src={thumbs[f.id]} style={{width:38,height:38,borderRadius:8,objectFit:"cover",flexShrink:0}}/>:<div style={{width:38,height:38,borderRadius:8,background:"rgba(255,255,255,.03)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><IC d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" size={16} color="#475569"/></div>}
+                  <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,color:"#e2e8f0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{f.name}</div>
+                    <div className="mono" style={{fontSize:10,color:"#475569"}}>{fb(f.size)}</div></div>
+                  <button onClick={()=>setFiles(p=>p.filter(x=>x.id!==f.id))} style={{background:"none",border:"none",cursor:"pointer",padding:4}}><IC d="M6 18L18 6M6 6l12 12" size={14} color="#475569"/></button></div>)}</div></div>}</div>
 
-            {files.length>0&&<div style={{flex:1,overflow:"auto"}}>{files.map(f=>(
-              <div key={f.id} className="row" style={{padding:"10px 12px",gap:10}}>
-                {thumbs[f.id]?<img src={thumbs[f.id]} className="thumb" style={{width:44,height:44}}/>:<div className="thumb" style={{width:44,height:44,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>🎬</div>}
-                <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#e2e8f0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{f.name}</div>
-                  <div className="mono" style={{fontSize:11,color:"#475569"}}>{fb(f.size)} <span style={{color:"#2dd4bf"}}>→ ×{ver}</span></div></div>
-                <button className="btn btn-s" style={{padding:"3px 8px",fontSize:10,color:"#f87171"}} onClick={()=>setFiles(p=>p.filter(x=>x.id!==f.id))}>✕</button></div>))}</div>}
+          <button onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:16,borderRadius:14,background:proc||!files.length?"rgba(255,255,255,.03)":"linear-gradient(135deg,#0d9488,#06b6d4)",color:proc||!files.length?"#475569":"#fff",fontSize:14,fontWeight:700,border:"none",cursor:proc||!files.length?"not-allowed":"pointer",fontFamily:"inherit",marginTop:4,transition:"all .15s",letterSpacing:"-.2px"}}>
+            {proc?"⏳ Traitement en cours...":`Traiter ${files.length||0} fichier${files.length>1?"s":""} → ${(files.length||0)*ver} versions`}</button>
+        </div>)}
 
-            <button className="btn btn-p" onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:14,fontSize:14,borderRadius:12}}>
-              {proc?"⏳ Traitement...":`🔒 Traiter ${files.length||0} fichier${files.length>1?"s":""} → ${(files.length||0)*ver} versions`}</button>
-          </div></div>)}
-
-        {vw==="results"&&(<div>
-          {proc&&<div className="card" style={{padding:"44px 20px",textAlign:"center",marginBottom:14}}>
-            <div style={{fontSize:28,marginBottom:10}}><span style={{display:"inline-block",animation:"spin 1s linear infinite"}}>⚙️</span></div>
-            <div style={{fontSize:15,fontWeight:700,color:"#fff",marginBottom:4}}>Randomisation en cours...</div>
-            <div className="mono" style={{fontSize:12,color:"#475569",marginBottom:14}}>{prog.f} — v{prog.v}/{ver}</div>
-            <div className="pbar" style={{maxWidth:400,margin:"0 auto"}}><div className="pfill" style={{width:`${prog.t?(prog.c/prog.t)*100:0}%`}}/></div></div>}
-          {!proc&&totV>0&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:6}}>
-            <span style={{fontSize:14,fontWeight:700,color:"#fff"}}>✓ {totV} versions uniques</span>
-            <button className="btn btn-p" style={{padding:"8px 20px",fontSize:12}} onClick={dlAll}>📥 Tout télécharger</button></div>}
-          {res.map((g,gi)=><div key={gi} className="card" style={{marginBottom:8}}>
-            <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",gap:10}}>
-              {thumbs[g.orig.id]?<img src={thumbs[g.orig.id]} style={{width:38,height:38,borderRadius:8,objectFit:"cover"}}/>:null}
-              <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#e2e8f0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{g.orig.name}</div><div className="mono" style={{fontSize:10,color:"#475569"}}>{fb(g.orig.size)} • {g.vers.length}v</div></div></div>
-            <div className="ver-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:5,padding:"10px 12px"}}>{g.vers.map((v,vi)=>(
-              <div key={vi} className="vc" onClick={()=>v.thumb?setPreview({...v,vi:vi+1,origId:g.orig.id}):dl(v)}>
-                {v.thumb&&<img src={v.thumb} style={{width:"100%",height:60,objectFit:"cover",borderRadius:8,marginBottom:4,display:"block"}}/>}
+        {vw==="results"&&(<div style={{padding:"20px 24px"}}>
+          {proc&&<div style={{padding:"48px 20px",textAlign:"center",marginBottom:14,borderRadius:16,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.05)"}}>
+            <div style={{marginBottom:12}}><IC d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" size={32} color="#2dd4bf"/></div>
+            <div style={{fontSize:16,fontWeight:700,color:"#f1f5f9",marginBottom:4}}>Randomisation en cours</div>
+            <div className="mono" style={{fontSize:12,color:"#475569",marginBottom:16}}>{prog.f} — v{prog.v}/{ver}</div>
+            <div style={{maxWidth:400,margin:"0 auto",height:3,borderRadius:3,background:"rgba(255,255,255,.04)",overflow:"hidden"}}><div style={{height:"100%",background:"linear-gradient(90deg,#0d9488,#06b6d4)",borderRadius:3,width:`${prog.t?(prog.c/prog.t)*100:0}%`,transition:"width .2s"}}/></div></div>}
+          {!proc&&totV>0&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <IC d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" size={18} color="#2dd4bf"/>
+              <span style={{fontSize:15,fontWeight:700,color:"#f1f5f9"}}>{totV} versions uniques</span></div>
+            <button onClick={dlAll} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 20px",borderRadius:10,background:"linear-gradient(135deg,#0d9488,#06b6d4)",color:"#fff",fontSize:12,fontWeight:700,border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+              <IC d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" size={14} color="#fff"/>Tout télécharger</button></div>}
+          {res.map((g,gi)=><div key={gi} style={{marginBottom:10,borderRadius:14,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.05)",overflow:"hidden"}}>
+            <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,.03)",display:"flex",alignItems:"center",gap:10}}>
+              {thumbs[g.orig.id]?<img src={thumbs[g.orig.id]} style={{width:36,height:36,borderRadius:8,objectFit:"cover"}}/>:null}
+              <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:"#e2e8f0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{g.orig.name}</div><div className="mono" style={{fontSize:10,color:"#475569"}}>{fb(g.orig.size)} • {g.vers.length} versions</div></div></div>
+            <div className="ver-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(110px,1fr))",gap:6,padding:"12px 14px"}}>{g.vers.map((v,vi)=>(
+              <div key={vi} onClick={()=>v.thumb?setPreview({...v,vi:vi+1,origId:g.orig.id}):dl(v)} style={{borderRadius:10,border:"1px solid rgba(255,255,255,.04)",padding:6,cursor:"pointer",transition:"all .12s",background:"rgba(255,255,255,.01)"}}>
+                {v.thumb&&<img src={v.thumb} style={{width:"100%",height:56,objectFit:"cover",borderRadius:7,marginBottom:4,display:"block"}}/>}
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span className="badge bt" style={{fontSize:8}}>v{vi+1}</span>
-                  {v.similarity!=null&&<span className="mono" style={{fontSize:8,color:v.similarity>99?"#f87171":"#2dd4bf"}}>SSIM {v.similarity}%</span>}</div></div>))}</div></div>)}
-          {!proc&&totV>0&&<button className="btn btn-s" onClick={dlAll} style={{width:"100%",padding:12,fontSize:13,marginTop:6}}>📥 Télécharger les {totV} fichiers</button>}
+                  <span style={{fontSize:9,fontWeight:700,color:"#2dd4bf",padding:"2px 6px",borderRadius:4,background:"rgba(13,148,136,.08)"}}>v{vi+1}</span>
+                  {v.similarity!=null&&<span className="mono" style={{fontSize:9,color:v.similarity>99?"#f87171":"#2dd4bf"}}>SSIM {v.similarity}%</span>}</div></div>))}</div></div>)}
+          {!proc&&totV>0&&<button onClick={dlAll} style={{width:"100%",padding:14,borderRadius:12,background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.05)",color:"#94a3b8",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",marginTop:6}}>
+            <span style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><IC d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" size={14} color="#94a3b8"/>Télécharger les {totV} fichiers</span></button>}
         </div>)}
       </main></div>);
 }
