@@ -447,7 +447,7 @@ export default function App(){
               <button className="btn" onClick={()=>goStripe(STRIPE.lifetime)} style={{padding:"14px 24px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button></div></section>
         </main>)}
       <footer style={{padding:"20px 28px",borderTop:"1px solid rgba(255,255,255,.04)",textAlign:"center",position:"relative",zIndex:1}}>
-        <div style={{fontSize:11,color:"#1e293b"}}>Veilora © 2026 — Par Alkyma Agency</div></footer></div>);
+        <div style={{fontSize:11,color:"#1e293b"}}>Veilora © 2026 — Par Mat Agency</div></footer></div>);
 
   function PricingModal({close}){return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.9)",backdropFilter:"blur(20px)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={close}><div onClick={e=>e.stopPropagation()} style={{maxWidth:860,width:"100%",maxHeight:"90vh",overflowY:"auto"}}>
     <div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:24,fontWeight:800,color:"#fff",letterSpacing:"-.5px"}}>Choisis ton plan</div></div>
@@ -543,8 +543,8 @@ export default function App(){
                 <div style={{display:"flex",alignItems:"center",gap:4}}>
                   <button onClick={()=>setVer(v=>Math.max(1,v-1))} style={{width:28,height:28,borderRadius:7,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.02)",color:"#94a3b8",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>−</button>
                   <div className="mono" style={{fontSize:20,fontWeight:800,color:"#2dd4bf",width:36,textAlign:"center"}}>{ver}</div>
-                  <button onClick={()=>setVer(v=>Math.min(pro?100:5,v+1))} style={{width:28,height:28,borderRadius:7,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.02)",color:"#94a3b8",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>+</button></div></div>
-              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,25,50,100].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"4px 9px",borderRadius:6,fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:ver===n?"#2dd4bf":"#475569",border:ver===n?"1px solid rgba(13,148,136,.2)":"1px solid rgba(255,255,255,.04)",cursor:"pointer",opacity:!pro&&n>5?.3:1,fontFamily:"inherit"}}>{n}</button>)}</div></div></div>
+                  <button onClick={()=>setVer(v=>pro?v+1:Math.min(5,v+1))} style={{width:28,height:28,borderRadius:7,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.02)",color:"#94a3b8",fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>+</button></div></div>
+              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,25,50,100,250,500].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"4px 9px",borderRadius:6,fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:ver===n?"#2dd4bf":"#475569",border:ver===n?"1px solid rgba(13,148,136,.2)":"1px solid rgba(255,255,255,.04)",cursor:"pointer",opacity:!pro&&n>5?.3:1,fontFamily:"inherit"}}>{n}</button>)}</div></div></div>
 
           {/* SIDE PANELS: GPS + DEVICE + TRANSFORMATIONS */}
           <div className="app-side-panels" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:16}}>
@@ -553,19 +553,19 @@ export default function App(){
                 <IC d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" size={15} color="#22d3ee"/>
                 <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>GPS</span>
                 <span style={{marginLeft:"auto",fontSize:10,fontWeight:600,color:"#2dd4bf"}}>{loc.city}</span></div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:3,maxHeight:120,overflowY:"auto"}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"4px 9px",fontSize:10,opacity:!pro&&i>3?.3:1}}>{l.city}</button>)}</div></div>}
+              <div style={{display:"flex",flexWrap:"wrap",gap:3,maxHeight:160,overflowY:"auto"}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"4px 9px",fontSize:10,opacity:!pro&&i>3?.3:1}}>{l.city}</button>)}</div></div>}
             {tf.metaTemplate&&<div style={{padding:"14px 16px",borderRadius:14,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.05)"}}>
               <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
                 <IC d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" size={15} color="#a78bfa"/>
                 <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>Device</span>
                 <span style={{marginLeft:"auto",fontSize:10,fontWeight:600,color:"#a78bfa"}}>{mtpl.name}</span></div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:3,maxHeight:120,overflowY:"auto"}}>{MTPL.map((m,i)=><button key={m.id} className={`lb ${mtpl.id===m.id?"on":""}`} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"4px 9px",fontSize:10,opacity:!pro&&i>2?.3:1}}>{m.name}</button>)}</div></div>}
+              <div style={{display:"flex",flexWrap:"wrap",gap:3,maxHeight:160,overflowY:"auto"}}>{MTPL.map((m,i)=><button key={m.id} className={`lb ${mtpl.id===m.id?"on":""}`} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"4px 9px",fontSize:10,opacity:!pro&&i>2?.3:1}}>{m.name}</button>)}</div></div>}
             <div style={{padding:"14px 16px",borderRadius:14,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.05)"}}>
               <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
                 <IC d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" size={15} color="#fbbf24"/>
                 <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>Transfo</span>
                 <span style={{marginLeft:"auto",fontSize:10,fontWeight:600,color:"#fbbf24"}}>{activeT}/13</span></div>
-              <div style={{maxHeight:120,overflowY:"auto"}}>{Object.entries(TF).map(([k,m])=>{const on=tf[k];const lk=!pro&&m.p;return(
+              <div style={{maxHeight:200,overflowY:"auto"}}>{Object.entries(TF).map(([k,m])=>{const on=tf[k];const lk=!pro&&m.p;return(
                 <div key={k} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 6px",borderRadius:6,cursor:"pointer",opacity:lk?.25:1,transition:"background .1s",background:on&&!lk?"rgba(13,148,136,.04)":"transparent"}}>
                   <div style={{width:14,height:14,borderRadius:4,border:on&&!lk?"none":"1.5px solid rgba(255,255,255,.1)",background:on&&!lk?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:"#fff",flexShrink:0}}>{on&&!lk?"✓":""}</div>
                   <span style={{fontSize:11,fontWeight:600,color:on&&!lk?"#cbd5e1":"#475569"}}>{m.l}</span></div>)})}</div></div></div>
@@ -573,7 +573,7 @@ export default function App(){
           {/* DROP ZONE + FILE LIST */}
           <div className="app-grid" style={{display:"grid",gridTemplateColumns:files.length?"1fr 1fr":"1fr",gap:12}}>
             <div onClick={()=>{if(!ck())return;ir.current?.click()}} onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}
-              style={{padding:files.length?"28px 20px":"56px 20px",borderRadius:16,border:`2px dashed ${drag?"rgba(13,148,136,.4)":"rgba(255,255,255,.06)"}`,background:drag?"rgba(13,148,136,.03)":"rgba(255,255,255,.01)",textAlign:"center",cursor:"pointer",transition:"all .15s"}}>
+              style={{padding:files.length?"24px 20px":"80px 20px",borderRadius:16,border:`2px dashed ${drag?"rgba(13,148,136,.4)":"rgba(255,255,255,.06)"}`,background:drag?"rgba(13,148,136,.03)":"rgba(255,255,255,.01)",textAlign:"center",cursor:"pointer",transition:"all .15s"}}>
               <div style={{marginBottom:8}}>
                 <IC d={mode==="photo"?"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z":"M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"} size={files.length?28:40} color={drag?"#2dd4bf":"#334155"}/></div>
               <div style={{fontSize:14,fontWeight:700,color:drag?"#2dd4bf":"#e2e8f0",marginBottom:4}}>{drag?"Lâche ici":`Dépose tes ${mode==="photo"?"images":"vidéos"}`}</div>
@@ -589,7 +589,7 @@ export default function App(){
                   <div key={i} style={{padding:"10px 10px",borderRadius:10,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)"}}>
                     <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:4}}><IC d={s.ic} size={11} color={s.c}/><span style={{fontSize:9,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</span></div>
                     <div className="mono" style={{fontSize:15,fontWeight:800,color:s.c}}>{s.v}</div></div>)}</div>
-              <div style={{maxHeight:180,overflowY:"auto",marginBottom:10}}>
+              <div style={{maxHeight:280,overflowY:"auto",marginBottom:10}}>
                 {files.map(f=><div key={f.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:10,marginBottom:2,background:"rgba(255,255,255,.01)"}}>
                   {thumbs[f.id]?<img src={thumbs[f.id]} style={{width:38,height:38,borderRadius:8,objectFit:"cover",flexShrink:0}}/>:<div style={{width:38,height:38,borderRadius:8,background:"rgba(255,255,255,.03)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><IC d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" size={16} color="#475569"/></div>}
                   <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,color:"#e2e8f0",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{f.name}</div>
