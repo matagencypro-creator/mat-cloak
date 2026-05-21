@@ -172,10 +172,10 @@ export default function App(){
   const[dm,setDm]=useState("split");const[panel,setPanel]=useState(null);const[hist,setHist]=useState([]);
   const[pricing,setPricing]=useState(false);const[auth,setAuth]=useState(null);const[pendingStripe,setPendingStripe]=useState(null);
   const[wh,setWh]=useState({discord:"",telegram:"",on:false,type:"discord"});
-  const[faqO,setFaqO]=useState(null);const[baSlider,setBaSlider]=useState(50);
-  const[hcFiles,setHcFiles]=useState([null,null]);const[hcResult,setHcResult]=useState(null);const[hcLoading,setHcLoading]=useState(false);
+  const[faqO,setFaqO]=useState(null);
+  
   const[user,setUser]=useState(null);const[profile,setProfile]=useState(null);const[pro,setPro]=useState(false);const[du,setDu]=useState(0);
-  const ir=useRef();const hcRef1=useRef();const hcRef2=useRef();
+  const ir=useRef();
   const cFiles=useCounter(142847);const cVersions=useCounter(1284920);const cUsers=useCounter(3847);
 
   useEffect(()=>{
@@ -213,10 +213,7 @@ export default function App(){
   const clr=()=>{setFiles([]);setRes([]);setVw("config");setThumbs({})};
   const iL=inten<.25?"Ultra léger":inten<.45?"Léger":inten<.65?"Balanced":inten<.85?"Agressif":"Maximum";
   const iC=inten<.25?"#6ee7b7":inten<.45?"#67e8f9":inten<.65?"#a78bfa":inten<.85?"#fbbf24":"#f87171";
-  const hcPick=async(idx)=>{(idx===0?hcRef1:hcRef2).current?.click()};
-  const hcLoad=async(idx,e)=>{const file=e.target.files?.[0];if(!file)return;const nf=[...hcFiles];nf[idx]=file;setHcFiles(nf);
-    if(nf[0]&&nf[1]){setHcLoading(true);try{const[h1,h2]=await Promise.all([pH(nf[0]),pH(nf[1])]);
-      const match=h1===h2;setHcResult({h1:h1.slice(0,32),h2:h2.slice(0,32),match,s1:fb(nf[0].size),s2:fb(nf[1].size)})}catch(e){setHcResult(null)}setHcLoading(false)}};
+  
   const goStripe=(url)=>{if(user){window.open(url,"_blank")}else{setPendingStripe(url);setAuth("register")}};
 
   const FEATURES=[
@@ -262,8 +259,8 @@ export default function App(){
     .slider{-webkit-appearance:none;width:100%;height:3px;border-radius:3px;outline:none;background:rgba(255,255,255,.08)}.slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:linear-gradient(135deg,#0d9488,#06b6d4);border-radius:50%;cursor:pointer;box-shadow:0 0 16px rgba(13,148,136,.4)}
     .mono{font-family:'SF Mono',SFMono-Regular,Menlo,monospace}
     .faq-item{margin-bottom:4px}.faq-q{padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;border-radius:14px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01);transition:all .15s}.faq-q:hover{background:rgba(255,255,255,.025)}.faq-q.open{background:rgba(13,148,136,.03);border-color:rgba(13,148,136,.12)}.faq-a{padding:12px 18px 18px;font-size:14px;color:#64748b;line-height:1.8}
-    .ba-container{position:relative;overflow:hidden;border-radius:20px;border:1px solid rgba(255,255,255,.06);width:100%;aspect-ratio:16/9;background:#0a0e12;touch-action:none}
-    .ba-slider{position:absolute;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#0d9488,#06b6d4);z-index:3;cursor:ew-resize}.ba-slider::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#06b6d4);border:3px solid rgba(255,255,255,.9);box-shadow:0 0 20px rgba(13,148,136,.5)}
+    
+    
     .feat-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:28px 24px;transition:all .25s;position:relative;overflow:hidden}
     .feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(13,148,136,.3),transparent);opacity:0;transition:opacity .25s}.feat-card:hover::before{opacity:1}
     .feat-card:hover{border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.03);transform:translateY(-2px)}
@@ -288,16 +285,16 @@ export default function App(){
       .guide-grid{grid-template-columns:1fr!important}
       .section{padding:0 16px!important}
       .section-t{font-size:24px!important}
-      .hc-grid{grid-template-columns:1fr!important}
-      .app-layout{grid-template-columns:1fr!important}
-      .app-side{order:2}
+      
+      
+      
       .app-header{padding:8px 12px!important}
       .app-header-btns{flex-wrap:wrap;gap:3px!important}
       .app-header-btns .btn{padding:4px 7px!important;font-size:9px!important}
       .stat-grid{grid-template-columns:repeat(2,1fr)!important}
       .ver-grid{grid-template-columns:repeat(2,1fr)!important}
-      .preset-grid{grid-template-columns:repeat(3,1fr)!important;gap:4px!important}
-      .preset-grid .pc{padding:8px 4px!important}
+      .preset-grid{flex-wrap:wrap!important}
+      .preset-grid .pc{padding:4px 8px!important}
       .prc{padding:24px 18px!important}
       .ov{padding:10px!important}
     }
@@ -366,26 +363,18 @@ export default function App(){
                 <div className="mono" style={{fontSize:22,fontWeight:800,color:"#f1f5f9"}}>{s.n}</div>
                 <div style={{fontSize:11,color:"#475569",marginTop:4}}>{s.l}</div></div>))}</section>
 
-          {/* BEFORE/AFTER */}
-          <section className="section" style={{maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
+          {/* VIDEO DEMO */}
+          <section className="section" style={{maxWidth:750,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:24}}>
-              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Vois la différence. Ou pas.</h2>
-              <p style={{fontSize:14,color:"#475569"}}>Glisse le curseur — même image, hash complètement différent.</p></div>
-            <div className="ba-container" onMouseMove={e=>{const r=e.currentTarget.getBoundingClientRect();setBaSlider(Math.max(5,Math.min(95,((e.clientX-r.left)/r.width)*100)))}} onTouchMove={e=>{e.preventDefault();const r=e.currentTarget.getBoundingClientRect();const t=e.touches[0];setBaSlider(Math.max(5,Math.min(95,((t.clientX-r.left)/r.width)*100)))}}>
-              <div style={{position:"absolute",inset:0}}>
-                <img src="/demo.png" alt="V" style={{width:"100%",height:"100%",objectFit:"cover",filter:"brightness(1.03) saturate(1.08) hue-rotate(4deg)"}}/>
-                <div style={{position:"absolute",top:12,right:12,zIndex:4,padding:"4px 10px",borderRadius:8,background:"rgba(13,148,136,.12)",border:"1px solid rgba(45,212,191,.2)",backdropFilter:"blur(8px)"}}><div className="mono" style={{fontSize:10,color:"#2dd4bf"}}>SHA-256: e91b...f8a4</div></div></div>
-              <div style={{position:"absolute",top:0,bottom:0,left:0,width:`${baSlider}%`,overflow:"hidden",zIndex:2}}>
-                <div style={{position:"absolute",inset:0,width:`${10000/Math.max(baSlider,1)}%`}}>
-                  <img src="/demo.png" alt="O" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-                  <div style={{position:"absolute",top:12,left:12,zIndex:4,padding:"4px 10px",borderRadius:8,background:"rgba(0,0,0,.5)",backdropFilter:"blur(8px)"}}><div className="mono" style={{fontSize:10,color:"#94a3b8"}}>SHA-256: 7f3a...c2d1</div></div></div></div>
-              <div className="ba-slider" style={{left:`${baSlider}%`,transform:"translateX(-50%)"}}/>
-              <div style={{position:"absolute",bottom:12,left:14,zIndex:4,fontSize:11,fontWeight:700,color:"#fff",background:"rgba(0,0,0,.6)",padding:"5px 12px",borderRadius:8,backdropFilter:"blur(8px)"}}>ORIGINAL</div>
-              <div style={{position:"absolute",bottom:12,right:14,zIndex:4,fontSize:11,fontWeight:700,color:"#2dd4bf",background:"rgba(0,0,0,.6)",padding:"5px 12px",borderRadius:8,backdropFilter:"blur(8px)"}}>VERSION</div></div></section>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Vois Veilora en action</h2>
+              <p style={{fontSize:14,color:"#475569"}}>1 fichier → 100 versions uniques en quelques secondes.</p></div>
+            <div style={{borderRadius:20,border:"1px solid rgba(255,255,255,.06)",overflow:"hidden",background:"#0a0e12",position:"relative",aspectRatio:"16/9"}}>
+              <video src="/video/demo.mp4" controls playsInline preload="metadata" poster="/demo.png" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+              <div style={{position:"absolute",top:12,right:12,padding:"4px 10px",borderRadius:8,background:"rgba(13,148,136,.12)",border:"1px solid rgba(45,212,191,.2)",backdropFilter:"blur(8px)",pointerEvents:"none"}}><div className="mono" style={{fontSize:10,color:"#2dd4bf"}}>100% Local Processing</div></div></div></section>
 
           {/* NUMBERS */}
           <section className="nums-grid section" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
-            {[{n:"100",l:"Versions max"},{n:"13",l:"Transformations"},{n:"22",l:"Localisations GPS"},{n:"8",l:"Fake Devices"}].map((s,i)=>(
+            {[{n:"100",l:"Versions / fichier"},{n:"40+",l:"Champs EXIF"},{n:"22",l:"Villes GPS"},{n:"9",l:"Devices authentiques"}].map((s,i)=>(
               <div key={i} style={{textAlign:"center"}}><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>{s.n}</div><div style={{fontSize:11,color:"#475569",marginTop:2}}>{s.l}</div></div>))}</section>
 
           {/* FEATURES */}
@@ -418,28 +407,7 @@ export default function App(){
                 <div style={{marginTop:12,padding:"8px 12px",borderRadius:8,background:"rgba(45,212,191,.06)",textAlign:"center"}}><span style={{fontSize:11,fontWeight:700,color:"#2dd4bf"}}>Capture authentique</span></div></div></div>
             <div style={{textAlign:"center",marginTop:14,fontSize:12,color:"#334155"}}>Veilora injecte 40+ champs EXIF authentiques. Les plateformes voient un fichier iPhone original.</div></section>
 
-          {/* HASH CHECKER */}
-          <section className="section" style={{maxWidth:600,margin:"0 auto 60px",padding:"0 20px"}}>
-            <div style={{textAlign:"center",marginBottom:24}}>
-              <div className="badge bt" style={{marginBottom:12}}>Outil gratuit</div>
-              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Hash Checker</h2>
-              <p style={{fontSize:14,color:"#475569"}}>Drop 2 fichiers — compare leur hash instantanément.</p></div>
-            <div className="card" style={{padding:"28px 24px"}}>
-              <div className="hc-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
-                {[0,1].map(idx=><div key={idx} onClick={()=>hcPick(idx)} style={{padding:"28px 16px",borderRadius:16,border:"2px dashed rgba(255,255,255,.06)",textAlign:"center",cursor:"pointer",background:hcFiles[idx]?"rgba(13,148,136,.03)":"transparent",borderColor:hcFiles[idx]?"rgba(13,148,136,.2)":"rgba(255,255,255,.06)",transition:"all .15s"}}>
-                  <div style={{marginBottom:6}}><IC d={hcFiles[idx]?"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z":"M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"} size={24} color={hcFiles[idx]?"#2dd4bf":"#475569"}/></div>
-                  <div style={{fontSize:12,fontWeight:600,color:hcFiles[idx]?"#2dd4bf":"#475569",wordBreak:"break-all"}}>{hcFiles[idx]?hcFiles[idx].name:`Fichier ${idx+1}`}</div>
-                  <input ref={idx===0?hcRef1:hcRef2} type="file" accept="image/*" style={{display:"none"}} onChange={e=>hcLoad(idx,e)}/></div>)}</div>
-              {hcResult&&<div>
-                <div className="hc-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-                  {[{h:hcResult.h1,s:hcResult.s1,l:"Hash fichier 1"},{h:hcResult.h2,s:hcResult.s2,l:"Hash fichier 2"}].map((x,i)=><div key={i} style={{padding:"12px 14px",borderRadius:12,background:"rgba(255,255,255,.02)"}}>
-                    <div style={{fontSize:10,color:"#475569",textTransform:"uppercase",marginBottom:4,letterSpacing:".5px"}}>{x.l}</div>
-                    <div className="mono" style={{fontSize:11,color:"#94a3b8",wordBreak:"break-all"}}>{x.h}...</div>
-                    <div style={{fontSize:11,color:"#475569",marginTop:4}}>{x.s}</div></div>)}</div>
-                <div style={{textAlign:"center",padding:"16px 18px",borderRadius:14,background:hcResult.match?"rgba(248,113,113,.05)":"rgba(45,212,191,.05)",border:`1px solid ${hcResult.match?"rgba(248,113,113,.12)":"rgba(45,212,191,.12)"}`}}>
-                  <div style={{fontSize:16,fontWeight:700,color:hcResult.match?"#f87171":"#2dd4bf"}}>{hcResult.match?"⚠ Doublon détectable":"✓ Fichiers uniques"}</div></div>
-                <button className="btn btn-s" onClick={()=>{setHcFiles([null,null]);setHcResult(null)}} style={{width:"100%",marginTop:12}}>Réinitialiser</button></div>}</div></section>
-
+          
           {/* PRICING */}
           <section className="section" style={{maxWidth:860,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:32}}>
@@ -531,14 +499,15 @@ export default function App(){
             {user&&<button className="btn btn-s" style={{padding:"5px 8px",fontSize:10}} onClick={doLogout}>Déco</button>}
             {files.length>0&&<button className="btn btn-s" style={{padding:"5px 8px",fontSize:10,color:"#f87171"}} onClick={clr}>✕</button>}</div></div></header>
 
-      <main style={{flex:1,overflow:"auto",padding:"16px 18px",position:"relative",zIndex:1}}>
-        <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:3,borderRadius:10,maxWidth:240,margin:"0 auto 14px",border:"1px solid rgba(255,255,255,.05)"}}>
-          {[["photo","\ud83d\udcf8 Photos"],["video","\ud83c\udfac Vid\u00e9os"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"8px 0",fontSize:12,fontWeight:700,borderRadius:8,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b"}}>{l}</button>)}</div>
-
-        <div className="preset-grid" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:5,maxWidth:500,margin:"0 auto 14px"}}>
-          {PRESETS.map(p=><div key={p.id} className={`pc ${preset?.id===p.id?"on":""}`} onClick={()=>applyP(p)}>
-            <div style={{fontSize:18,marginBottom:1}}>{p.icon}</div>
-            <div style={{fontSize:10,fontWeight:700,color:preset?.id===p.id?"#2dd4bf":"#64748b"}}>{p.name}</div></div>)}</div>
+      <main style={{flex:1,overflow:"auto",padding:"0",position:"relative",zIndex:1}}>
+        {/* TOP BAR */}
+        <div style={{padding:"12px 20px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+          <div style={{display:"flex",gap:4,background:"rgba(255,255,255,.02)",padding:3,borderRadius:10,border:"1px solid rgba(255,255,255,.05)"}}>
+            {[["photo","\ud83d\udcf8 Photos"],["video","\ud83c\udfac Vid\u00e9os"]].map(([m,l])=><button key={m} className="btn" onClick={()=>{setMode(m);clr()}} style={{padding:"7px 18px",fontSize:12,fontWeight:700,borderRadius:8,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b"}}>{l}</button>)}</div>
+          <div className="preset-grid" style={{display:"flex",gap:4}}>
+            {PRESETS.map(p=><div key={p.id} className={`pc ${preset?.id===p.id?"on":""}`} onClick={()=>applyP(p)} style={{padding:"6px 14px",borderRadius:10,display:"flex",alignItems:"center",gap:5,cursor:"pointer",border:preset?.id===p.id?"1px solid rgba(13,148,136,.3)":"1px solid transparent",background:preset?.id===p.id?"rgba(13,148,136,.06)":"rgba(255,255,255,.02)"}}>
+              <span style={{fontSize:14}}>{p.icon}</span>
+              <span style={{fontSize:11,fontWeight:700,color:preset?.id===p.id?"#2dd4bf":"#64748b"}}>{p.name}</span></div>)}</div></div>
 
         {res.length>0&&<div style={{display:"flex",gap:6,marginBottom:12,justifyContent:"center"}}>
           <button className={`btn ${vw==="config"?"btn-p":"btn-s"}`} style={{padding:"7px 16px",fontSize:11}} onClick={()=>setVw("config")}>{"\u2699\ufe0f"} Config</button>
@@ -551,12 +520,12 @@ export default function App(){
               <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)}/></div>
             <div className="card" style={{padding:"12px 16px"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
-                <span style={{fontSize:13,fontWeight:700,color:"#e2e8f0"}}>Versions</span>
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <button className="cnt" onClick={()=>setVer(v=>Math.max(1,v-1))}>−</button>
-                  <div className="mono" style={{fontSize:22,fontWeight:700,color:"#2dd4bf",width:36,textAlign:"center"}}>{ver}</div>
-                  <button className="cnt" onClick={()=>setVer(v=>Math.min(pro?100:5,v+1))}>+</button></div></div>
-              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,20,50,100].map(n=><button key={n} className="btn btn-s" onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"4px 8px",fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:ver===n?"#2dd4bf":"#64748b",opacity:!pro&&n>5?.3:1}}>{n}</button>)}</div></div>
+                <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>Versions</span>
+                <div style={{display:"flex",alignItems:"center",gap:4}}>
+                  <button className="cnt" style={{width:30,height:30,fontSize:14}} onClick={()=>setVer(v=>Math.max(1,v-1))}>−</button>
+                  <div className="mono" style={{fontSize:20,fontWeight:700,color:"#2dd4bf",width:32,textAlign:"center"}}>{ver}</div>
+                  <button className="cnt" style={{width:30,height:30,fontSize:14}} onClick={()=>setVer(v=>Math.min(pro?100:5,v+1))}>+</button></div></div>
+              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,25,50,100].map(n=><button key={n} className="btn btn-s" onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"3px 7px",fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"rgba(255,255,255,.02)",color:ver===n?"#2dd4bf":"#64748b",opacity:!pro&&n>5?.3:1}}>{n}</button>)}</div></div>
             {tf.location&&<div className="card" style={{padding:"12px 14px"}}>
               <div style={{fontSize:12,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>📍 GPS Spoofing</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:3}}>{LOCS.map((l,i)=><button key={i} className={`lb ${loc.city===l.city?"on":""}`} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"5px 10px",fontSize:10,opacity:!pro&&i>3?.3:1}}>{l.city}</button>)}</div></div>}
@@ -566,12 +535,11 @@ export default function App(){
             <div className="card" style={{padding:"10px 10px",flex:1}}>
               <div style={{display:"flex",justifyContent:"space-between",padding:"0 6px",marginBottom:4}}>
                 <span style={{fontSize:12,fontWeight:700,color:"#e2e8f0"}}>Transformations</span>
-                <span className="badge bt" style={{fontSize:10}}>{activeT}</span></div>
+                <span className="badge bt" style={{fontSize:9}}>{activeT}/13</span></div>
               <div style={{maxHeight:250,overflowY:"auto"}}>{Object.entries(TF).map(([k,m])=>{const on=tf[k];const lk=!pro&&m.p;return(
                 <div key={k} className={`chk ${on&&!lk?"on":""}`} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{opacity:lk?.25:1,padding:"7px 10px"}}>
                   <div className={`dot ${on&&!lk?"on":""}`} style={{width:16,height:16,fontSize:9}}>{on&&!lk?"✓":lk?"🔒":""}</div>
                   <div style={{fontSize:12,fontWeight:600,color:on&&!lk?"#2dd4bf":"#64748b"}}>{m.i} {m.l}</div></div>)})}</div></div>
-          </aside>
 
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}
@@ -595,7 +563,7 @@ export default function App(){
 
             <button className="btn btn-p" onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:14,fontSize:14,borderRadius:12}}>
               {proc?"⏳ Traitement...":`🔒 Traiter ${files.length||0} fichier${files.length>1?"s":""} → ${(files.length||0)*ver} versions`}</button>
-          </div></div>)}
+          </div>)}
 
         {vw==="results"&&(<div>
           {proc&&<div className="card" style={{padding:"44px 20px",textAlign:"center",marginBottom:14}}>
