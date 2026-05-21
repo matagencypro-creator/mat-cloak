@@ -638,5 +638,6 @@ export default function App(){
           </div>
         </div>
       </div>
-      </main></div>);
+      </div>
+      </div>);
 }
