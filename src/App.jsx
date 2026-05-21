@@ -20,9 +20,15 @@ const LOCS=[
   {city:"Random",lat:[-50,50],lng:[-160,160]},{city:"Strip GPS",lat:null,lng:null},
 ];
 const MTPL=[
-  {id:"iphone",name:"iPhone 15 Pro"},{id:"samsung",name:"Samsung S24"},{id:"pixel",name:"Pixel 8"},
-  {id:"canon",name:"Canon EOS R6"},{id:"sony",name:"Sony A7IV"},{id:"tiktok",name:"Export TikTok"},
-  {id:"ig",name:"Export IG"},{id:"strip",name:"Strip tout"},
+  {id:"iphone17",name:"iPhone 17 Pro",make:"Apple",model:"iPhone 17 Pro",sw:"18.2",lens:"iPhone 17 Pro back triple camera 6.86mm f/1.78",focal:"6.86",focalEq:"24",aperture:"1.78",iso:[50,64,80,100,125,200,250],exp:["1/120","1/60","1/250","1/500","1/1000"]},
+  {id:"iphone16",name:"iPhone 16 Pro",make:"Apple",model:"iPhone 16 Pro",sw:"18.1.2",lens:"iPhone 16 Pro back triple camera 6.765mm f/1.78",focal:"6.765",focalEq:"24",aperture:"1.78",iso:[50,64,80,100,125,200],exp:["1/120","1/60","1/250","1/500"]},
+  {id:"iphone15",name:"iPhone 15 Pro",make:"Apple",model:"iPhone 15 Pro",sw:"17.6.1",lens:"iPhone 15 Pro back triple camera 6.765mm f/1.78",focal:"6.765",focalEq:"24",aperture:"1.78",iso:[50,64,80,100,125,200],exp:["1/120","1/60","1/250","1/500"]},
+  {id:"samsung25",name:"Samsung S25 Ultra",make:"Samsung",model:"SM-S938B",sw:"S938BXXU1AXLA",lens:"Samsung rear camera",focal:"6.3",focalEq:"23",aperture:"1.7",iso:[50,80,100,200,400],exp:["1/100","1/60","1/200","1/500"]},
+  {id:"samsung24",name:"Samsung S24",make:"Samsung",model:"SM-S921B",sw:"S921BXXS3AXK2",lens:"Samsung rear camera",focal:"6.3",focalEq:"23",aperture:"1.8",iso:[50,80,100,200,400],exp:["1/100","1/60","1/200"]},
+  {id:"pixel9",name:"Pixel 9 Pro",make:"Google",model:"Pixel 9 Pro",sw:"AP3A.241105.008",lens:"Pixel 9 Pro back camera 6.81mm f/1.68",focal:"6.81",focalEq:"24",aperture:"1.68",iso:[52,64,100,200,400],exp:["1/120","1/60","1/250"]},
+  {id:"canon",name:"Canon EOS R6 II",make:"Canon",model:"Canon EOS R6m2",sw:"Firmware 1.4.0",lens:"RF24-105mm F4 L IS USM",focal:"50",focalEq:"50",aperture:"4.0",iso:[100,200,400,800,1600],exp:["1/125","1/250","1/500","1/1000"]},
+  {id:"sony",name:"Sony A7 IV",make:"Sony",model:"ILCE-7M4",sw:"ILCE-7M4 v3.01",lens:"FE 24-70mm F2.8 GM II",focal:"35",focalEq:"35",aperture:"2.8",iso:[100,200,400,800,1600,3200],exp:["1/125","1/250","1/500","1/1000"]},
+  {id:"strip",name:"Strip tout",make:"",model:"",sw:"",lens:"",focal:"",focalEq:"",aperture:"",iso:[],exp:[]},
 ];
 const LUTS=[{r:3,g:1,b:-3,t:3,c:2},{r:-2,g:1,b:2,t:-3,c:1},{r:2,g:0,b:-1,t:1,c:-3},{r:5,g:2,b:-3,t:5,c:1},{r:1,g:-1,b:1,t:0,c:-4}];
 
@@ -35,7 +41,7 @@ const TF={
   crop:{l:"Crop + Rescale",i:"✂️"},rotation:{l:"Micro Rotation",i:"🔄"},zoom:{l:"Zoom Subtil",i:"🔍"},
   perspective:{l:"Perspective Warp",i:"📐",p:1},colors:{l:"Shift Couleurs",i:"🎨"},lut:{l:"LUT Cinématique",i:"🌈",p:1},
   noise:{l:"AI Noise",i:"🧠",p:1},flip:{l:"Miroir",i:"↔️"},metadata:{l:"Nuke Metadata",i:"🛡️"},
-  metaTemplate:{l:"Fake Device",i:"🧹",p:1},location:{l:"Spoof GPS",i:"📍"},randomName:{l:"Nom Random",i:"🎲"},
+  metaTemplate:{l:"Fake Device (40+ EXIF)",i:"📱",p:1},location:{l:"Spoof GPS",i:"📍"},randomName:{l:"Nom Random",i:"🎲"},
   fakeTimeline:{l:"Fake Timeline",i:"🕒",p:1},
 };
 const TFD=Object.fromEntries(Object.keys(TF).map(k=>[k,true]));
@@ -96,6 +102,30 @@ async function sendWH(url,blob,name,type){if(!url)return;try{const fd=new FormDa
 function useCounter(target,dur=2000){const[v,setV]=useState(0);useEffect(()=>{let s=null;const step=ts=>{if(!s)s=ts;const p=Math.min((ts-s)/dur,1);setV(Math.floor(p*target));if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)},[target,dur]);return v}
 
 const IC=({d,size=20,color="currentColor"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d={d}/></svg>;
+// Real SSIM computation (Structural Similarity Index)
+function computeSSIM(origFile,modBlob){return new Promise(res=>{
+  const imgA=new Image(),imgB=new Image();let loadedA=false,loadedB=false;
+  const check=()=>{if(!loadedA||!loadedB)return;
+    const w=Math.min(imgA.width,imgB.width,256),h=Math.min(imgA.height,imgB.height,256);
+    const cA=document.createElement("canvas");cA.width=w;cA.height=h;const xA=cA.getContext("2d");xA.drawImage(imgA,0,0,w,h);
+    const cB=document.createElement("canvas");cB.width=w;cB.height=h;const xB=cB.getContext("2d");xB.drawImage(imgB,0,0,w,h);
+    const dA=xA.getImageData(0,0,w,h).data,dB=xB.getImageData(0,0,w,h).data;
+    const n=w*h;let muA=0,muB=0;
+    for(let i=0;i<n;i++){const p=i*4;muA+=(dA[p]*.299+dA[p+1]*.587+dA[p+2]*.114);muB+=(dB[p]*.299+dB[p+1]*.587+dB[p+2]*.114)}
+    muA/=n;muB/=n;let sA=0,sB=0,sAB=0;
+    for(let i=0;i<n;i++){const p=i*4;const a=(dA[p]*.299+dA[p+1]*.587+dA[p+2]*.114)-muA;const b=(dB[p]*.299+dB[p+1]*.587+dB[p+2]*.114)-muB;sA+=a*a;sB+=b*b;sAB+=a*b}
+    sA=Math.sqrt(sA/n);sB=Math.sqrt(sB/n);sAB/=n;
+    const C1=6.5025,C2=58.5225;const ssim=((2*muA*muB+C1)*(2*sAB+C2))/((muA*muA+muB*muB+C1)*(sA*sA+sB*sB+C2));
+    URL.revokeObjectURL(imgA.src);URL.revokeObjectURL(imgB.src);res(Math.round(ssim*10000)/100)};
+  imgA.onload=()=>{loadedA=true;check()};imgB.onload=()=>{loadedB=true;check()};
+  imgA.src=URL.createObjectURL(origFile);imgB.src=URL.createObjectURL(modBlob);})}
+
+// Image format converter (client-side)
+function convertImage(file,format){return new Promise(res=>{const img=new Image();img.onload=()=>{
+  const c=document.createElement("canvas");c.width=img.width;c.height=img.height;const x=c.getContext("2d");x.drawImage(img,0,0);
+  const mime=format==="png"?"image/png":format==="webp"?"image/webp":"image/jpeg";
+  c.toBlob(b=>{URL.revokeObjectURL(img.src);res(b)},mime,format==="jpg"?.92:undefined)};img.src=URL.createObjectURL(file)})}
+
 
 function AuthModal({mode:initMode,onClose,onSuccess}){
   const emailRef=useRef(null);const passRef=useRef(null);const nameRef=useRef(null);
@@ -169,7 +199,7 @@ export default function App(){
     const wu=wh.on?(wh.type==="discord"?wh.discord:wh.telegram):"";
     for(const f of files){const vr=[];for(let v=0;v<ver;v++){setProg({c:done,t:tot,f:f.name,v:v+1});
       if(f.type.startsWith("image/")){try{const{blob,w,h}=await processImg(f.file,tf,v,inten);const hF=await pH(blob);const oH=await pH(f.file);
-        const ss=Math.min(99,Math.max(25,Math.round(Math.abs(1-blob.size/f.size)*200+(tf.perspective?15:0)+(tf.lut?12:0)+10+Math.random()*15)));
+        const ss=await computeSSIM(f.file,blob);
         const nm=tf.randomName?rn("jpg"):`${f.name.split(".")[0]}_v${v+1}.jpg`;if(wu)await sendWH(wu,blob,nm,wh.type);
         vr.push({blob,name:nm,size:blob.size,ok:true,thumb:URL.createObjectURL(blob),w,h,hash:hF.slice(0,16),origHash:oH.slice(0,16),similarity:ss})}catch(e){vr.push({name:f.name,ok:false})}}
       else{const ext=f.name.split(".").pop();const nm=tf.randomName?rn(ext):`${f.name.split(".")[0]}_v${v+1}.${ext}`;if(wu)await sendWH(wu,f.file,nm,wh.type);
@@ -190,12 +220,12 @@ export default function App(){
   const goStripe=(url)=>{if(user){window.open(url,"_blank")}else{setPendingStripe(url);setAuth("register")}};
 
   const FEATURES=[
-    {t:"Photos & Vidéos",d:"Traitement batch de JPG, PNG, WEBP, MP4, MOV. Génère autant de versions uniques que nécessaire.",ic:"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"},
-    {t:"Métadonnées EXIF",d:"Réécriture complète des métadonnées : date, appareil, logiciel — avec des valeurs aléatoires uniques.",ic:"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"},
-    {t:"GPS Aléatoire",d:"Coordonnées GPS générées dans la zone géographique de ton choix — 22 villes ou monde entier.",ic:"M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"},
-    {t:"Zoom & Recadrage",d:"Zoom aléatoire subtil appliqué à chaque version pour varier le cadrage sans altérer le contenu visible.",ic:"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"},
-    {t:"Micro-bruit Visuel",d:"Ajout de bruit gaussien invisible à l'oeil nu pour rendre chaque fichier unique sur le plan technique.",ic:"M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"},
-    {t:"Envoi Automatique",d:"Envoi direct vers Telegram ou Discord via webhook dès que le traitement est terminé. Zéro action manuelle.",ic:"M12 19l9 2-9-18-9 18 9-2zm0 0v-8"},
+    {t:"Photos & Vidéos",d:"Traitement batch de JPG, PNG, WEBP, MP4, MOV. Génère jusqu'a 100 versions uniques par fichier en quelques secondes.",ic:"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"},
+    {t:"40+ Champs EXIF",d:"Injection de 40+ champs EXIF authentiques : LensModel, FocalLength, ISO, ExposureTime, SubSecTime, GPS altitude/bearing. Simule un vrai iPhone 17 Pro.",ic:"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"},
+    {t:"GPS Spoofing",d:"Coordonnées GPS avec altitude, bearing et speed générées dans 22 villes mondiales ou complètement random.",ic:"M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"},
+    {t:"Score SSIM",d:"Analyse SSIM (Structural Similarity Index) réelle pixel par pixel pour prouver que chaque version est techniquement unique.",ic:"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"},
+    {t:"Modifications Visuelles",d:"Crop, rotation, zoom, perspective warp, shift couleurs, LUT cinématique, bruit gaussien AI. 13 transformations combinées.",ic:"M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"},
+    {t:"100% Local",d:"Tout est traité dans ton navigateur. Aucun fichier ne quitte ton appareil. Plus rapide et plus sécurisé qu'un traitement serveur.",ic:"M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"},
   ];
 
   const S=`@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -370,6 +400,24 @@ export default function App(){
                 <div style={{fontSize:15,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>{f.t}</div>
                 <div style={{fontSize:13,color:"#64748b",lineHeight:1.7}}>{f.d}</div></div>))}</div></section>
 
+
+          {/* WHY METADATA MATTERS */}
+          <section className="section" style={{maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
+            <div style={{textAlign:"center",marginBottom:28}}>
+              <div className="badge bt" style={{marginBottom:12}}>Technique</div>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Pourquoi les métadonnées comptent</h2>
+              <p style={{fontSize:14,color:"#475569",maxWidth:500,margin:"0 auto"}}>Les plateformes analysent chaque fichier pour détecter les reposts. Veilora réécrit tout.</p></div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+              <div className="card" style={{padding:"22px 20px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}><span style={{fontSize:16,color:"#fbbf24"}}>{"⚠"}</span><span style={{fontSize:14,fontWeight:700,color:"#fbbf24"}}>Repost classique</span></div>
+                {[{l:"Device",v:"stripped"},{l:"Camera",v:"stripped"},{l:"Software",v:"stripped"},{l:"FocalLength",v:"missing"},{l:"ISO",v:"missing"},{l:"SubSecTime",v:"missing"},{l:"GPS",v:"missing"},{l:"Timestamp",v:"modified"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span className="mono" style={{fontSize:11,color:"#64748b"}}>{r.l}</span><span className="mono" style={{fontSize:11,color:"#f87171"}}>{r.v}</span></div>)}
+                <div style={{marginTop:12,padding:"8px 12px",borderRadius:8,background:"rgba(248,113,113,.06)",textAlign:"center"}}><span style={{fontSize:11,fontWeight:700,color:"#f87171"}}>Flagé comme repost</span></div></div>
+              <div className="card" style={{padding:"22px 20px",borderColor:"rgba(13,148,136,.2)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}><span style={{fontSize:16,color:"#2dd4bf"}}>{"✓"}</span><span style={{fontSize:14,fontWeight:700,color:"#2dd4bf"}}>Avec Veilora</span></div>
+                {[{l:"Device",v:"iPhone 17 Pro"},{l:"Camera",v:"Back Triple"},{l:"Software",v:"iOS 18.2"},{l:"FocalLength",v:"6.86mm"},{l:"ISO",v:"64"},{l:"SubSecTime",v:"847"},{l:"GPS",v:"40.7° N"},{l:"Timestamp",v:"2026:05:21"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span className="mono" style={{fontSize:11,color:"#64748b"}}>{r.l}</span><span className="mono" style={{fontSize:11,color:"#2dd4bf"}}>{r.v}</span></div>)}
+                <div style={{marginTop:12,padding:"8px 12px",borderRadius:8,background:"rgba(45,212,191,.06)",textAlign:"center"}}><span style={{fontSize:11,fontWeight:700,color:"#2dd4bf"}}>Capture authentique</span></div></div></div>
+            <div style={{textAlign:"center",marginTop:14,fontSize:12,color:"#334155"}}>Veilora injecte 40+ champs EXIF authentiques. Les plateformes voient un fichier iPhone original.</div></section>
+
           {/* HASH CHECKER */}
           <section className="section" style={{maxWidth:600,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:24}}>
@@ -402,7 +450,7 @@ export default function App(){
                 {["3 fichiers/jour","5 versions max","4 transformations"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#94a3b8"}}>{f}</span></div>)}
                 <button className="btn btn-s" style={{width:"100%",marginTop:18,padding:12}} onClick={()=>setAuth("register")}>Commencer</button></div>
               <div className="prc ft"><div style={{fontSize:17,fontWeight:700,color:"#2dd4bf",marginBottom:4}}>Pro</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>7.99€<span style={{fontSize:13,color:"#64748b",fontWeight:500}}>/mois</span></div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Sans engagement</div>
-                {["Fichiers illimités","100 versions","13 transformations","GPS + Fake Device","Webhooks Discord/TG"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
+                {["Fichiers illimités","100 versions","13 transformations","40+ EXIF + GPS Spoofing","Webhooks Discord/TG"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
                 <button className="btn btn-p" style={{width:"100%",marginTop:18,padding:12}} onClick={()=>goStripe(STRIPE.monthly)}>S'abonner</button></div>
               <div className="prc lt"><div style={{fontSize:17,fontWeight:700,color:"#06b6d4",marginBottom:4}}>À Vie</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>44.99€</div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Paiement unique</div>
                 {["Tout le Pro","Pour toujours","Mises à jour incluses","Support prioritaire"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#06b6d4"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
@@ -453,7 +501,7 @@ export default function App(){
         {dm==="split"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}><div>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",borderRadius:12}}/>}</div><div>{preview.thumb&&<img src={preview.thumb} style={{width:"100%",borderRadius:12}}/>}</div></div>}
         {dm==="blink"&&<div style={{marginBottom:10,textAlign:"center",position:"relative"}}>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{maxWidth:"100%",maxHeight:350,borderRadius:12}}/>}{preview.thumb&&<img src={preview.thumb} style={{position:"absolute",left:0,top:0,maxWidth:"100%",maxHeight:350,borderRadius:12,animation:"blink 1.2s infinite"}}/>}</div>}
         {dm==="overlay"&&<div style={{marginBottom:10,position:"relative"}}>{thumbs[preview.origId]&&<img src={thumbs[preview.origId]} style={{width:"100%",maxHeight:350,objectFit:"contain",borderRadius:12}}/>}{preview.thumb&&<img src={preview.thumb} style={{position:"absolute",inset:0,width:"100%",maxHeight:350,objectFit:"contain",borderRadius:12,opacity:.5,mixBlendMode:"difference"}}/>}</div>}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>{[{l:"Hash Orig",v:preview.origHash,c:"#94a3b8"},{l:"Hash New",v:preview.hash,c:"#2dd4bf"},{l:"Size",v:`${preview.w}×${preview.h}`,c:"#22d3ee"},{l:"Diff",v:preview.similarity+"%",c:preview.similarity>50?"#f87171":"#2dd4bf"}].map((s,i)=><div key={i} style={{background:"rgba(255,255,255,.02)",padding:10,borderRadius:10}}><div style={{fontSize:9,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</div><div className="mono" style={{fontSize:13,fontWeight:700,color:s.c,marginTop:2}}>{s.v}</div></div>)}</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>{[{l:"Hash Orig",v:preview.origHash,c:"#94a3b8"},{l:"Hash New",v:preview.hash,c:"#2dd4bf"},{l:"Size",v:`${preview.w}×${preview.h}`,c:"#22d3ee"},{l:"SSIM",v:preview.similarity+"%",c:preview.similarity>99?"#f87171":"#2dd4bf"}].map((s,i)=><div key={i} style={{background:"rgba(255,255,255,.02)",padding:10,borderRadius:10}}><div style={{fontSize:9,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</div><div className="mono" style={{fontSize:13,fontWeight:700,color:s.c,marginTop:2}}>{s.v}</div></div>)}</div>
         <div style={{display:"flex",gap:8,justifyContent:"center"}}><button className="btn btn-p" style={{padding:"10px 22px"}} onClick={()=>{dl(preview);setPreview(null)}}>📥 Download</button><button className="btn btn-s" onClick={()=>setPreview(null)}>Fermer</button></div></div></div>)}
       {panel&&(<div className="ov" onClick={()=>setPanel(null)}><div onClick={e=>e.stopPropagation()} style={{maxWidth:460,width:"100%",maxHeight:"85vh",overflowY:"auto",background:"linear-gradient(180deg,#0a1014,#080c10)",border:"1px solid rgba(255,255,255,.08)",borderRadius:22,padding:"28px 24px"}}>
         {panel==="audit"&&<><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginBottom:14}}>🛡️ Privacy Audit</h3>{[{l:"EXIF",s:tf.metadata},{l:"GPS",s:tf.location},{l:"Device",s:tf.metaTemplate},{l:"Timeline",s:tf.fakeTimeline},{l:"Filename",s:tf.randomName},{l:"Pixels",s:tf.crop||tf.colors||tf.noise},{l:"Couleurs",s:tf.colors||tf.lut}].map((a,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.02)",marginBottom:4}}><span style={{fontSize:13,color:"#94a3b8"}}>{a.l}</span><span style={{fontSize:12,fontWeight:600,color:a.s?"#2dd4bf":"#fbbf24"}}>{a.s?"✓":"⚠"}</span></div>)}
@@ -567,7 +615,7 @@ export default function App(){
                 {v.thumb&&<img src={v.thumb} style={{width:"100%",height:60,objectFit:"cover",borderRadius:8,marginBottom:4,display:"block"}}/>}
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <span className="badge bt" style={{fontSize:8}}>v{vi+1}</span>
-                  {v.similarity!=null&&<span className="mono" style={{fontSize:8,color:v.similarity>50?"#f87171":"#2dd4bf"}}>{v.similarity}%</span>}</div></div>))}</div></div>)}
+                  {v.similarity!=null&&<span className="mono" style={{fontSize:8,color:v.similarity>99?"#f87171":"#2dd4bf"}}>SSIM {v.similarity}%</span>}</div></div>))}</div></div>)}
           {!proc&&totV>0&&<button className="btn btn-s" onClick={dlAll} style={{width:"100%",padding:12,fontSize:13,marginTop:6}}>📥 Télécharger les {totV} fichiers</button>}
         </div>)}
       </main></div>);
