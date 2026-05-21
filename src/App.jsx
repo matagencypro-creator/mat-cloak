@@ -172,7 +172,7 @@ export default function App(){
   const[dm,setDm]=useState("split");const[panel,setPanel]=useState(null);const[hist,setHist]=useState([]);
   const[pricing,setPricing]=useState(false);const[auth,setAuth]=useState(null);const[pendingStripe,setPendingStripe]=useState(null);
   const[wh,setWh]=useState({discord:"",telegram:"",on:false,type:"discord"});
-  const[faqO,setFaqO]=useState(null);
+  const[faqO,setFaqO]=useState(null);const[baSlider,setBaSlider]=useState(50);
   
   const[user,setUser]=useState(null);const[profile,setProfile]=useState(null);const[pro,setPro]=useState(false);const[du,setDu]=useState(0);
   const ir=useRef();
@@ -261,6 +261,8 @@ export default function App(){
     .faq-item{margin-bottom:4px}.faq-q{padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;border-radius:14px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01);transition:all .15s}.faq-q:hover{background:rgba(255,255,255,.025)}.faq-q.open{background:rgba(13,148,136,.03);border-color:rgba(13,148,136,.12)}.faq-a{padding:12px 18px 18px;font-size:14px;color:#64748b;line-height:1.8}
     
     
+        .ba-container{position:relative;overflow:hidden;border-radius:20px;border:1px solid rgba(255,255,255,.06);width:100%;aspect-ratio:16/9;background:#0a0e12;touch-action:none}
+    .ba-slider{position:absolute;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#0d9488,#06b6d4);z-index:3;cursor:ew-resize}.ba-slider::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#06b6d4);border:3px solid rgba(255,255,255,.9);box-shadow:0 0 20px rgba(13,148,136,.5)}
     .feat-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:28px 24px;transition:all .25s;position:relative;overflow:hidden}
     .feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(13,148,136,.3),transparent);opacity:0;transition:opacity .25s}.feat-card:hover::before{opacity:1}
     .feat-card:hover{border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.03);transform:translateY(-2px)}
@@ -309,18 +311,20 @@ export default function App(){
       {pricing&&<PricingModal close={()=>setPricing(false)}/>}
       {auth&&<AuthModal mode={auth} onClose={()=>{setAuth(null);setPendingStripe(null)}} onSuccess={()=>{setAuth(null);if(pendingStripe){window.open(pendingStripe,"_blank");setPendingStripe(null)}}}/>}
 
-      <nav className="nav-bar" style={{padding:"16px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative",zIndex:2,maxWidth:1200,margin:"0 auto"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setPg("landing")}>
-          <div style={{width:34,height:34,borderRadius:10,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain"}} alt="V"/></div>
-          <span style={{fontWeight:800,fontSize:18,color:"#f1f5f9",letterSpacing:"-1px"}}>Veilora</span></div>
-        <div style={{display:"flex",gap:6,alignItems:"center"}}>
-          <div className="nav-links" style={{display:"flex",gap:4}}>
-            <button className="btn btn-s" style={{fontSize:12,padding:"8px 14px"}} onClick={()=>setPg(pg==="guide"?"landing":"guide")}>{pg==="guide"?"← Retour":"Guide"}</button>
-            <button className="btn btn-s" style={{fontSize:12,padding:"8px 14px"}} onClick={()=>setPricing(true)}>Pricing</button></div>
-          {user?<><span style={{fontSize:11,color:"#2dd4bf",maxWidth:100,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{profile?.name||user.email?.split("@")[0]}</span>{pro&&<span className="badge bt" style={{fontSize:9}}>PRO</span>}<button className="btn btn-s" style={{padding:"6px 12px",fontSize:11}} onClick={doLogout}>Déconnexion</button></>:
-            <button className="btn btn-s" style={{fontSize:12,padding:"8px 14px"}} onClick={()=>setAuth("login")}>Connexion</button>}
-          {user&&<button className="btn btn-p" style={{fontSize:12,padding:"10px 20px"}} onClick={()=>setPg("app")}>Ouvrir l'app</button>}
-        </div></nav>
+      <div style={{position:"sticky",top:0,zIndex:50,display:"flex",justifyContent:"center",padding:"14px 20px"}}>
+        <nav style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",maxWidth:1000,padding:"10px 8px 10px 18px",borderRadius:16,background:"rgba(10,14,18,.75)",backdropFilter:"blur(16px)",border:"1px solid rgba(255,255,255,.06)"}}>
+          <div style={{display:"flex",alignItems:"center",gap:9,cursor:"pointer"}} onClick={()=>setPg("landing")}>
+            <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain"}} alt="V"/></div>
+            <span style={{fontWeight:800,fontSize:17,color:"#f1f5f9",letterSpacing:"-.8px"}}>Veilora</span></div>
+          <div className="nav-links" style={{display:"flex",gap:2,alignItems:"center"}}>
+            {[{l:"Features",a:"features"},{l:"How It Works",a:"guide"},{l:"Pricing",a:"pricing"},{l:"FAQ",a:"faq"}].map(n=>
+              <button key={n.a} onClick={()=>{if(n.a==="guide")setPg("guide");else if(n.a==="pricing")setPricing(true);else{const el=document.getElementById(n.a);el&&el.scrollIntoView({behavior:"smooth"})}}} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",borderRadius:8,transition:"color .15s"}}>{n.l}</button>)}</div>
+          <div style={{display:"flex",gap:6,alignItems:"center"}}>
+            {user?<><button onClick={doLogout} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>Déconnexion</button>
+              <button className="btn btn-p" style={{fontSize:13,padding:"9px 22px",borderRadius:12}} onClick={()=>setPg("app")}>Ouvrir l'app</button></>:
+              <><button onClick={()=>setAuth("login")} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>Login</button>
+              <button onClick={()=>setAuth("register")} style={{padding:"9px 22px",fontSize:13,fontWeight:700,borderRadius:12,background:"linear-gradient(135deg,#0d9488,#06b6d4)",color:"#fff",border:"none",cursor:"pointer",fontFamily:"inherit"}}>Get Started →</button></>}
+          </div></nav></div>
 
       {pg==="guide"?(<main className="section" style={{maxWidth:800,margin:"0 auto",padding:"40px 28px",position:"relative",zIndex:1}}>
         <div style={{textAlign:"center",marginBottom:40}}>
@@ -351,7 +355,7 @@ export default function App(){
               <span style={{width:6,height:6,borderRadius:"50%",background:"#2dd4bf",animation:"pulse 2s infinite"}}/>100% local — aucun fichier uploadé</div>
             <h1 className="hero-t" style={{fontSize:52,fontWeight:800,color:"#f1f5f9",lineHeight:1.08,letterSpacing:"-2.5px",marginBottom:20}}>
               Modifiez vos médias.<br/><span style={{background:"linear-gradient(135deg,#0d9488,#06b6d4,#22d3ee)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Invisiblement.</span></h1>
-            <p className="hero-sub" style={{fontSize:16,color:"#475569",maxWidth:520,margin:"0 auto 32px",lineHeight:1.7}}>Veilora modifie les métadonnées, le GPS, le bruit visuel, le zoom et bien plus — pour que chaque export soit unique.</p>
+            <p className="hero-sub" style={{fontSize:16,color:"#475569",maxWidth:520,margin:"0 auto 32px",lineHeight:1.7}}>Veilora injecte 40+ champs EXIF authentiques, modifie chaque pixel et génère des versions illimitées — 100% dans ton navigateur.</p>
             <div className="hero-btns" style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"15px 32px",fontSize:15,borderRadius:14}}>→ Commencer — 7.99€/mois</button>
               <button className="btn" onClick={()=>goStripe(STRIPE.lifetime)} style={{padding:"15px 28px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button>
@@ -365,21 +369,30 @@ export default function App(){
                 <div className="mono" style={{fontSize:22,fontWeight:800,color:"#f1f5f9"}}>{s.n}</div>
                 <div style={{fontSize:11,color:"#475569",marginTop:4}}>{s.l}</div></div>))}</section>
 
-          {/* VIDEO DEMO */}
-          <section className="section" style={{maxWidth:750,margin:"0 auto 60px",padding:"0 20px"}}>
+          {/* BEFORE/AFTER */}
+          <section className="section" style={{maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:24}}>
-              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Vois Veilora en action</h2>
-              <p style={{fontSize:14,color:"#475569"}}>1 fichier → 100 versions uniques en quelques secondes.</p></div>
-            <div style={{borderRadius:20,border:"1px solid rgba(255,255,255,.06)",overflow:"hidden",background:"#0a0e12",position:"relative",aspectRatio:"16/9"}}>
-              <video src="/video/demo.mp4" controls playsInline preload="metadata" poster="/demo.png" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
-              <div style={{position:"absolute",top:12,right:12,padding:"4px 10px",borderRadius:8,background:"rgba(13,148,136,.12)",border:"1px solid rgba(45,212,191,.2)",backdropFilter:"blur(8px)",pointerEvents:"none"}}><div className="mono" style={{fontSize:10,color:"#2dd4bf"}}>100% Local Processing</div></div></div></section>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Vois la différence. Ou pas.</h2>
+              <p style={{fontSize:14,color:"#475569"}}>Glisse le curseur — même image, hash complètement différent.</p></div>
+            <div className="ba-container" onMouseMove={e=>{const r=e.currentTarget.getBoundingClientRect();setBaSlider(Math.max(5,Math.min(95,((e.clientX-r.left)/r.width)*100)))}} onTouchMove={e=>{e.preventDefault();const r=e.currentTarget.getBoundingClientRect();const t=e.touches[0];setBaSlider(Math.max(5,Math.min(95,((t.clientX-r.left)/r.width)*100)))}}>
+              <div style={{position:"absolute",inset:0}}>
+                <img src="/demo.png" alt="V" style={{width:"100%",height:"100%",objectFit:"cover",filter:"brightness(1.03) saturate(1.08) hue-rotate(4deg)"}}/>
+                <div style={{position:"absolute",top:12,right:12,zIndex:4,padding:"4px 10px",borderRadius:8,background:"rgba(13,148,136,.12)",border:"1px solid rgba(45,212,191,.2)",backdropFilter:"blur(8px)"}}><div className="mono" style={{fontSize:10,color:"#2dd4bf"}}>SHA-256: e91b...f8a4</div></div></div>
+              <div style={{position:"absolute",top:0,bottom:0,left:0,width:`${baSlider}%`,overflow:"hidden",zIndex:2}}>
+                <div style={{position:"absolute",inset:0,width:`${10000/Math.max(baSlider,1)}%`}}>
+                  <img src="/demo.png" alt="O" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                  <div style={{position:"absolute",top:12,left:12,zIndex:4,padding:"4px 10px",borderRadius:8,background:"rgba(0,0,0,.5)",backdropFilter:"blur(8px)"}}><div className="mono" style={{fontSize:10,color:"#94a3b8"}}>SHA-256: 7f3a...c2d1</div></div></div></div>
+              <div className="ba-slider" style={{left:`${baSlider}%`,transform:"translateX(-50%)"}}/>
+              <div style={{position:"absolute",bottom:12,left:14,zIndex:4,fontSize:11,fontWeight:700,color:"#fff",background:"rgba(0,0,0,.6)",padding:"5px 12px",borderRadius:8,backdropFilter:"blur(8px)"}}>ORIGINAL</div>
+              <div style={{position:"absolute",bottom:12,right:14,zIndex:4,fontSize:11,fontWeight:700,color:"#2dd4bf",background:"rgba(0,0,0,.6)",padding:"5px 12px",borderRadius:8,backdropFilter:"blur(8px)"}}>VERSION</div></div></section>
 
           {/* NUMBERS */}
           <section className="nums-grid section" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
-            {[{n:"100",l:"Versions / fichier"},{n:"40+",l:"Champs EXIF"},{n:"22",l:"Villes GPS"},{n:"9",l:"Devices authentiques"}].map((s,i)=>(
+            {[{n:"∞",l:"Versions / fichier"},{n:"40+",l:"Champs EXIF"},{n:"22",l:"Villes GPS"},{n:"9",l:"Devices authentiques"}].map((s,i)=>(
               <div key={i} style={{textAlign:"center"}}><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>{s.n}</div><div style={{fontSize:11,color:"#475569",marginTop:2}}>{s.l}</div></div>))}</section>
 
           {/* FEATURES */}
+          <div id="features"/>
           <section className="section" style={{maxWidth:900,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:32}}>
               <div className="badge bt" style={{marginBottom:12}}>Fonctionnalités</div>
@@ -411,6 +424,7 @@ export default function App(){
 
           
           {/* PRICING */}
+          <div id="pricing"/>
           <section className="section" style={{maxWidth:860,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:32}}>
               <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Prêt à commencer ?</h2>
@@ -420,13 +434,14 @@ export default function App(){
                 {["3 fichiers/jour","5 versions max","4 transformations"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#94a3b8"}}>{f}</span></div>)}
                 <button className="btn btn-s" style={{width:"100%",marginTop:18,padding:12}} onClick={()=>setAuth("register")}>Commencer</button></div>
               <div className="prc ft"><div style={{fontSize:17,fontWeight:700,color:"#2dd4bf",marginBottom:4}}>Pro</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>7.99€<span style={{fontSize:13,color:"#64748b",fontWeight:500}}>/mois</span></div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Sans engagement</div>
-                {["Fichiers illimités","100 versions","13 transformations","40+ EXIF + GPS Spoofing","Webhooks Discord/TG"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
+                {["Fichiers illimités","Versions illimitées","13 transformations","40+ EXIF + GPS Spoofing","Webhooks Discord/TG"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
                 <button className="btn btn-p" style={{width:"100%",marginTop:18,padding:12}} onClick={()=>goStripe(STRIPE.monthly)}>S'abonner</button></div>
               <div className="prc lt"><div style={{fontSize:17,fontWeight:700,color:"#06b6d4",marginBottom:4}}>À Vie</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>44.99€</div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Paiement unique</div>
                 {["Tout le Pro","Pour toujours","Mises à jour incluses","Support prioritaire"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#06b6d4"/><span style={{fontSize:13,color:"#e2e8f0"}}>{f}</span></div>)}
                 <button className="btn" style={{width:"100%",marginTop:18,padding:12,borderRadius:12,background:"rgba(6,182,212,.1)",color:"#22d3ee",fontWeight:700,fontSize:13,border:"1px solid rgba(6,182,212,.2)",cursor:"pointer"}} onClick={()=>goStripe(STRIPE.lifetime)}>Acheter à vie</button></div></div>
             <div style={{textAlign:"center",marginTop:14,fontSize:12,color:"#334155"}}>🔒 Paiement sécurisé par Stripe</div></section>
 
+          <div id="faq"/>
           {/* TESTIMONIALS */}
           <section className="section" style={{maxWidth:900,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:28}}>
