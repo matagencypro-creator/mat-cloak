@@ -563,48 +563,48 @@ export default function App(){
       </div>
 
       {/* BOTTOM CONTROLS BAR */}
-      <div className="app-bottom" style={{flexShrink:0,borderTop:"1px solid rgba(255,255,255,.04)",background:"rgba(5,8,9,.85)",backdropFilter:"blur(12px)"}}>
+      <div className="app-bottom" style={{flexShrink:0,height:"45vh",borderTop:"1px solid rgba(255,255,255,.04)",background:"rgba(5,8,9,.85)",backdropFilter:"blur(12px)",display:"flex",flexDirection:"column"}}>
         {/* ROW 1: Mode + Presets + Humanizer + Versions */}
-        <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 20px",borderBottom:"1px solid rgba(255,255,255,.03)",overflowX:"auto"}}>
+        <div style={{display:"flex",alignItems:"center",gap:14,padding:"16px 24px",borderBottom:"1px solid rgba(255,255,255,.03)",overflowX:"auto"}}>
           <div style={{display:"flex",gap:2,background:"rgba(255,255,255,.02)",padding:2,borderRadius:7,border:"1px solid rgba(255,255,255,.04)",flexShrink:0}}>
-            {[["photo","Photos"],["video","Vid\u00e9os"]].map(([m,l])=><button key={m} onClick={()=>{setMode(m);clr()}} style={{padding:"5px 14px",fontSize:10,fontWeight:700,borderRadius:5,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b",border:"none",cursor:"pointer",fontFamily:"inherit"}}>{l}</button>)}</div>
+            {[["photo","Photos"],["video","Vid\u00e9os"]].map(([m,l])=><button key={m} onClick={()=>{setMode(m);clr()}} style={{padding:"8px 20px",fontSize:12,fontWeight:700,borderRadius:6,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b",border:"none",cursor:"pointer",fontFamily:"inherit"}}>{l}</button>)}</div>
           <div style={{width:1,height:20,background:"rgba(255,255,255,.04)",flexShrink:0}}/>
           <div style={{display:"flex",gap:3,flexShrink:0}}>
-            {PRESETS.map(p=><button key={p.id} onClick={()=>applyP(p)} style={{padding:"4px 10px",borderRadius:6,display:"flex",alignItems:"center",gap:3,border:preset?.id===p.id?"1px solid rgba(13,148,136,.2)":"1px solid rgba(255,255,255,.03)",background:preset?.id===p.id?"rgba(13,148,136,.05)":"transparent",fontFamily:"inherit",cursor:"pointer",flexShrink:0}}>
-              <span style={{fontSize:11}}>{p.icon}</span>
-              <span style={{fontSize:9,fontWeight:600,color:preset?.id===p.id?"#2dd4bf":"#475569"}}>{p.name}</span></button>)}</div>
+            {PRESETS.map(p=><button key={p.id} onClick={()=>applyP(p)} style={{padding:"7px 14px",borderRadius:8,display:"flex",alignItems:"center",gap:5,border:preset?.id===p.id?"1px solid rgba(13,148,136,.2)":"1px solid rgba(255,255,255,.03)",background:preset?.id===p.id?"rgba(13,148,136,.05)":"transparent",fontFamily:"inherit",cursor:"pointer",flexShrink:0}}>
+              <span style={{fontSize:14}}>{p.icon}</span>
+              <span style={{fontSize:11,fontWeight:600,color:preset?.id===p.id?"#2dd4bf":"#475569"}}>{p.name}</span></button>)}</div>
           <div style={{width:1,height:20,background:"rgba(255,255,255,.04)",flexShrink:0}}/>
           <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
-            <span style={{fontSize:10,fontWeight:600,color:"#475569"}}>Intensit\u00e9</span>
-            <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)} style={{width:100}}/>
-            <span className="mono" style={{fontSize:9,fontWeight:700,color:iC,minWidth:50}}>{iL}</span></div>
+            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>Intensit\u00e9</span>
+            <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)} style={{width:140}}/>
+            <span className="mono" style={{fontSize:11,fontWeight:700,color:iC,minWidth:60}}>{iL}</span></div>
           <div style={{width:1,height:20,background:"rgba(255,255,255,.04)",flexShrink:0}}/>
           <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-            <span style={{fontSize:10,fontWeight:600,color:"#475569"}}>Versions</span>
-            <button onClick={()=>setVer(v=>Math.max(1,v-1))} style={{width:20,height:20,borderRadius:4,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#64748b",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>\u2212</button>
-            <div className="mono" style={{fontSize:14,fontWeight:800,color:"#2dd4bf",width:24,textAlign:"center"}}>{ver}</div>
-            <button onClick={()=>setVer(v=>pro?v+1:Math.min(5,v+1))} style={{width:20,height:20,borderRadius:4,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#64748b",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>+</button>
-            <div style={{display:"flex",gap:1,marginLeft:4}}>{[5,10,25,100,500].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"2px 5px",borderRadius:3,fontSize:8,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"transparent",color:ver===n?"#2dd4bf":"#334155",border:"none",cursor:"pointer",opacity:!pro&&n>5?.2:1,fontFamily:"inherit"}}>{n}</button>)}</div></div>
+            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>Versions</span>
+            <button onClick={()=>setVer(v=>Math.max(1,v-1))} style={{width:26,height:26,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>\u2212</button>
+            <div className="mono" style={{fontSize:18,fontWeight:800,color:"#2dd4bf",width:30,textAlign:"center"}}>{ver}</div>
+            <button onClick={()=>setVer(v=>pro?v+1:Math.min(5,v+1))} style={{width:26,height:26,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>+</button>
+            <div style={{display:"flex",gap:1,marginLeft:4}}>{[5,10,25,100,500].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"4px 8px",borderRadius:4,fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"transparent",color:ver===n?"#2dd4bf":"#334155",border:"none",cursor:"pointer",opacity:!pro&&n>5?.2:1,fontFamily:"inherit"}}>{n}</button>)}</div></div>
         </div>
         {/* ROW 2: GPS + Device + Transformations + Process button */}
-        <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 20px",overflowX:"auto"}}>
+        <div style={{flex:1,display:"flex",alignItems:"center",gap:14,padding:"16px 24px",overflowX:"auto"}}>
           {tf.location&&<div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-            <span style={{fontSize:10,fontWeight:600,color:"#475569"}}>GPS</span>
-            <div style={{display:"flex",gap:2}}>{LOCS.slice(0,8).map((l,i)=><button key={i} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"2px 6px",borderRadius:4,fontSize:8,fontWeight:600,background:loc.city===l.city?"rgba(13,148,136,.08)":"transparent",color:loc.city===l.city?"#2dd4bf":"#334155",border:loc.city===l.city?"1px solid rgba(13,148,136,.12)":"none",cursor:"pointer",opacity:!pro&&i>3?.2:1,fontFamily:"inherit"}}>{l.city}</button>)}<button onClick={()=>setPanel("gps")} style={{padding:"2px 6px",borderRadius:4,fontSize:8,fontWeight:600,color:"#475569",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.03)",cursor:"pointer",fontFamily:"inherit"}}>+{LOCS.length-8}</button></div></div>}
+            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>GPS</span>
+            <div style={{display:"flex",gap:2}}>{LOCS.slice(0,8).map((l,i)=><button key={i} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"5px 10px",borderRadius:6,fontSize:10,fontWeight:600,background:loc.city===l.city?"rgba(13,148,136,.08)":"transparent",color:loc.city===l.city?"#2dd4bf":"#334155",border:loc.city===l.city?"1px solid rgba(13,148,136,.12)":"none",cursor:"pointer",opacity:!pro&&i>3?.2:1,fontFamily:"inherit"}}>{l.city}</button>)}<button onClick={()=>setPanel("gps")} style={{padding:"5px 10px",borderRadius:6,fontSize:10,fontWeight:600,color:"#64748b",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.04)",cursor:"pointer",fontFamily:"inherit"}}>+{LOCS.length-8}</button></div></div>}
           {tf.location&&<div style={{width:1,height:16,background:"rgba(255,255,255,.04)",flexShrink:0}}/>}
           {tf.metaTemplate&&<div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-            <span style={{fontSize:10,fontWeight:600,color:"#475569"}}>Device</span>
-            <div style={{display:"flex",gap:2}}>{MTPL.slice(0,4).map((m,i)=><button key={m.id} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"2px 6px",borderRadius:4,fontSize:8,fontWeight:600,background:mtpl.id===m.id?"rgba(167,139,250,.06)":"transparent",color:mtpl.id===m.id?"#a78bfa":"#334155",border:mtpl.id===m.id?"1px solid rgba(167,139,250,.1)":"none",cursor:"pointer",opacity:!pro&&i>2?.2:1,fontFamily:"inherit"}}>{m.name}</button>)}<button onClick={()=>setPanel("device")} style={{padding:"2px 6px",borderRadius:4,fontSize:8,fontWeight:600,color:"#475569",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.03)",cursor:"pointer",fontFamily:"inherit"}}>+{MTPL.length-4}</button></div></div>}
+            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>Device</span>
+            <div style={{display:"flex",gap:2}}>{MTPL.slice(0,4).map((m,i)=><button key={m.id} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"5px 10px",borderRadius:6,fontSize:10,fontWeight:600,background:mtpl.id===m.id?"rgba(167,139,250,.06)":"transparent",color:mtpl.id===m.id?"#a78bfa":"#334155",border:mtpl.id===m.id?"1px solid rgba(167,139,250,.1)":"none",cursor:"pointer",opacity:!pro&&i>2?.2:1,fontFamily:"inherit"}}>{m.name}</button>)}<button onClick={()=>setPanel("device")} style={{padding:"5px 10px",borderRadius:6,fontSize:10,fontWeight:600,color:"#64748b",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.04)",cursor:"pointer",fontFamily:"inherit"}}>+{MTPL.length-4}</button></div></div>}
           {tf.metaTemplate&&<div style={{width:1,height:16,background:"rgba(255,255,255,.04)",flexShrink:0}}/>}
           <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-            <span style={{fontSize:10,fontWeight:600,color:"#475569"}}>Transfo</span>
-            <span style={{fontSize:9,fontWeight:700,color:"#fbbf24"}}>{activeT}/13</span>
-            <button onClick={()=>setPanel("transfo")} style={{padding:"2px 8px",borderRadius:4,fontSize:8,fontWeight:600,color:"#475569",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.03)",cursor:"pointer",fontFamily:"inherit"}}>Modifier</button></div>
+            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>Transfo</span>
+            <span style={{fontSize:11,fontWeight:700,color:"#fbbf24"}}>{activeT}/13</span>
+            <button onClick={()=>setPanel("transfo")} style={{padding:"5px 12px",borderRadius:6,fontSize:10,fontWeight:600,color:"#475569",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.03)",cursor:"pointer",fontFamily:"inherit"}}>Modifier</button></div>
           <div style={{flex:1}}/>
           {res.length>0&&<div style={{display:"flex",gap:3,flexShrink:0}}>
             {[["config","Config"],["results","R\u00e9sultats"]].map(([v,l])=>
-              <button key={v} onClick={()=>setVw(v)} style={{padding:"4px 12px",borderRadius:5,fontSize:10,fontWeight:600,background:vw===v?"rgba(13,148,136,.06)":"transparent",color:vw===v?"#2dd4bf":"#475569",border:vw===v?"1px solid rgba(13,148,136,.1)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",fontFamily:"inherit"}}>{l}{v==="results"?` (${totV})`:""}</button>)}</div>}
-          <button onClick={run} disabled={proc||!files.length} style={{padding:"8px 24px",borderRadius:8,background:proc||!files.length?"rgba(255,255,255,.02)":"linear-gradient(135deg,#0d9488,#06b6d4)",color:proc||!files.length?"#334155":"#fff",fontSize:12,fontWeight:700,border:proc||!files.length?"1px solid rgba(255,255,255,.04)":"none",cursor:proc||!files.length?"default":"pointer",fontFamily:"inherit",flexShrink:0}}>
+              <button key={v} onClick={()=>setVw(v)} style={{padding:"6px 16px",borderRadius:6,fontSize:11,fontWeight:600,background:vw===v?"rgba(13,148,136,.06)":"transparent",color:vw===v?"#2dd4bf":"#475569",border:vw===v?"1px solid rgba(13,148,136,.1)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",fontFamily:"inherit"}}>{l}{v==="results"?` (${totV})`:""}</button>)}</div>}
+          <button onClick={run} disabled={proc||!files.length} style={{padding:"12px 32px",borderRadius:10,background:proc||!files.length?"rgba(255,255,255,.02)":"linear-gradient(135deg,#0d9488,#06b6d4)",color:proc||!files.length?"#334155":"#fff",fontSize:14,fontWeight:700,border:proc||!files.length?"1px solid rgba(255,255,255,.04)":"none",cursor:proc||!files.length?"default":"pointer",fontFamily:"inherit",flexShrink:0}}>
             {proc?"En cours...":`Traiter \u2192 ${(files.length||0)*ver}v`}</button>
         </div>
       </div>
