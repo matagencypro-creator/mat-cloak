@@ -540,6 +540,7 @@ export default function App(){
                 <div key={k} className={`chk ${on&&!lk?"on":""}`} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{opacity:lk?.25:1,padding:"7px 10px"}}>
                   <div className={`dot ${on&&!lk?"on":""}`} style={{width:16,height:16,fontSize:9}}>{on&&!lk?"✓":lk?"🔒":""}</div>
                   <div style={{fontSize:12,fontWeight:600,color:on&&!lk?"#2dd4bf":"#64748b"}}>{m.i} {m.l}</div></div>)})}</div></div>
+          </aside>
 
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}
@@ -563,7 +564,7 @@ export default function App(){
 
             <button className="btn btn-p" onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:14,fontSize:14,borderRadius:12}}>
               {proc?"⏳ Traitement...":`🔒 Traiter ${files.length||0} fichier${files.length>1?"s":""} → ${(files.length||0)*ver} versions`}</button>
-          </div>)}
+          </div></div>)}
 
         {vw==="results"&&(<div>
           {proc&&<div className="card" style={{padding:"44px 20px",textAlign:"center",marginBottom:14}}>
