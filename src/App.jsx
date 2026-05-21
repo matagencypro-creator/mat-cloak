@@ -490,7 +490,7 @@ export default function App(){
 
       {/* ===== APP ===== */}
       {/* TOP BAR */}
-      <div style={{padding:"10px 20px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
+      <div style={{padding:"8px 20px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <div style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}} onClick={()=>setPg("landing")}>
             <div style={{width:26,height:26,borderRadius:7,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain"}} alt="V"/></div>
@@ -508,42 +508,32 @@ export default function App(){
         </div>
       </div>
 
-      {/* MAIN DROP ZONE - takes all available space */}
-      <div style={{flex:1,overflow:"auto",display:"flex",flexDirection:"column"}}>
-        {vw==="config"&&<div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:files.length?"flex-start":"center",padding:files.length?"20px 28px":"0 28px"}}
+      {/* MAIN AREA - drop zone or results */}
+      <div style={{flex:1,overflow:"auto",minHeight:0}}>
+        {vw==="config"&&<div style={{height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:files.length?"flex-start":"center",padding:files.length?"20px 28px":"0 28px"}}
           onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}>
-
-          {!files.length&&<div onClick={()=>{if(!ck())return;ir.current?.click()}} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:14,cursor:"pointer",padding:50}}>
+          {!files.length&&<div onClick={()=>{if(!ck())return;ir.current?.click()}} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:14,cursor:"pointer",padding:40}}>
             <div style={{width:72,height:72,borderRadius:20,background:drag?"rgba(13,148,136,.06)":"rgba(255,255,255,.015)",border:`2px dashed ${drag?"rgba(13,148,136,.3)":"rgba(255,255,255,.05)"}`,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}}>
               <IC d={mode==="photo"?"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z":"M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"} size={30} color={drag?"#2dd4bf":"#1e293b"}/></div>
-            <div style={{textAlign:"center"}}>
-              <div style={{fontSize:16,fontWeight:700,color:drag?"#2dd4bf":"#94a3b8",marginBottom:4}}>D\u00e9pose tes {mode==="photo"?"images":"vid\u00e9os"}</div>
-              <div className="mono" style={{fontSize:11,color:"#1e293b"}}>{mode==="photo"?"JPG \u2022 PNG \u2022 WEBP":"MP4 \u2022 MOV \u2022 WEBM"}</div>
-              <div style={{marginTop:12,fontSize:12,color:"#334155"}}>ou clique pour parcourir</div></div></div>}
-
+            <div style={{textAlign:"center"}}><div style={{fontSize:16,fontWeight:700,color:drag?"#2dd4bf":"#94a3b8",marginBottom:4}}>D\u00e9pose tes {mode==="photo"?"images":"vid\u00e9os"}</div>
+              <div className="mono" style={{fontSize:11,color:"#1e293b"}}>{mode==="photo"?"JPG \u2022 PNG \u2022 WEBP":"MP4 \u2022 MOV \u2022 WEBM"}</div></div></div>}
           {files.length>0&&<div style={{width:"100%",maxWidth:900}}>
             <div style={{display:"flex",gap:20,marginBottom:16,justifyContent:"center"}}>
               {[{l:"Fichiers",v:files.length,c:"#2dd4bf"},{l:"Versions",v:files.length*ver,c:"#a78bfa"},{l:"Taille",v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24"},{l:"Intensit\u00e9",v:iL,c:iC}].map((s,i)=>
-                <div key={i} style={{textAlign:"center"}}>
-                  <div className="mono" style={{fontSize:20,fontWeight:800,color:s.c}}>{s.v}</div>
-                  <div style={{fontSize:9,color:"#334155",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</div></div>)}</div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8,marginBottom:16}}>
+                <div key={i} style={{textAlign:"center"}}><div className="mono" style={{fontSize:20,fontWeight:800,color:s.c}}>{s.v}</div><div style={{fontSize:9,color:"#334155",textTransform:"uppercase",letterSpacing:".5px"}}>{s.l}</div></div>)}</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8}}>
               {files.map(f=><div key={f.id} style={{borderRadius:10,border:"1px solid rgba(255,255,255,.04)",overflow:"hidden",background:"rgba(255,255,255,.01)",position:"relative"}}>
                 {thumbs[f.id]?<img src={thumbs[f.id]} style={{width:"100%",height:85,objectFit:"cover",display:"block"}}/>:<div style={{width:"100%",height:85,background:"rgba(255,255,255,.02)",display:"flex",alignItems:"center",justifyContent:"center"}}><IC d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" size={18} color="#1e293b"/></div>}
-                <div style={{padding:"5px 7px"}}>
-                  <div style={{fontSize:9,fontWeight:600,color:"#94a3b8",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{f.name}</div>
-                  <div className="mono" style={{fontSize:8,color:"#334155"}}>{fb(f.size)}</div></div>
+                <div style={{padding:"5px 7px"}}><div style={{fontSize:9,fontWeight:600,color:"#94a3b8",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{f.name}</div><div className="mono" style={{fontSize:8,color:"#334155"}}>{fb(f.size)}</div></div>
                 <button onClick={e=>{e.stopPropagation();setFiles(p=>p.filter(x=>x.id!==f.id))}} style={{position:"absolute",top:3,right:3,width:16,height:16,borderRadius:4,background:"rgba(0,0,0,.6)",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><IC d="M6 18L18 6M6 6l12 12" size={8} color="#94a3b8"/></button></div>)}
               <div onClick={()=>{if(!ck())return;ir.current?.click()}} style={{borderRadius:10,border:"1px dashed rgba(255,255,255,.04)",display:"flex",alignItems:"center",justifyContent:"center",minHeight:85,cursor:"pointer"}}><IC d="M12 4v16m8-8H4" size={18} color="#1e293b"/></div></div></div>}
-
           <input ref={ir} type="file" multiple accept={mode==="photo"?"image/*":"video/*"} style={{display:"none"}} onChange={e=>{if(!ck())return;add(e.target.files)}}/></div>}
-
-        {vw==="results"&&<div style={{padding:"20px 28px",flex:1,overflow:"auto"}}>
+        {vw==="results"&&<div style={{padding:"20px 28px"}}>
           {proc&&<div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"60px 20px",gap:12}}>
             <div style={{width:44,height:44,borderRadius:12,background:"rgba(13,148,136,.06)",display:"flex",alignItems:"center",justifyContent:"center",animation:"spin 2s linear infinite"}}><IC d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" size={20} color="#2dd4bf"/></div>
             <div style={{fontSize:14,fontWeight:700,color:"#e2e8f0"}}>Randomisation en cours</div>
             <div className="mono" style={{fontSize:11,color:"#475569"}}>{prog.f} \u2014 v{prog.v}/{ver}</div>
-            <div style={{width:200,height:2,borderRadius:2,background:"rgba(255,255,255,.04)",overflow:"hidden"}}><div style={{height:"100%",background:"linear-gradient(90deg,#0d9488,#06b6d4)",borderRadius:2,width:`${prog.t?(prog.c/prog.t)*100:0}%`,transition:"width .2s"}}/></div></div>}
+            <div style={{width:200,height:2,borderRadius:2,background:"rgba(255,255,255,.04)",overflow:"hidden"}}><div style={{height:"100%",background:"linear-gradient(90deg,#0d9488,#06b6d4)",width:`${prog.t?(prog.c/prog.t)*100:0}%`}}/></div></div>}
           {!proc&&totV>0&&<>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
               <span style={{fontSize:14,fontWeight:700,color:"#e2e8f0"}}>{totV} versions</span>
@@ -562,50 +552,77 @@ export default function App(){
         </div>}
       </div>
 
-      {/* BOTTOM CONTROLS BAR */}
-      <div className="app-bottom" style={{flexShrink:0,height:"45vh",borderTop:"1px solid rgba(255,255,255,.04)",background:"rgba(5,8,9,.85)",backdropFilter:"blur(12px)",display:"flex",flexDirection:"column"}}>
-        {/* ROW 1: Mode + Presets + Humanizer + Versions */}
-        <div style={{display:"flex",alignItems:"center",gap:14,padding:"16px 24px",borderBottom:"1px solid rgba(255,255,255,.03)",overflowX:"auto"}}>
-          <div style={{display:"flex",gap:2,background:"rgba(255,255,255,.02)",padding:2,borderRadius:7,border:"1px solid rgba(255,255,255,.04)",flexShrink:0}}>
-            {[["photo","Photos"],["video","Vid\u00e9os"]].map(([m,l])=><button key={m} onClick={()=>{setMode(m);clr()}} style={{padding:"8px 20px",fontSize:12,fontWeight:700,borderRadius:6,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b",border:"none",cursor:"pointer",fontFamily:"inherit"}}>{l}</button>)}</div>
-          <div style={{width:1,height:20,background:"rgba(255,255,255,.04)",flexShrink:0}}/>
-          <div style={{display:"flex",gap:3,flexShrink:0}}>
-            {PRESETS.map(p=><button key={p.id} onClick={()=>applyP(p)} style={{padding:"7px 14px",borderRadius:8,display:"flex",alignItems:"center",gap:5,border:preset?.id===p.id?"1px solid rgba(13,148,136,.2)":"1px solid rgba(255,255,255,.03)",background:preset?.id===p.id?"rgba(13,148,136,.05)":"transparent",fontFamily:"inherit",cursor:"pointer",flexShrink:0}}>
-              <span style={{fontSize:14}}>{p.icon}</span>
-              <span style={{fontSize:11,fontWeight:600,color:preset?.id===p.id?"#2dd4bf":"#475569"}}>{p.name}</span></button>)}</div>
-          <div style={{width:1,height:20,background:"rgba(255,255,255,.04)",flexShrink:0}}/>
-          <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
-            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>Intensit\u00e9</span>
-            <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)} style={{width:140}}/>
-            <span className="mono" style={{fontSize:11,fontWeight:700,color:iC,minWidth:60}}>{iL}</span></div>
-          <div style={{width:1,height:20,background:"rgba(255,255,255,.04)",flexShrink:0}}/>
-          <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>Versions</span>
-            <button onClick={()=>setVer(v=>Math.max(1,v-1))} style={{width:26,height:26,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>\u2212</button>
-            <div className="mono" style={{fontSize:18,fontWeight:800,color:"#2dd4bf",width:30,textAlign:"center"}}>{ver}</div>
-            <button onClick={()=>setVer(v=>pro?v+1:Math.min(5,v+1))} style={{width:26,height:26,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>+</button>
-            <div style={{display:"flex",gap:1,marginLeft:4}}>{[5,10,25,100,500].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"4px 8px",borderRadius:4,fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"transparent",color:ver===n?"#2dd4bf":"#334155",border:"none",cursor:"pointer",opacity:!pro&&n>5?.2:1,fontFamily:"inherit"}}>{n}</button>)}</div></div>
+      {/* BOTTOM PANEL - takes ~50% of page */}
+      <div className="app-bottom" style={{height:"48vh",flexShrink:0,borderTop:"1px solid rgba(255,255,255,.04)",background:"rgba(5,8,9,.9)",backdropFilter:"blur(12px)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+        <div style={{flex:1,overflowY:"auto",padding:"16px 24px",display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:14}}>
+          {/* COL 1: Mode + Presets */}
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>Mode</div>
+            <div style={{display:"flex",gap:2,background:"rgba(255,255,255,.02)",padding:2,borderRadius:7,border:"1px solid rgba(255,255,255,.04)"}}>
+              {[["photo","Photos"],["video","Vid\u00e9os"]].map(([m,l])=><button key={m} onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"6px 0",fontSize:11,fontWeight:700,borderRadius:5,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b",border:"none",cursor:"pointer",fontFamily:"inherit"}}>{l}</button>)}</div>
+            <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px",marginTop:4}}>Preset</div>
+            <div style={{display:"flex",flexDirection:"column",gap:3}}>
+              {PRESETS.map(p=><button key={p.id} onClick={()=>applyP(p)} style={{padding:"6px 12px",borderRadius:7,display:"flex",alignItems:"center",gap:6,border:preset?.id===p.id?"1px solid rgba(13,148,136,.25)":"1px solid rgba(255,255,255,.04)",background:preset?.id===p.id?"rgba(13,148,136,.06)":"transparent",fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>
+                <span style={{fontSize:14}}>{p.icon}</span>
+                <span style={{fontSize:11,fontWeight:600,color:preset?.id===p.id?"#2dd4bf":"#64748b"}}>{p.name}</span></button>)}</div>
+          </div>
+
+          {/* COL 2: Intensité + Versions */}
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>Intensit\u00e9</div>
+            <div style={{padding:"10px 12px",borderRadius:10,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                <span style={{fontSize:11,fontWeight:600,color:"#94a3b8"}}>Humanizer</span>
+                <span className="mono" style={{fontSize:10,fontWeight:700,color:iC}}>{iL}</span></div>
+              <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)}/></div>
+            <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px",marginTop:4}}>Versions</div>
+            <div style={{padding:"10px 12px",borderRadius:10,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                <div style={{display:"flex",alignItems:"center",gap:4}}>
+                  <button onClick={()=>setVer(v=>Math.max(1,v-1))} style={{width:24,height:24,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>\u2212</button>
+                  <div className="mono" style={{fontSize:20,fontWeight:800,color:"#2dd4bf",width:30,textAlign:"center"}}>{ver}</div>
+                  <button onClick={()=>setVer(v=>pro?v+1:Math.min(5,v+1))} style={{width:24,height:24,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>+</button></div></div>
+              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,25,50,100,250,500].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"3px 8px",borderRadius:4,fontSize:9,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"transparent",color:ver===n?"#2dd4bf":"#334155",border:ver===n?"1px solid rgba(13,148,136,.15)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&n>5?.2:1,fontFamily:"inherit"}}>{n}</button>)}</div></div>
+          </div>
+
+          {/* COL 3: GPS */}
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>GPS</span>
+              <span style={{fontSize:9,fontWeight:600,color:"#2dd4bf"}}>{loc.city}</span></div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:3,flex:1,alignContent:"flex-start"}}>
+              {LOCS.map((l,i)=><button key={i} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"4px 9px",borderRadius:5,fontSize:10,fontWeight:600,background:loc.city===l.city?"rgba(13,148,136,.08)":"transparent",color:loc.city===l.city?"#2dd4bf":"#475569",border:loc.city===l.city?"1px solid rgba(13,148,136,.15)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&i>3?.2:1,fontFamily:"inherit"}}>{l.city}</button>)}</div>
+          </div>
+
+          {/* COL 4: Device */}
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>Device</span>
+              <span style={{fontSize:9,fontWeight:600,color:"#a78bfa"}}>{mtpl.name}</span></div>
+            <div style={{display:"flex",flexDirection:"column",gap:3}}>
+              {MTPL.map((m,i)=><button key={m.id} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"5px 10px",borderRadius:6,fontSize:11,fontWeight:600,background:mtpl.id===m.id?"rgba(167,139,250,.06)":"transparent",color:mtpl.id===m.id?"#a78bfa":"#475569",border:mtpl.id===m.id?"1px solid rgba(167,139,250,.12)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&i>2?.2:1,fontFamily:"inherit",textAlign:"left"}}>{m.name}</button>)}</div>
+          </div>
+
+          {/* COL 5: Transformations */}
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>Transformations</span>
+              <span style={{fontSize:10,fontWeight:700,color:"#fbbf24"}}>{activeT}/13</span></div>
+            <div style={{display:"flex",flexDirection:"column",gap:1,flex:1}}>
+              {Object.entries(TF).map(([k,m])=>{const on=tf[k];const lk=!pro&&m.p;return(
+                <div key={k} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{display:"flex",alignItems:"center",gap:7,padding:"3px 4px",borderRadius:4,cursor:"pointer",opacity:lk?.2:1}}>
+                  <div style={{width:13,height:13,borderRadius:3,border:on&&!lk?"none":"1.5px solid rgba(255,255,255,.08)",background:on&&!lk?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:"#fff",flexShrink:0}}>{on&&!lk?"\u2713":""}</div>
+                  <span style={{fontSize:11,fontWeight:500,color:on&&!lk?"#cbd5e1":"#334155"}}>{m.l}</span></div>)})}</div>
+          </div>
         </div>
-        {/* ROW 2: GPS + Device + Transformations + Process button */}
-        <div style={{flex:1,display:"flex",alignItems:"center",gap:14,padding:"16px 24px",overflowX:"auto"}}>
-          {tf.location&&<div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>GPS</span>
-            <div style={{display:"flex",gap:2}}>{LOCS.slice(0,8).map((l,i)=><button key={i} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"5px 10px",borderRadius:6,fontSize:10,fontWeight:600,background:loc.city===l.city?"rgba(13,148,136,.08)":"transparent",color:loc.city===l.city?"#2dd4bf":"#334155",border:loc.city===l.city?"1px solid rgba(13,148,136,.12)":"none",cursor:"pointer",opacity:!pro&&i>3?.2:1,fontFamily:"inherit"}}>{l.city}</button>)}<button onClick={()=>setPanel("gps")} style={{padding:"5px 10px",borderRadius:6,fontSize:10,fontWeight:600,color:"#64748b",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.04)",cursor:"pointer",fontFamily:"inherit"}}>+{LOCS.length-8}</button></div></div>}
-          {tf.location&&<div style={{width:1,height:16,background:"rgba(255,255,255,.04)",flexShrink:0}}/>}
-          {tf.metaTemplate&&<div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>Device</span>
-            <div style={{display:"flex",gap:2}}>{MTPL.slice(0,4).map((m,i)=><button key={m.id} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"5px 10px",borderRadius:6,fontSize:10,fontWeight:600,background:mtpl.id===m.id?"rgba(167,139,250,.06)":"transparent",color:mtpl.id===m.id?"#a78bfa":"#334155",border:mtpl.id===m.id?"1px solid rgba(167,139,250,.1)":"none",cursor:"pointer",opacity:!pro&&i>2?.2:1,fontFamily:"inherit"}}>{m.name}</button>)}<button onClick={()=>setPanel("device")} style={{padding:"5px 10px",borderRadius:6,fontSize:10,fontWeight:600,color:"#64748b",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.04)",cursor:"pointer",fontFamily:"inherit"}}>+{MTPL.length-4}</button></div></div>}
-          {tf.metaTemplate&&<div style={{width:1,height:16,background:"rgba(255,255,255,.04)",flexShrink:0}}/>}
-          <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-            <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>Transfo</span>
-            <span style={{fontSize:11,fontWeight:700,color:"#fbbf24"}}>{activeT}/13</span>
-            <button onClick={()=>setPanel("transfo")} style={{padding:"5px 12px",borderRadius:6,fontSize:10,fontWeight:600,color:"#475569",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.03)",cursor:"pointer",fontFamily:"inherit"}}>Modifier</button></div>
-          <div style={{flex:1}}/>
-          {res.length>0&&<div style={{display:"flex",gap:3,flexShrink:0}}>
+
+        {/* ACTION BAR */}
+        <div style={{padding:"10px 24px",borderTop:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",gap:10}}>
+          {res.length>0&&<div style={{display:"flex",gap:4}}>
             {[["config","Config"],["results","R\u00e9sultats"]].map(([v,l])=>
-              <button key={v} onClick={()=>setVw(v)} style={{padding:"6px 16px",borderRadius:6,fontSize:11,fontWeight:600,background:vw===v?"rgba(13,148,136,.06)":"transparent",color:vw===v?"#2dd4bf":"#475569",border:vw===v?"1px solid rgba(13,148,136,.1)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",fontFamily:"inherit"}}>{l}{v==="results"?` (${totV})`:""}</button>)}</div>}
-          <button onClick={run} disabled={proc||!files.length} style={{padding:"12px 32px",borderRadius:10,background:proc||!files.length?"rgba(255,255,255,.02)":"linear-gradient(135deg,#0d9488,#06b6d4)",color:proc||!files.length?"#334155":"#fff",fontSize:14,fontWeight:700,border:proc||!files.length?"1px solid rgba(255,255,255,.04)":"none",cursor:proc||!files.length?"default":"pointer",fontFamily:"inherit",flexShrink:0}}>
-            {proc?"En cours...":`Traiter \u2192 ${(files.length||0)*ver}v`}</button>
+              <button key={v} onClick={()=>setVw(v)} style={{padding:"6px 16px",borderRadius:7,fontSize:11,fontWeight:600,background:vw===v?"rgba(13,148,136,.06)":"transparent",color:vw===v?"#2dd4bf":"#475569",border:vw===v?"1px solid rgba(13,148,136,.1)":"1px solid rgba(255,255,255,.04)",cursor:"pointer",fontFamily:"inherit"}}>{l}{v==="results"?` (${totV})`:""}</button>)}</div>}
+          <button onClick={run} disabled={proc||!files.length} style={{flex:1,padding:"12px 0",borderRadius:10,background:proc||!files.length?"rgba(255,255,255,.02)":"linear-gradient(135deg,#0d9488,#06b6d4)",color:proc||!files.length?"#334155":"#fff",fontSize:14,fontWeight:700,border:proc||!files.length?"1px solid rgba(255,255,255,.04)":"none",cursor:proc||!files.length?"default":"pointer",fontFamily:"inherit",transition:"all .15s"}}>
+            {proc?"Traitement en cours...":`Traiter ${files.length||0} fichier${files.length>1?"s":""} \u2192 ${(files.length||0)*ver} versions`}</button>
         </div>
       </div>
     </div>);
