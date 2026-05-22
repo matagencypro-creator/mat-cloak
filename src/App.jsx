@@ -509,7 +509,7 @@ export default function App(){
       </div>
 
       {/* MAIN AREA - drop zone or results */}
-      <div style={{overflow:"auto",minHeight:"35vh"}}>
+      <div style={{overflow:"auto",minHeight:"25vh",maxHeight:"35vh"}}>
         {vw==="config"&&<div style={{height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:files.length?"flex-start":"center",padding:files.length?"20px 28px":"0 28px"}}
           onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}>
           {!files.length&&<div onClick={()=>{if(!ck())return;ir.current?.click()}} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:14,cursor:"pointer",padding:40}}>
@@ -554,70 +554,70 @@ export default function App(){
 
       {/* BOTTOM PANEL - takes ~50% of page */}
       <div className="app-bottom" style={{flex:1,flexShrink:0,minHeight:0,borderTop:"1px solid rgba(255,255,255,.04)",background:"rgba(5,8,9,.9)",backdropFilter:"blur(12px)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-        <div style={{flex:1,overflowY:"auto",padding:"16px 24px",display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:14}}>
+        <div style={{flex:1,overflowY:"auto",padding:"20px 28px",display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:20,alignContent:"stretch"}}>
           {/* COL 1: Mode + Presets */}
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>Mode</div>
+            <div style={{fontSize:11,fontWeight:700,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px"}}>Mode</div>
             <div style={{display:"flex",gap:2,background:"rgba(255,255,255,.02)",padding:2,borderRadius:7,border:"1px solid rgba(255,255,255,.04)"}}>
               {[["photo","Photos"],["video","Vid\u00e9os"]].map(([m,l])=><button key={m} onClick={()=>{setMode(m);clr()}} style={{flex:1,padding:"6px 0",fontSize:11,fontWeight:700,borderRadius:5,background:mode===m?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",color:mode===m?"#fff":"#64748b",border:"none",cursor:"pointer",fontFamily:"inherit"}}>{l}</button>)}</div>
-            <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px",marginTop:4}}>Preset</div>
+            <div style={{fontSize:11,fontWeight:700,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginTop:4}}>Preset</div>
             <div style={{display:"flex",flexDirection:"column",gap:3}}>
-              {PRESETS.map(p=><button key={p.id} onClick={()=>applyP(p)} style={{padding:"6px 12px",borderRadius:7,display:"flex",alignItems:"center",gap:6,border:preset?.id===p.id?"1px solid rgba(13,148,136,.25)":"1px solid rgba(255,255,255,.04)",background:preset?.id===p.id?"rgba(13,148,136,.06)":"transparent",fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>
+              {PRESETS.map(p=><button key={p.id} onClick={()=>applyP(p)} style={{padding:"10px 14px",borderRadius:8,display:"flex",alignItems:"center",gap:8,border:preset?.id===p.id?"1px solid rgba(13,148,136,.25)":"1px solid rgba(255,255,255,.04)",background:preset?.id===p.id?"rgba(13,148,136,.06)":"transparent",fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>
                 <span style={{fontSize:14}}>{p.icon}</span>
                 <span style={{fontSize:11,fontWeight:600,color:preset?.id===p.id?"#2dd4bf":"#64748b"}}>{p.name}</span></button>)}</div>
           </div>
 
           {/* COL 2: Intensité + Versions */}
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>Intensit\u00e9</div>
-            <div style={{padding:"10px 12px",borderRadius:10,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)"}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                <span style={{fontSize:11,fontWeight:600,color:"#94a3b8"}}>Humanizer</span>
+            <div style={{fontSize:11,fontWeight:700,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px"}}>Intensit\u00e9</div>
+            <div style={{padding:"14px 14px",borderRadius:10,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
+                <span style={{fontSize:12,fontWeight:600,color:"#94a3b8"}}>Humanizer</span>
                 <span className="mono" style={{fontSize:10,fontWeight:700,color:iC}}>{iL}</span></div>
               <input type="range" className="slider" min="0" max="1" step=".01" value={inten} onChange={e=>setInten(+e.target.value)}/></div>
-            <div style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px",marginTop:4}}>Versions</div>
-            <div style={{padding:"10px 12px",borderRadius:10,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)"}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px",marginTop:4}}>Versions</div>
+            <div style={{padding:"14px 14px",borderRadius:10,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
                 <div style={{display:"flex",alignItems:"center",gap:4}}>
                   <button onClick={()=>setVer(v=>Math.max(1,v-1))} style={{width:24,height:24,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>−</button>
                   <div className="mono" style={{fontSize:20,fontWeight:800,color:"#2dd4bf",width:30,textAlign:"center"}}>{ver}</div>
                   <button onClick={()=>setVer(v=>pro?v+1:Math.min(5,v+1))} style={{width:24,height:24,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>+</button></div></div>
-              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,25,50,100,250,500].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"3px 8px",borderRadius:4,fontSize:9,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"transparent",color:ver===n?"#2dd4bf":"#334155",border:ver===n?"1px solid rgba(13,148,136,.15)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&n>5?.2:1,fontFamily:"inherit"}}>{n}</button>)}</div></div>
+              <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,25,50,100,250,500].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"5px 10px",borderRadius:5,fontSize:10,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"transparent",color:ver===n?"#2dd4bf":"#334155",border:ver===n?"1px solid rgba(13,148,136,.15)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&n>5?.2:1,fontFamily:"inherit"}}>{n}</button>)}</div></div>
           </div>
 
           {/* COL 3: GPS */}
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>GPS</span>
+              <span style={{fontSize:11,fontWeight:700,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px"}}>GPS</span>
               <span style={{fontSize:9,fontWeight:600,color:"#2dd4bf"}}>{loc.city}</span></div>
             <div style={{display:"flex",flexWrap:"wrap",gap:3,flex:1,alignContent:"flex-start"}}>
-              {LOCS.map((l,i)=><button key={i} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"4px 9px",borderRadius:5,fontSize:10,fontWeight:600,background:loc.city===l.city?"rgba(13,148,136,.08)":"transparent",color:loc.city===l.city?"#2dd4bf":"#475569",border:loc.city===l.city?"1px solid rgba(13,148,136,.15)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&i>3?.2:1,fontFamily:"inherit"}}>{l.city}</button>)}</div>
+              {LOCS.map((l,i)=><button key={i} onClick={()=>{if(!pro&&i>3){setPricing(true);return}setLoc(l)}} style={{padding:"6px 12px",borderRadius:6,fontSize:11,fontWeight:600,background:loc.city===l.city?"rgba(13,148,136,.08)":"transparent",color:loc.city===l.city?"#2dd4bf":"#475569",border:loc.city===l.city?"1px solid rgba(13,148,136,.15)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&i>3?.2:1,fontFamily:"inherit"}}>{l.city}</button>)}</div>
           </div>
 
           {/* COL 4: Device */}
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>Device</span>
+              <span style={{fontSize:11,fontWeight:700,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px"}}>Device</span>
               <span style={{fontSize:9,fontWeight:600,color:"#a78bfa"}}>{mtpl.name}</span></div>
             <div style={{display:"flex",flexDirection:"column",gap:3}}>
-              {MTPL.map((m,i)=><button key={m.id} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"5px 10px",borderRadius:6,fontSize:11,fontWeight:600,background:mtpl.id===m.id?"rgba(167,139,250,.06)":"transparent",color:mtpl.id===m.id?"#a78bfa":"#475569",border:mtpl.id===m.id?"1px solid rgba(167,139,250,.12)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&i>2?.2:1,fontFamily:"inherit",textAlign:"left"}}>{m.name}</button>)}</div>
+              {MTPL.map((m,i)=><button key={m.id} onClick={()=>{if(!pro&&i>2){setPricing(true);return}setMtpl(m)}} style={{padding:"8px 12px",borderRadius:7,fontSize:12,fontWeight:600,background:mtpl.id===m.id?"rgba(167,139,250,.06)":"transparent",color:mtpl.id===m.id?"#a78bfa":"#475569",border:mtpl.id===m.id?"1px solid rgba(167,139,250,.12)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&i>2?.2:1,fontFamily:"inherit",textAlign:"left"}}>{m.name}</button>)}</div>
           </div>
 
           {/* COL 5: Transformations */}
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontSize:10,fontWeight:600,color:"#475569",textTransform:"uppercase",letterSpacing:".5px"}}>Transformations</span>
+              <span style={{fontSize:11,fontWeight:700,color:"#64748b",textTransform:"uppercase",letterSpacing:".5px"}}>Transformations</span>
               <span style={{fontSize:10,fontWeight:700,color:"#fbbf24"}}>{activeT}/13</span></div>
             <div style={{display:"flex",flexDirection:"column",gap:1,flex:1}}>
               {Object.entries(TF).map(([k,m])=>{const on=tf[k];const lk=!pro&&m.p;return(
-                <div key={k} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{display:"flex",alignItems:"center",gap:7,padding:"3px 4px",borderRadius:4,cursor:"pointer",opacity:lk?.2:1}}>
-                  <div style={{width:13,height:13,borderRadius:3,border:on&&!lk?"none":"1.5px solid rgba(255,255,255,.08)",background:on&&!lk?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:"#fff",flexShrink:0}}>{on&&!lk?"\u2713":""}</div>
-                  <span style={{fontSize:11,fontWeight:500,color:on&&!lk?"#cbd5e1":"#334155"}}>{m.l}</span></div>)})}</div>
+                <div key={k} onClick={()=>{if(lk){setPricing(true);return}setTf2(t=>({...t,[k]:!t[k]}))}} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 6px",borderRadius:5,cursor:"pointer",opacity:lk?.2:1}}>
+                  <div style={{width:15,height:15,borderRadius:4,border:on&&!lk?"none":"1.5px solid rgba(255,255,255,.08)",background:on&&!lk?"linear-gradient(135deg,#0d9488,#06b6d4)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,color:"#fff",flexShrink:0}}>{on&&!lk?"\u2713":""}</div>
+                  <span style={{fontSize:12,fontWeight:500,color:on&&!lk?"#cbd5e1":"#475569"}}>{m.l}</span></div>)})}</div>
           </div>
         </div>
 
         {/* ACTION BAR */}
-        <div style={{padding:"10px 24px",borderTop:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",gap:10}}>
+        <div style={{padding:"14px 28px",borderTop:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",gap:12}}>
           {res.length>0&&<div style={{display:"flex",gap:4}}>
             {[["config","Config"],["results","R\u00e9sultats"]].map(([v,l])=>
               <button key={v} onClick={()=>setVw(v)} style={{padding:"6px 16px",borderRadius:7,fontSize:11,fontWeight:600,background:vw===v?"rgba(13,148,136,.06)":"transparent",color:vw===v?"#2dd4bf":"#475569",border:vw===v?"1px solid rgba(13,148,136,.1)":"1px solid rgba(255,255,255,.04)",cursor:"pointer",fontFamily:"inherit"}}>{l}{v==="results"?` (${totV})`:""}</button>)}</div>}
