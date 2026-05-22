@@ -509,7 +509,7 @@ export default function App(){
       </div>
 
       {/* MAIN AREA - drop zone or results */}
-      <div style={{flex:1,overflow:"auto",minHeight:0}}>
+      <div style={{overflow:"auto",minHeight:"35vh"}}>
         {vw==="config"&&<div style={{height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:files.length?"flex-start":"center",padding:files.length?"20px 28px":"0 28px"}}
           onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);if(!ck())return;add(e.dataTransfer.files)}}>
           {!files.length&&<div onClick={()=>{if(!ck())return;ir.current?.click()}} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:14,cursor:"pointer",padding:40}}>
@@ -553,7 +553,7 @@ export default function App(){
       </div>
 
       {/* BOTTOM PANEL - takes ~50% of page */}
-      <div className="app-bottom" style={{height:"48vh",flexShrink:0,borderTop:"1px solid rgba(255,255,255,.04)",background:"rgba(5,8,9,.9)",backdropFilter:"blur(12px)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+      <div className="app-bottom" style={{flex:1,flexShrink:0,minHeight:0,borderTop:"1px solid rgba(255,255,255,.04)",background:"rgba(5,8,9,.9)",backdropFilter:"blur(12px)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
         <div style={{flex:1,overflowY:"auto",padding:"16px 24px",display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:14}}>
           {/* COL 1: Mode + Presets */}
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
@@ -579,7 +579,7 @@ export default function App(){
             <div style={{padding:"10px 12px",borderRadius:10,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.04)"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
                 <div style={{display:"flex",alignItems:"center",gap:4}}>
-                  <button onClick={()=>setVer(v=>Math.max(1,v-1))} style={{width:24,height:24,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>\u2212</button>
+                  <button onClick={()=>setVer(v=>Math.max(1,v-1))} style={{width:24,height:24,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>−</button>
                   <div className="mono" style={{fontSize:20,fontWeight:800,color:"#2dd4bf",width:30,textAlign:"center"}}>{ver}</div>
                   <button onClick={()=>setVer(v=>pro?v+1:Math.min(5,v+1))} style={{width:24,height:24,borderRadius:5,border:"1px solid rgba(255,255,255,.06)",background:"transparent",color:"#94a3b8",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>+</button></div></div>
               <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>{[1,5,10,25,50,100,250,500].map(n=><button key={n} onClick={()=>{if(!pro&&n>5){setPricing(true);return}setVer(n)}} style={{padding:"3px 8px",borderRadius:4,fontSize:9,fontWeight:700,background:ver===n?"rgba(13,148,136,.1)":"transparent",color:ver===n?"#2dd4bf":"#334155",border:ver===n?"1px solid rgba(13,148,136,.15)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",opacity:!pro&&n>5?.2:1,fontFamily:"inherit"}}>{n}</button>)}</div></div>
