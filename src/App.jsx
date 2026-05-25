@@ -490,10 +490,15 @@ export default function App(){
         <button className="btn btn-s" onClick={()=>setPanel(null)} style={{marginTop:12,width:"100%"}}>Fermer</button></div></div>)}
 
       {/* ===== APP VIEW ===== */}
-      <div style={{display:"flex",height:"100%",overflow:"hidden"}}>
+      {/* TOP HEADER */}
+      <div style={{padding:"8px 20px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",justifyContent:"flex-end",gap:4,flexShrink:0}}>
+        {[{p:"audit",l:"Audit"},{p:"webhook",l:"Webhooks"},{p:"history",l:"Historique"}].map(b=>
+          <button key={b.p} onClick={()=>setPanel(b.p)} style={{padding:"5px 14px",borderRadius:6,background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.04)",color:"#64748b",fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{b.l}</button>)}
+      </div>
+      <div style={{display:"flex",flex:1,overflow:"hidden"}}>
 
         {/* ====== SIDEBAR ====== */}
-        <div className="app-sb" style={{width:260,flexShrink:0,display:"flex",flexDirection:"column",borderRight:"1px solid rgba(255,255,255,.04)",background:"rgba(8,12,16,.5)"}}>
+        <div className="app-sb" style={{width:320,flexShrink:0,display:"flex",flexDirection:"column",borderRight:"1px solid rgba(255,255,255,.04)",background:"rgba(8,12,16,.5)"}}>
 
           {/* SB HEADER */}
           <div style={{padding:"14px 16px",borderBottom:"1px solid rgba(255,255,255,.04)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -571,11 +576,7 @@ export default function App(){
                   <span style={{fontSize:10,fontWeight:500,color:on&&!lk?"#94a3b8":"#1e293b"}}>{m.l}</span></div>)})}</div></div>
           </div>
 
-          {/* SB FOOTER */}
-          <div style={{borderTop:"1px solid rgba(255,255,255,.04)",padding:"8px 10px",display:"flex",gap:3}}>
-            {[{p:"audit",l:"Audit"},{p:"webhook",l:"Webhooks"},{p:"history",l:"Historique"}].map(b=>
-              <button key={b.p} onClick={()=>setPanel(b.p)} style={{flex:1,padding:"6px 0",borderRadius:5,background:"rgba(255,255,255,.015)",border:"1px solid rgba(255,255,255,.03)",color:"#334155",fontSize:8,fontWeight:600,cursor:"pointer",fontFamily:"inherit",transition:"color .1s"}}>{b.l}</button>)}
-          </div>
+
           {user&&<div style={{padding:"6px 14px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <button onClick={doLogout} style={{fontSize:9,color:"#1e293b",cursor:"pointer",background:"none",border:"none",fontFamily:"inherit"}}>D\u00e9connexion</button>
             {files.length>0&&<button onClick={clr} style={{fontSize:9,color:"#334155",cursor:"pointer",background:"none",border:"none",fontFamily:"inherit"}}>Effacer tout</button>}</div>}
@@ -660,6 +661,7 @@ export default function App(){
             <button onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:"14px 0",borderRadius:12,background:proc||!files.length?"rgba(255,255,255,.015)":"linear-gradient(135deg,#0d9488,#06b6d4)",color:proc||!files.length?"#1e293b":"#fff",fontSize:14,fontWeight:700,border:proc||!files.length?"1px solid rgba(255,255,255,.04)":"none",cursor:proc||!files.length?"default":"pointer",fontFamily:"inherit",transition:"all .15s",letterSpacing:"-.2px"}}>
               {proc?"Traitement en cours...":`Traiter ${files.length||0} fichier${files.length>1?"s":""} \u2192 ${(files.length||0)*ver} versions`}</button></div>
         </div>
+      </div>
       </div>
     </div>);
 }
