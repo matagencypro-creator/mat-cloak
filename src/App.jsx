@@ -662,6 +662,5 @@ export default function App(){
               {proc?"Traitement en cours...":`Traiter ${files.length||0} fichier${files.length>1?"s":""} \u2192 ${(files.length||0)*ver} versions`}</button></div>
         </div>
       </div>
-      </div>
     </div>);
 }
