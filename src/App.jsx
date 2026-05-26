@@ -164,6 +164,7 @@ function AuthModal({mode:initMode,onClose,onSuccess}){
 
 export default function App(){
   const[pg,setPg]=useState("landing");
+  const[lang,setLang]=useState(navigator.language?.startsWith("fr")?"fr":"en");
   const[mode,setMode]=useState("photo");const[files,setFiles]=useState([]);const[ver,setVer]=useState(5);
   const[tf,setTf2]=useState({...TFD});const[loc,setLoc]=useState(LOCS[0]);const[mtpl,setMtpl]=useState(MTPL[0]);
   const[preset,setPreset]=useState(null);const[inten,setInten]=useState(.5);const[proc,setProc]=useState(false);
@@ -177,6 +178,115 @@ export default function App(){
   const[user,setUser]=useState(null);const[profile,setProfile]=useState(null);const[pro,setPro]=useState(false);const[du,setDu]=useState(0);
   const ir=useRef();
   const cFiles=useCounter(142847);const cVersions=useCounter(1284920);const cUsers=useCounter(3847);
+
+  const T={
+    // Landing
+    hero1:{fr:"Un fichier. Mille versions.",en:"One file. A thousand versions."},
+    hero2:{fr:"{t("hero2")}",en:"Zero detection."},
+    heroSub:{fr:"{t("heroSub")}",en:"Veilora injects 40+ authentic EXIF fields, modifies every pixel and generates unlimited versions — 100% in your browser."},
+    heroCta1:{fr:"Commencer — 7.99€/mois",en:"Get Started — €7.99/mo"},
+    heroCta2:{fr:"À vie — 44.99€",en:"Lifetime — €44.99"},
+    heroFree:{fr:"3 fichiers/jour gratuits • Aucune carte requise",en:"3 files/day free • No card required"},
+    navGuide:{fr:"Guide",en:"Guide"},
+    navFeatures:{fr:"Fonctionnalités",en:"Features"},
+    navPricing:{fr:"Pricing",en:"Pricing"},
+    navFaq:{fr:"FAQ",en:"FAQ"},
+    navLogin:{fr:"Connexion",en:"Login"},
+    navStart:{fr:"Commencer →",en:"Get Started →"},
+    navLogout:{fr:"Déconnexion",en:"Logout"},
+    navOpenApp:{fr:"Ouvrir l'app",en:"Open App"},
+    // Stats
+    statFiles:{fr:t("statFiles"),en:"Files processed"},
+    statVersions:{fr:t("statVersions"),en:"Versions generated"},
+    statUsers:{fr:t("statUsers"),en:"Active users"},
+    // Before/After
+    baDiff:{fr:"Vois la différence. Ou pas.",en:"See the difference. Or not."},
+    baSub:{fr:"Glisse le curseur — même image, hash complètement différent.",en:"Slide the cursor — same image, completely different hash."},
+    // Numbers
+    numVer:{fr:t("numVer"),en:"Versions / file"},
+    numExif:{fr:t("numExif"),en:"EXIF Fields"},
+    numGps:{fr:t("numGps"),en:"GPS Cities"},
+    numDev:{fr:t("numDev"),en:"Authentic Devices"},
+    // Metadata
+    metaTitle:{fr:"Pourquoi les métadonnées comptent",en:"Why metadata matters"},
+    metaSub:{fr:"Les plateformes analysent chaque fichier pour détecter les reposts. Veilora réécrit tout.",en:"Platforms analyze every file to detect reposts. Veilora rewrites everything."},
+    metaRepost:{fr:"Repost classique",en:"Classic repost"},
+    metaVeilora:{fr:"Avec Veilora",en:"With Veilora"},
+    metaFlag:{fr:"Flagé comme repost",en:"Flagged as repost"},
+    metaAuth:{fr:"Capture authentique",en:"Authentic capture"},
+    metaBottom:{fr:"Veilora injecte 40+ champs EXIF authentiques. Les plateformes voient un fichier iPhone original.",en:"Veilora injects 40+ authentic EXIF fields. Platforms see an original iPhone file."},
+    // Pricing
+    pricingTitle:{fr:"Prêt à commencer ?",en:"Ready to start?"},
+    pricingSub:{fr:"Choisissez l'offre qui vous convient.",en:"Choose the plan that fits you."},
+    priceFree:{fr:"Pour tester",en:"To try"},
+    priceNoCommit:{fr:"Sans engagement",en:"No commitment"},
+    priceOnce:{fr:"Paiement unique",en:"One-time payment"},
+    pricePopular:{fr:"POPULAIRE",en:"POPULAR"},
+    priceSubscribe:{fr:"S'abonner",en:"Subscribe"},
+    priceBuy:{fr:"Acheter à vie",en:"Buy lifetime"},
+    priceStart:{fr:"Commencer",en:"Get started"},
+    priceSecure:{fr:"Paiement sécurisé par Stripe",en:"Secure payment via Stripe"},
+    // Pricing features
+    pf1:{fr:"3 fichiers/jour",en:"3 files/day"},
+    pf2:{fr:"5 versions max",en:"5 versions max"},
+    pf3:{fr:"4 transformations",en:"4 transformations"},
+    pf4:{fr:"Fichiers illimités",en:"Unlimited files"},
+    pf5:{fr:"Versions illimitées",en:"Unlimited versions"},
+    pf6:{fr:"13 transformations",en:"13 transformations"},
+    pf7:{fr:"40+ EXIF + GPS Spoofing",en:"40+ EXIF + GPS Spoofing"},
+    pf8:{fr:"Webhooks Discord/TG",en:"Discord/TG Webhooks"},
+    pf9:{fr:"Tout le Pro",en:"Everything in Pro"},
+    pf10:{fr:"Pour toujours",en:"Forever"},
+    pf11:{fr:"Mises à jour incluses",en:"Updates included"},
+    pf12:{fr:"Support prioritaire",en:"Priority support"},
+    // Testimonials
+    testiTitle:{fr:"Ils utilisent Veilora",en:"They use Veilora"},
+    // CTA
+    ctaTitle:{fr:"Prêt à commencer ?",en:"Ready to start?"},
+    ctaSub:{fr:"Créez votre compte et accédez à Veilora en quelques secondes.",en:"Create your account and access Veilora in seconds."},
+    ctaBtn:{fr:"Commencer gratuitement",en:"Start for free"},
+    // Guide
+    guideTitle:{fr:"Comment utiliser Veilora",en:"How to use Veilora"},
+    guideSub:{fr:"De l'inscription au téléchargement, tout est expliqué en détail.",en:"From sign-up to download, everything explained in detail."},
+    guideFaq:{fr:"Questions fréquentes",en:"Frequently asked questions"},
+    guideBtn:{fr:"Créer un compte",en:"Create an account"},
+    // Auth
+    authCreate:{fr:"Créer un compte",en:"Create account"},
+    authLogin:{fr:"Connexion",en:"Login"},
+    authFree:{fr:"Commence gratuitement",en:"Start for free"},
+    authWelcome:{fr:"Content de te revoir",en:"Welcome back"},
+    authName:{fr:"Prénom",en:"First name"},
+    authEmail:{fr:"Email",en:"Email"},
+    authPass:{fr:"Mot de passe (min 6 caractères)",en:"Password (min 6 characters)"},
+    authCreateBtn:{fr:"Créer mon compte",en:"Create my account"},
+    authLoginBtn:{fr:"Se connecter",en:"Sign in"},
+    authNoAccount:{fr:"Pas de compte ?",en:"No account?"},
+    authSignup:{fr:"S'inscrire",en:"Sign up"},
+    authHasAccount:{fr:"Déjà inscrit ?",en:"Already registered?"},
+    // App
+    appPhotos:{fr:"Photos",en:"Photos"},
+    appVideos:{fr:"Vidéos",en:"Videos"},
+    appDrop:{fr:"Dépose tes",en:"Drop your"},
+    appImages:{fr:"images",en:"images"},
+    appVids:{fr:"vidéos",en:"videos"},
+    appBrowse:{fr:"ou clique pour parcourir",en:"or click to browse"},
+    appFiles:{fr:"Fichiers",en:"Files"},
+    appVersions:{fr:"Versions",en:"Versions"},
+    appSize:{fr:t("appSize"),en:"Total size"},
+    appIntensity:{fr:"Intensité",en:"Intensity"},
+    appAdd:{fr:"Ajouter",en:"Add"},
+    appProcess:{fr:"Traiter",en:"Process"},
+    appProcessing:{fr:"Traitement en cours...",en:"Processing..."},
+    appResults:{fr:t("appResults"),en:"Results"},
+    appConfig:{fr:t("appConfig"),en:t("appConfig")},
+    appGenerated:{fr:"versions générées",en:"versions generated"},
+    appDownload:{fr:"Tout télécharger",en:"Download all"},
+    appDownloadN:{fr:"Télécharger les",en:"Download"},
+    appRandomizing:{fr:"Randomisation en cours",en:"Randomizing"},
+    appClear:{fr:"Effacer tout",en:"Clear all"},
+    appLogout:{fr:"Déconnexion",en:"Logout"},
+  };
+  const t=(key)=>T[key]?.[lang]||T[key]?.fr||key;
 
   useEffect(()=>{
     supabase.auth.getSession().then(({data:{session}})=>{if(session?.user){setUser(session.user);loadProfile(session.user.id)}});
@@ -313,7 +423,7 @@ export default function App(){
             <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#0d9488,#06b6d4)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><img src="/logo.png" style={{width:"100%",height:"100%",objectFit:"contain"}} alt="V"/></div>
             <span style={{fontWeight:800,fontSize:17,color:"#f1f5f9",letterSpacing:"-.8px"}}>Veilora</span></div>
           <div className="nav-links" style={{display:"flex",gap:2,alignItems:"center"}}>
-            {[{l:"Fonctionnalités",a:"metadata"},{l:"Guide",a:"guide"},{l:"Pricing",a:"pricing"},{l:"FAQ",a:"faq"}].map(n=>
+            {[{l:t("navFeatures"),a:"metadata"},{l:t("navGuide"),a:"guide"},{l:t("navPricing"),a:"pricing"},{l:t("navFaq"),a:"faq"}].map(n=>
               <button key={n.a} onClick={()=>{if(n.a==="guide")setPg("guide");else if(n.a==="pricing")setPricing(true);else{const el=document.getElementById(n.a);el&&el.scrollIntoView({behavior:"smooth"})}}} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",borderRadius:8,transition:"color .15s"}}>{n.l}</button>)}</div>
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
             {user?<><button onClick={doLogout} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>Déconnexion</button>
@@ -350,17 +460,17 @@ export default function App(){
             <div style={{display:"inline-flex",alignItems:"center",gap:8,padding:"6px 16px",borderRadius:100,border:"1px solid rgba(13,148,136,.15)",background:"rgba(13,148,136,.04)",fontSize:12,color:"#2dd4bf",fontWeight:600,marginBottom:28}}>
               <span style={{width:6,height:6,borderRadius:"50%",background:"#2dd4bf",animation:"pulse 2s infinite"}}/>100% local — aucun fichier uploadé</div>
             <h1 className="hero-t" style={{fontSize:52,fontWeight:800,color:"#f1f5f9",lineHeight:1.08,letterSpacing:"-2.5px",marginBottom:20}}>
-              Un fichier. Mille versions.<br/><span style={{background:"linear-gradient(135deg,#0d9488,#06b6d4,#22d3ee)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Zéro détection.</span></h1>
-            <p className="hero-sub" style={{fontSize:16,color:"#475569",maxWidth:520,margin:"0 auto 32px",lineHeight:1.7}}>Veilora injecte 40+ champs EXIF authentiques, modifie chaque pixel et génère des versions illimitées — 100% dans ton navigateur.</p>
+              {t("hero1")}<br/><span style={{background:"linear-gradient(135deg,#0d9488,#06b6d4,#22d3ee)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{t("hero2")}</span></h1>
+            <p className="hero-sub" style={{fontSize:16,color:"#475569",maxWidth:520,margin:"0 auto 32px",lineHeight:1.7}}>{t("heroSub")}</p>
             <div className="hero-btns" style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
-              <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"15px 32px",fontSize:15,borderRadius:14}}>→ Commencer — 7.99€/mois</button>
-              <button className="btn" onClick={()=>goStripe(STRIPE.lifetime)} style={{padding:"15px 28px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button>
+              <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"15px 32px",fontSize:15,borderRadius:14}}>{"→ "}{t("heroCta1")}</button>
+              <button className="btn" onClick={()=>goStripe(STRIPE.lifetime)} style={{padding:"15px 28px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>{"☆ "}{t("heroCta2")}</button>
               <button className="btn btn-s" onClick={()=>setAuth("login")} style={{padding:"15px 22px",fontSize:14,borderRadius:14}}>→ Se connecter</button></div>
-            <div style={{marginTop:14,fontSize:12,color:"#334155"}}>3 fichiers/jour gratuits • Aucune carte requise</div></section>
+            <div style={{marginTop:14,fontSize:12,color:"#334155"}}>{t("heroFree")}</div></section>
 
           {/* STATS */}
           <section className="live-stats section" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
-            {[{n:cFiles.toLocaleString(),l:"Fichiers traités"},{n:cVersions.toLocaleString(),l:"Versions générées"},{n:cUsers.toLocaleString(),l:"Utilisateurs actifs"}].map((s,i)=>(
+            {[{n:cFiles.toLocaleString(),l:t("statFiles")},{n:cVersions.toLocaleString(),l:t("statVersions")},{n:cUsers.toLocaleString(),l:t("statUsers")}].map((s,i)=>(
               <div key={i} className="card" style={{padding:"20px 16px",textAlign:"center"}}>
                 <div className="mono" style={{fontSize:22,fontWeight:800,color:"#f1f5f9"}}>{s.n}</div>
                 <div style={{fontSize:11,color:"#475569",marginTop:4}}>{s.l}</div></div>))}</section>
@@ -368,8 +478,8 @@ export default function App(){
           {/* BEFORE/AFTER */}
           <section className="section" style={{maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:24}}>
-              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Vois la différence. Ou pas.</h2>
-              <p style={{fontSize:14,color:"#475569"}}>Glisse le curseur — même image, hash complètement différent.</p></div>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>{t("baDiff")}</h2>
+              <p style={{fontSize:14,color:"#475569"}}>{t("baSub")}</p></div>
             <div className="ba-container" onMouseMove={e=>{const r=e.currentTarget.getBoundingClientRect();setBaSlider(Math.max(5,Math.min(95,((e.clientX-r.left)/r.width)*100)))}} onTouchMove={e=>{e.preventDefault();const r=e.currentTarget.getBoundingClientRect();const t=e.touches[0];setBaSlider(Math.max(5,Math.min(95,((t.clientX-r.left)/r.width)*100)))}}>
               <div style={{position:"absolute",inset:0}}>
                 <img src="/demo.png" alt="V" style={{width:"100%",height:"100%",objectFit:"cover",filter:"brightness(1.03) saturate(1.08) hue-rotate(4deg)"}}/>
@@ -384,7 +494,7 @@ export default function App(){
 
           {/* NUMBERS */}
           <section className="nums-grid section" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
-            {[{n:"∞",l:"Versions / fichier"},{n:"40+",l:"Champs EXIF"},{n:"22",l:"Villes GPS"},{n:"9",l:"Devices authentiques"}].map((s,i)=>(
+            {[{n:"∞",l:t("numVer")},{n:"40+",l:t("numExif")},{n:"22",l:t("numGps")},{n:"9",l:t("numDev")}].map((s,i)=>(
               <div key={i} style={{textAlign:"center"}}><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>{s.n}</div><div style={{fontSize:11,color:"#475569",marginTop:2}}>{s.l}</div></div>))}</section>
 
           
@@ -393,7 +503,7 @@ export default function App(){
           <section className="section" style={{maxWidth:700,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:28}}>
               <div className="badge bt" style={{marginBottom:12}}>Technique</div>
-              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Pourquoi les métadonnées comptent</h2>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>{t("metaTitle")}</h2>
               <p style={{fontSize:14,color:"#475569",maxWidth:500,margin:"0 auto"}}>Les plateformes analysent chaque fichier pour détecter les reposts. Veilora réécrit tout.</p></div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
               <div className="card" style={{padding:"22px 20px"}}>
@@ -411,8 +521,8 @@ export default function App(){
           <div id="pricing"/>
           <section className="section" style={{maxWidth:860,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:32}}>
-              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>Prêt à commencer ?</h2>
-              <p style={{fontSize:14,color:"#475569"}}>Choisissez l'offre qui vous convient.</p></div>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:6}}>{t("pricingTitle")}</h2>
+              <p style={{fontSize:14,color:"#475569"}}>{t("pricingSub")}</p></div>
             <div className="price-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
               <div className="prc"><div style={{fontSize:17,fontWeight:700,color:"#e2e8f0",marginBottom:4}}>Free</div><div style={{fontSize:36,fontWeight:800,color:"#f1f5f9",letterSpacing:"-1px"}}>0€</div><div style={{fontSize:12,color:"#475569",marginBottom:18}}>Pour tester</div>
                 {["3 fichiers/jour","5 versions max","4 transformations"].map((f,i)=><div key={i} style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}><IC d="M5 13l4 4L19 7" size={14} color="#2dd4bf"/><span style={{fontSize:13,color:"#94a3b8"}}>{f}</span></div>)}
@@ -429,7 +539,7 @@ export default function App(){
           {/* TESTIMONIALS */}
           <section className="section" style={{maxWidth:900,margin:"0 auto 60px",padding:"0 20px"}}>
             <div style={{textAlign:"center",marginBottom:28}}>
-              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px"}}>Ils utilisent Veilora</h2></div>
+              <h2 className="section-t" style={{fontSize:28,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px"}}>{t("testiTitle")}</h2></div>
             <div className="testi-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
               {TESTI.map((t,i)=>(<div key={i} className="card" style={{padding:"22px 20px"}}>
                 <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
@@ -439,11 +549,11 @@ export default function App(){
 
           {/* CTA FINAL */}
           <section style={{textAlign:"center",padding:"40px 20px 70px",maxWidth:600,margin:"0 auto"}}>
-            <h2 style={{fontSize:24,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:10}}>Prêt à commencer ?</h2>
-            <p style={{fontSize:14,color:"#475569",marginBottom:24}}>Créez votre compte et accédez à Veilora en quelques secondes.</p>
+            <h2 style={{fontSize:24,fontWeight:800,color:"#f1f5f9",letterSpacing:"-.5px",marginBottom:10}}>{t("ctaTitle")}</h2>
+            <p style={{fontSize:14,color:"#475569",marginBottom:24}}>{t("ctaSub")}</p>
             <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-              <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"14px 28px",fontSize:15,borderRadius:14}}>→ Commencer gratuitement</button>
-              <button className="btn" onClick={()=>goStripe(STRIPE.lifetime)} style={{padding:"14px 24px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>☆ À vie — 44.99€</button></div></section>
+              <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"14px 28px",fontSize:15,borderRadius:14}}>{"→ "}{t("ctaBtn")}</button>
+              <button className="btn" onClick={()=>goStripe(STRIPE.lifetime)} style={{padding:"14px 24px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>{"☆ "}{t("heroCta2")}</button></div></section>
         </main>)}
       <footer style={{padding:"20px 28px",borderTop:"1px solid rgba(255,255,255,.04)",textAlign:"center",position:"relative",zIndex:1}}>
         <div style={{fontSize:11,color:"#1e293b"}}>Veilora © 2026 — Par Mat Agency</div></footer></div>);
@@ -579,7 +689,7 @@ export default function App(){
 
           {user&&<div style={{padding:"6px 14px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <button onClick={doLogout} style={{fontSize:9,color:"#1e293b",cursor:"pointer",background:"none",border:"none",fontFamily:"inherit"}}>D\u00e9connexion</button>
-            {files.length>0&&<button onClick={clr} style={{fontSize:9,color:"#334155",cursor:"pointer",background:"none",border:"none",fontFamily:"inherit"}}>Effacer tout</button>}</div>}
+            {files.length>0&&<button onClick={clr} style={{fontSize:9,color:"#334155",cursor:"pointer",background:"none",border:"none",fontFamily:"inherit"}}>{t("appClear")}</button>}</div>}
         </div>
 
         {/* ====== MAIN CONTENT ====== */}
@@ -587,7 +697,7 @@ export default function App(){
 
           {/* TABS (config/results) */}
           {res.length>0&&<div style={{padding:"8px 24px",borderBottom:"1px solid rgba(255,255,255,.03)",display:"flex",gap:4}}>
-            {[["config","Configuration"],["results","R\u00e9sultats"]].map(([v,l])=>
+            {[["config",t("appConfig")],["results","R\u00e9sultats"]].map(([v,l])=>
               <button key={v} onClick={()=>setVw(v)} style={{padding:"6px 18px",borderRadius:7,fontSize:11,fontWeight:600,background:vw===v?"rgba(13,148,136,.06)":"transparent",color:vw===v?"#2dd4bf":"#334155",border:vw===v?"1px solid rgba(13,148,136,.1)":"1px solid rgba(255,255,255,.03)",cursor:"pointer",fontFamily:"inherit"}}>{l}{v==="results"?` (${totV})`:""}</button>)}</div>}
 
           {/* CONTENT AREA */}
@@ -601,14 +711,14 @@ export default function App(){
                   <IC d={mode==="photo"?"M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z":"M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"} size={32} color={drag?"#2dd4bf":"#1e293b"}/></div>
                 <div style={{textAlign:"center"}}>
                   <div style={{fontSize:16,fontWeight:700,color:drag?"#2dd4bf":"#64748b",marginBottom:4}}>D\u00e9pose tes {mode==="photo"?"images":"vid\u00e9os"}</div>
-                  <div style={{fontSize:12,color:"#1e293b"}}>ou clique pour parcourir</div>
+                  <div style={{fontSize:12,color:"#1e293b"}}>{t("appBrowse")}</div>
                   <div className="mono" style={{fontSize:10,color:"#0f172a",marginTop:8}}>{mode==="photo"?"JPG \u2022 PNG \u2022 WEBP":"MP4 \u2022 MOV \u2022 WEBM"}</div></div></div>}
 
               {/* FILES LOADED */}
               {files.length>0&&<div style={{width:"100%",maxWidth:1000}}>
                 {/* STATS */}
                 <div style={{display:"flex",gap:24,marginBottom:20,justifyContent:"center",padding:"16px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-                  {[{l:"Fichiers",v:files.length,c:"#2dd4bf"},{l:"Versions",v:files.length*ver,c:"#a78bfa"},{l:"Taille totale",v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24"},{l:"Intensit\u00e9",v:iL,c:iC}].map((s,i)=>
+                  {[{l:t("appFiles"),v:files.length,c:"#2dd4bf"},{l:t("appVersions"),v:files.length*ver,c:"#a78bfa"},{l:t("appSize"),v:fb(files.reduce((a,f)=>a+f.size,0)),c:"#fbbf24"},{l:"Intensit\u00e9",v:iL,c:iC}].map((s,i)=>
                     <div key={i} style={{textAlign:"center"}}>
                       <div className="mono" style={{fontSize:22,fontWeight:800,color:s.c,lineHeight:1}}>{s.v}</div>
                       <div style={{fontSize:9,color:"#334155",textTransform:"uppercase",letterSpacing:".5px",marginTop:4}}>{s.l}</div></div>)}</div>
@@ -634,7 +744,7 @@ export default function App(){
             {vw==="results"&&<div style={{padding:"24px 32px"}}>
               {proc&&<div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"80px 20px",gap:14}}>
                 <div style={{width:52,height:52,borderRadius:16,background:"rgba(13,148,136,.04)",border:"1px solid rgba(13,148,136,.08)",display:"flex",alignItems:"center",justifyContent:"center",animation:"spin 2s linear infinite"}}><IC d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" size={22} color="#2dd4bf"/></div>
-                <div style={{fontSize:15,fontWeight:700,color:"#e2e8f0"}}>Randomisation en cours</div>
+                <div style={{fontSize:15,fontWeight:700,color:"#e2e8f0"}}>{t("appRandomizing")}</div>
                 <div className="mono" style={{fontSize:11,color:"#475569"}}>{prog.f} \u2014 v{prog.v}/{ver}</div>
                 <div style={{width:240,height:3,borderRadius:3,background:"rgba(255,255,255,.04)",overflow:"hidden"}}><div style={{height:"100%",background:"linear-gradient(90deg,#0d9488,#06b6d4)",borderRadius:3,width:`${prog.t?(prog.c/prog.t)*100:0}%`,transition:"width .3s"}}/></div></div>}
               {!proc&&totV>0&&<>
@@ -659,7 +769,7 @@ export default function App(){
           {/* BOTTOM ACTION BAR */}
           <div style={{padding:"12px 32px",borderTop:"1px solid rgba(255,255,255,.04)",background:"rgba(5,8,9,.8)",backdropFilter:"blur(8px)"}}>
             <button onClick={run} disabled={proc||!files.length} style={{width:"100%",padding:"14px 0",borderRadius:12,background:proc||!files.length?"rgba(255,255,255,.015)":"linear-gradient(135deg,#0d9488,#06b6d4)",color:proc||!files.length?"#1e293b":"#fff",fontSize:14,fontWeight:700,border:proc||!files.length?"1px solid rgba(255,255,255,.04)":"none",cursor:proc||!files.length?"default":"pointer",fontFamily:"inherit",transition:"all .15s",letterSpacing:"-.2px"}}>
-              {proc?"Traitement en cours...":`Traiter ${files.length||0} fichier${files.length>1?"s":""} \u2192 ${(files.length||0)*ver} versions`}</button></div>
+              {proc?t("appProcessing"):`Traiter ${files.length||0} fichier${files.length>1?"s":""} \u2192 ${(files.length||0)*ver} versions`}</button></div>
         </div>
       </div>
     </div>);
