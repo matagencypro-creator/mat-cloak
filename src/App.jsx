@@ -426,10 +426,11 @@ export default function App(){
             {[{l:t("navFeatures"),a:"metadata"},{l:t("navGuide"),a:"guide"},{l:t("navPricing"),a:"pricing"},{l:t("navFaq"),a:"faq"}].map(n=>
               <button key={n.a} onClick={()=>{if(n.a==="guide")setPg("guide");else if(n.a==="pricing")setPricing(true);else{const el=document.getElementById(n.a);el&&el.scrollIntoView({behavior:"smooth"})}}} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",borderRadius:8,transition:"color .15s"}}>{n.l}</button>)}</div>
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
-            {user?<><button onClick={doLogout} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>Déconnexion</button>
-              <button className="btn btn-p" style={{fontSize:13,padding:"9px 22px",borderRadius:12}} onClick={()=>setPg("app")}>Ouvrir l'app</button></>:
-              <><button onClick={()=>setAuth("login")} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>Login</button>
-              <button onClick={()=>setAuth("register")} style={{padding:"9px 22px",fontSize:13,fontWeight:700,borderRadius:12,background:"linear-gradient(135deg,#0d9488,#06b6d4)",color:"#fff",border:"none",cursor:"pointer",fontFamily:"inherit"}}>Get Started →</button></>}
+            <button onClick={()=>setLang(lang==="fr"?"en":"fr")} style={{padding:"5px 10px",borderRadius:6,background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.05)",color:"#64748b",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{lang==="fr"?"\ud83c\uddec\ud83c\udde7 EN":"\ud83c\uddeb\ud83c\uddf7 FR"}</button>
+            {user?<><button onClick={doLogout} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>{t("navLogout")}</button>
+              <button className="btn btn-p" style={{fontSize:13,padding:"9px 22px",borderRadius:12}} onClick={()=>setPg("app")}>{t("navOpenApp")}</button></>:
+              <><button onClick={()=>setAuth("login")} style={{padding:"8px 16px",fontSize:13,fontWeight:500,color:"#94a3b8",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit"}}>{t("navLogin")}</button>
+              <button onClick={()=>setAuth("register")} style={{padding:"9px 22px",fontSize:13,fontWeight:700,borderRadius:12,background:"linear-gradient(135deg,#0d9488,#06b6d4)",color:"#fff",border:"none",cursor:"pointer",fontFamily:"inherit"}}>{t("navStart")}</button></>}
           </div></nav></div>
 
       {pg==="guide"?(<main className="section" style={{maxWidth:800,margin:"0 auto",padding:"40px 28px",position:"relative",zIndex:1}}>
@@ -465,7 +466,7 @@ export default function App(){
             <div className="hero-btns" style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="btn btn-p" onClick={()=>setAuth("register")} style={{padding:"15px 32px",fontSize:15,borderRadius:14}}>{"→ "}{t("heroCta1")}</button>
               <button className="btn" onClick={()=>goStripe(STRIPE.lifetime)} style={{padding:"15px 28px",fontSize:14,borderRadius:14,background:"rgba(13,148,136,.08)",color:"#2dd4bf",fontWeight:700,border:"1px solid rgba(13,148,136,.2)",cursor:"pointer"}}>{"☆ "}{t("heroCta2")}</button>
-              <button className="btn btn-s" onClick={()=>setAuth("login")} style={{padding:"15px 22px",fontSize:14,borderRadius:14}}>→ Se connecter</button></div>
+              <button className="btn btn-s" onClick={()=>setAuth("login")} style={{padding:"15px 22px",fontSize:14,borderRadius:14}}>{"\u2192 "}{t("navLogin")}</button></div>
             <div style={{marginTop:14,fontSize:12,color:"#334155"}}>{t("heroFree")}</div></section>
 
           {/* STATS */}
